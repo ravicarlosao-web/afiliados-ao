@@ -70,7 +70,7 @@ export function StarField() {
     <canvas
       ref={canvasRef}
       className="fixed inset-0 pointer-events-none z-0"
-      style={{ background: 'radial-gradient(circle at center, #0a0a0a 0%, #000000 100%)' }}
+      style={{ background: 'radial-gradient(circle at center, #050505 0%, #000000 100%)' }}
     />
   );
 }
