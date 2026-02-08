@@ -16,7 +16,7 @@ export function Hero() {
           persuasão em tempo real
         </h1>
         
-        <p className="text-lg md:text-xl text-zinc-400 max-w-2xl mx-auto leading-relaxed">
+        <p className="text-lg md:text-xl text-zinc-400 max-w-2xl mx-auto leading-relaxed font-['Poppins']">
           Respostas instantâneas, gestão de objeções e integração perfeita em Zoom, Meet, Teams e Hangouts. <span className="text-white font-medium">Teste grátis!</span>
         </p>
 

@@ -12,7 +12,7 @@ export function Navbar() {
           <span className="text-xl font-medium tracking-tight">perssua</span>
         </Link>
 
-        <div className="hidden md:flex items-center gap-8 text-sm font-medium text-zinc-400">
+        <div className="hidden md:flex items-center gap-8 text-sm font-medium text-zinc-400 font-['Poppins']">
           <a href="#how-it-works" className="hover:text-white transition-colors">Como Funciona</a>
           <a href="#applications" className="hover:text-white transition-colors">Aplicações</a>
           <a href="#features" className="hover:text-white transition-colors">Funcionalidades</a>
