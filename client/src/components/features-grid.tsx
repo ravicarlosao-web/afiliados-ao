@@ -24,7 +24,7 @@ export function FeaturesGrid() {
         <span className="inline-block px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-medium tracking-wider text-zinc-400 uppercase">
           Como Funciona
         </span>
-        <h2 className="text-4xl md:text-5xl font-semibold max-w-3xl mx-auto leading-tight">
+        <h2 className="text-4xl md:text-5xl font-normal max-w-3xl mx-auto leading-tight font-['DM_Sans']">
           Domine qualquer situação com apoio em tempo real
         </h2>
       </div>
@@ -45,7 +45,7 @@ export function FeaturesGrid() {
           </div>
 
           <div className="relative z-10">
-            <h3 className="text-2xl font-semibold mb-3">Guia em Tempo Real</h3>
+            <h3 className="text-2xl font-normal mb-3 font-['DM_Sans']">Guia em Tempo Real</h3>
             <p className="text-zinc-400 leading-relaxed">
               Enquanto você fala, Perssua ouve e sugere fatos, argumentos e respostas a perguntas difíceis.
             </p>
@@ -69,7 +69,7 @@ export function FeaturesGrid() {
           </div>
 
           <div className="relative z-10">
-            <h3 className="text-2xl font-semibold mb-3">Gestão de Objeções</h3>
+            <h3 className="text-2xl font-normal mb-3 font-['DM_Sans']">Gestão de Objeções</h3>
             <p className="text-zinc-400 leading-relaxed">
               Obtenha réplicas persuasivas e contextualizadas para manter o controle da conversa e fechar com autoridade.
             </p>
@@ -81,7 +81,7 @@ export function FeaturesGrid() {
          <span className="inline-block px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-medium tracking-wider text-zinc-400 uppercase mb-8">
           Aplicações
         </span>
-        <h2 className="text-4xl md:text-5xl font-semibold max-w-3xl mx-auto leading-tight">
+        <h2 className="text-4xl md:text-5xl font-normal max-w-3xl mx-auto leading-tight font-['DM_Sans']">
           Para quem lidera, vende, entrevista ou apresenta
         </h2>
       </div>
@@ -114,7 +114,7 @@ export function FeaturesGrid() {
           >
             <item.icon className="w-8 h-8 text-white mb-auto opacity-80 group-hover:opacity-100 transition-opacity" />
             <div>
-              <h3 className="text-xl font-semibold mb-3">{item.title}</h3>
+              <h3 className="text-xl font-normal mb-3 font-['DM_Sans']">{item.title}</h3>
               <p className="text-sm text-zinc-400 leading-relaxed">{item.desc}</p>
             </div>
           </motion.div>
@@ -143,7 +143,7 @@ export function FeaturesGrid() {
           >
             <item.icon className="w-8 h-8 text-white mb-auto opacity-80 group-hover:opacity-100 transition-opacity" />
             <div>
-              <h3 className="text-xl font-semibold mb-3">{item.title}</h3>
+              <h3 className="text-xl font-normal mb-3 font-['DM_Sans']">{item.title}</h3>
               <p className="text-sm text-zinc-400 leading-relaxed max-w-md">{item.desc}</p>
             </div>
           </motion.div>

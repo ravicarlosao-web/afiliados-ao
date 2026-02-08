@@ -6,7 +6,7 @@ export function Footer() {
     <footer className="pt-24 pb-12 px-6 container mx-auto border-t border-white/5">
       <div className="bg-card border border-white/10 rounded-[2.5rem] p-12 md:p-24 text-center mb-24 relative overflow-hidden">
         <div className="relative z-10 max-w-3xl mx-auto space-y-8">
-          <h2 className="text-4xl md:text-6xl font-semibold tracking-tight leading-[1.1]">
+          <h2 className="text-4xl md:text-6xl font-normal tracking-tight leading-[1.1] font-['DM_Sans']">
             Pronto para dominar suas apresentações?
           </h2>
           <p className="text-lg text-zinc-400 max-w-xl mx-auto">

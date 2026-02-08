@@ -12,7 +12,7 @@ export function FAQ() {
         <span className="inline-block px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-medium tracking-wider text-zinc-400 uppercase">
           Perguntas
         </span>
-        <h2 className="text-4xl md:text-5xl font-semibold">
+        <h2 className="text-4xl md:text-5xl font-normal font-['DM_Sans']">
           Alguma dúvida? Aqui está a resposta
         </h2>
         <p className="text-zinc-400">
