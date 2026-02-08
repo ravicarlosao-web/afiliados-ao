@@ -15,9 +15,7 @@ export function Footer() {
           
           <div className="flex flex-col items-center gap-4 pt-4">
              <Button size="lg" className="h-14 px-8 rounded-full bg-white text-black hover:bg-zinc-200 gap-3 text-base">
-                <Monitor className="w-5 h-5 fill-current" />
-                <span className="font-semibold">Windows</span>
-                <span className="bg-zinc-100 text-zinc-600 text-xs px-2 py-0.5 rounded ml-1 font-medium border border-zinc-200">beta</span>
+                <span className="font-semibold">Criar conta</span>
               </Button>
                <a href="#" className="text-sm text-zinc-500 hover:text-white transition-colors">
                 Ver todos os downloads

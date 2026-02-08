@@ -20,7 +20,7 @@ export function Navbar() {
         </div>
 
         <Button className="bg-white text-black hover:bg-zinc-200 rounded-full px-6 font-medium">
-          Download
+          Entrar
         </Button>
       </div>
     </nav>
