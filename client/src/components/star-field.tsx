@@ -14,12 +14,14 @@ export function StarField() {
     let stars: { x: number; y: number; size: number; opacity: number; speed: number }[] = [];
 
     const resizeCanvas = () => {
+      if (!canvas) return;
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
       initStars();
     };
 
     const initStars = () => {
+      if (!canvas) return;
       stars = [];
       const count = Math.floor((canvas.width * canvas.height) / 3000);
       for (let i = 0; i < count; i++) {
@@ -34,6 +36,7 @@ export function StarField() {
     };
 
     const draw = () => {
+      if (!ctx || !canvas) return;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       
       stars.forEach((star) => {
@@ -46,7 +49,7 @@ export function StarField() {
           star.speed = -star.speed;
         }
         
-        ctx.fillStyle = \`rgba(255, 255, 255, \${star.opacity})\`;
+        ctx.fillStyle = `rgba(255, 255, 255, ${star.opacity})`;
         ctx.fill();
       });
 
