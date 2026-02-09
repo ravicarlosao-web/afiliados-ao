@@ -19,7 +19,9 @@ export function AiTipCard() {
         </div>
         <div className="p-8 md:p-10">
           <p className="text-lg md:text-xl text-zinc-300 leading-relaxed font-light">
-            "O Perssua lhe oferece orientação em tempo real e manuseio eficiente de objeções durante apresentações, para que você possa focar em entregar mensagens impactantes e fechar mais negócios. Pode me falar um pouco mais sobre as principais dificuldades que enfrenta com apresentações atualmente?"
+            "Afiliados.ao lhe oferece a oportunidade de ganhar dinheiro todos os dias sem precisar criar websites.
+            Com uma rede de afiliados organizada e pagamentos automáticos, você indica clientes, acompanha tudo pelo dashboard e recebe sua comissão de forma rápida, segura e sem complicação.
+            É a forma mais simples de transformar contatos em vendas e renda real"
           </p>
         </div>
       </div>
