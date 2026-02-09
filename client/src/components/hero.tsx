@@ -11,7 +11,7 @@ export function Hero() {
         transition={{ duration: 0.6 }}
         className="max-w-4xl mx-auto space-y-8"
       >
-        <h1 className="text-5xl md:text-7xl font-normal tracking-tight leading-[1.1] font-['DM_Sans']">
+        <h1 className="text-4xl md:text-6xl font-normal tracking-tight leading-[1.2] font-['DM_Sans']">
           Comece a ganhar 20.000 Kz por semana vendendo sites sem precisar criar nenhum site!
         </h1>
         
