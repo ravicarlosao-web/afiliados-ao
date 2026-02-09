@@ -44,7 +44,7 @@ export function HowItWorks() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 justify-center">
         {steps.map((step, i) => (
           <motion.div
             key={i}
@@ -53,7 +53,7 @@ export function HowItWorks() {
             viewport={{ once: true }}
             transition={{ delay: i * 0.1 }}
             className={`bg-card border border-white/10 rounded-3xl p-8 flex flex-col justify-between min-h-[320px] hover:bg-white/5 transition-all group ${
-              i >= 3 ? 'lg:col-span-1' : ''
+              i >= 3 ? 'lg:col-start-auto' : ''
             }`}
           >
             <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center border border-white/10 mb-8 group-hover:scale-110 transition-transform">
