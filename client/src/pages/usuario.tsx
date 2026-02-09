@@ -1,16 +1,17 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider } from "@/components/ui/sidebar";
-import { LayoutDashboard, User, Settings, CreditCard, Bell, LogOut, ChevronRight, BarChart3, Clock, Zap } from "lucide-react";
+import { LayoutDashboard, User, Settings, Wallet, Bell, LogOut, ChevronRight, BarChart3, TrendingUp, DollarSign, Users, Briefcase } from "lucide-react";
 import { StarField } from "@/components/star-field";
 
 export default function UserDashboard() {
   const [activeItem, setActiveItem] = useState("dashboard");
 
   const menuItems = [
-    { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { id: "profile", label: "Perfil", icon: User },
-    { id: "billing", label: "Assinatura", icon: CreditCard },
+    { id: "dashboard", label: "Visão Geral", icon: LayoutDashboard },
+    { id: "profile", label: "Meu Perfil", icon: User },
+    { id: "commissions", label: "Minhas Comissões", icon: Wallet },
+    { id: "leads", label: "Indicações", icon: Users },
     { id: "notifications", label: "Notificações", icon: Bell },
     { id: "settings", label: "Configurações", icon: Settings },
   ];
@@ -25,7 +26,7 @@ export default function UserDashboard() {
           <SidebarContent>
             <SidebarGroup>
               <SidebarGroupLabel className="text-white/40 px-4 py-4 text-xs font-bold uppercase tracking-widest">
-                Menu Usuário
+                Painel Afiliado
               </SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
@@ -68,17 +69,17 @@ export default function UserDashboard() {
             {/* Header */}
             <div className="flex flex-col gap-1">
               <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-white to-white/40 bg-clip-text text-transparent">
-                Bem-vindo de volta
+                Olá, Afiliado!
               </h1>
-              <p className="text-white/40">Aqui está o resumo da sua atividade hoje.</p>
+              <p className="text-white/40">Aqui está o resumo dos seus ganhos e indicações de hoje.</p>
             </div>
 
             {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {[
-                { title: "Uso de Créditos", value: "84%", icon: Zap, color: "text-blue-400" },
-                { title: "Tempo Ativo", value: "12h 45m", icon: Clock, color: "text-purple-400" },
-                { title: "Eficiência", value: "92.4%", icon: BarChart3, color: "text-emerald-400" },
+                { title: "Saldo Disponível", value: "Kz 145.000,00", icon: Wallet, color: "text-emerald-400" },
+                { title: "Vendas Concluídas", value: "12", icon: Briefcase, color: "text-blue-400" },
+                { title: "Taxa de Conversão", value: "18.5%", icon: TrendingUp, color: "text-purple-400" },
               ].map((stat, i) => (
                 <Card key={i} className="bg-white/5 border-white/10 backdrop-blur-md hover:bg-white/[0.07] transition-all duration-300">
                   <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -96,21 +97,29 @@ export default function UserDashboard() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               <Card className="lg:col-span-2 bg-white/5 border-white/10 backdrop-blur-md">
                 <CardHeader>
-                  <CardTitle className="text-lg font-semibold">Atividade Recente</CardTitle>
+                  <CardTitle className="text-lg font-semibold">Vendas Recentes</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-6">
-                    {[1, 2, 3, 4].map((item) => (
-                      <div key={item} className="flex items-center gap-4 group cursor-pointer" data-testid={`row-activity-${item}`}>
+                    {[
+                      { id: 1, type: "Website Profissional", value: "40.000", time: "Há 2 horas" },
+                      { id: 2, type: "Website Essencial", value: "20.000", time: "Há 5 horas" },
+                      { id: 3, type: "Website Premium", value: "70.000", time: "Ontem" },
+                      { id: 4, type: "Website Profissional", value: "40.000", time: "Há 2 dias" },
+                    ].map((item) => (
+                      <div key={item.id} className="flex items-center gap-4 group cursor-pointer" data-testid={`row-activity-${item.id}`}>
                         <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-white/10 transition-colors">
-                          <Zap className="w-4 h-4 text-white/40 group-hover:text-white transition-colors" />
+                          <DollarSign className="w-4 h-4 text-emerald-400 group-hover:scale-110 transition-transform" />
                         </div>
                         <div className="flex-1">
-                          <div className="text-sm font-medium text-white/80 group-hover:text-white transition-colors">Processamento concluído #{item * 1240}</div>
-                          <div className="text-xs text-white/40">Há {item * 2} horas atrás</div>
+                          <div className="text-sm font-medium text-white/80 group-hover:text-white transition-colors">{item.type}</div>
+                          <div className="text-xs text-white/40">{item.time}</div>
                         </div>
-                        <div className="text-xs font-medium text-emerald-400/80 bg-emerald-400/5 px-2.5 py-1 rounded-full border border-emerald-400/10">
-                          Sucesso
+                        <div className="text-right">
+                          <div className="text-sm font-bold text-white">Kz {item.value},00</div>
+                          <div className="text-[10px] text-emerald-400/80 bg-emerald-400/5 px-2 py-0.5 rounded-full border border-emerald-400/10 inline-block">
+                            Comissão
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -121,28 +130,25 @@ export default function UserDashboard() {
               <Card className="bg-white/5 border-white/10 backdrop-blur-md overflow-hidden relative">
                 <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none" />
                 <CardHeader>
-                  <CardTitle className="text-lg font-semibold">Plano Atual</CardTitle>
+                  <CardTitle className="text-lg font-semibold">Seu Link de Afiliado</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  <div className="space-y-1">
-                    <div className="text-3xl font-bold text-white">Pro</div>
-                    <div className="text-sm text-white/40">Próxima renovação: 12 Mar</div>
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-xs font-medium">
-                      <span className="text-white/60">Uso mensal</span>
-                      <span className="text-white">75%</span>
-                    </div>
-                    <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
-                      <div className="h-full bg-white rounded-full transition-all duration-500" style={{ width: "75%" }} />
-                    </div>
+                  <div className="p-3 bg-black/40 border border-white/5 rounded-lg break-all text-xs font-mono text-white/60">
+                    afiliados.ao/ref/usuario_123
                   </div>
                   <button 
                     className="w-full py-3 px-4 bg-white text-black font-bold text-sm rounded-lg hover:bg-white/90 transition-all duration-300"
-                    data-testid="button-upgrade"
+                    data-testid="button-copy-link"
                   >
-                    Fazer Upgrade
+                    Copiar Link
                   </button>
+                  
+                  <div className="pt-4 border-t border-white/5">
+                    <div className="text-xs text-white/40 mb-3">Dica para vender mais:</div>
+                    <p className="text-xs text-white/60 leading-relaxed italic">
+                      "Foque em empresas que ainda não possuem site ou que têm sites antigos e não responsivos."
+                    </p>
+                  </div>
                 </CardContent>
               </Card>
             </div>

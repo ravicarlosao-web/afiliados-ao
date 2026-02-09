@@ -35,7 +35,7 @@ export function Footer() {
           <p className="leading-relaxed">
             Sua plataforma para vender sites sem complicações. Você indica, nós entregamos e você recebe sua comissão com total transparência e segurança.
           </p>
-          <p className="pt-4">© 2025 Afiliados.ao. Todos direitos reservados</p>
+          <p className="pt-4">© 2026 KYSdigital Todos direitos reservados</p>
         </div>
 
         <div className="grid grid-cols-2 gap-x-16 gap-y-4">
