@@ -1,6 +1,7 @@
 import { Navbar } from "@/components/navbar";
 import { Hero } from "@/components/hero";
 import { AiTipCard } from "@/components/ai-tip-card";
+import { HowItWorks } from "@/components/how-it-works";
 import { FeaturesGrid } from "@/components/features-grid";
 import { ValueProposition } from "@/components/value-proposition";
 import { FAQ } from "@/components/faq";
@@ -15,6 +16,7 @@ export default function Home() {
       <main className="relative z-10">
         <Hero />
         <AiTipCard />
+        <HowItWorks />
         <FeaturesGrid />
         <ValueProposition />
         <FAQ />
