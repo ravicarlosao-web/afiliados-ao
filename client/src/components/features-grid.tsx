@@ -1,5 +1,6 @@
-import { UserPlus, Search, PenSquare, CreditCard, Wallet, Mic, CheckCircle2, TrendingUp, PiggyBank, Tag } from "lucide-react";
+import { UserPlus, Search, PenSquare, CreditCard, Wallet, Calculator, CheckCircle2, ShieldCheck, Zap, Globe } from "lucide-react";
 import { motion } from "framer-motion";
+import { useState } from "react";
 
 const AudioWave = () => (
   <div className="flex items-center gap-1 h-12">
@@ -16,6 +17,64 @@ const AudioWave = () => (
     <div className="absolute inset-0 bg-gradient-to-r from-card via-transparent to-card pointer-events-none" />
   </div>
 );
+
+function CommissionCalculator() {
+  const [sales, setSales] = useState(1);
+  const plans = [
+    { name: "Essencial", commission: 20000 },
+    { name: "Profissional", commission: 40000 },
+    { name: "Premium", commission: 70000 },
+  ];
+
+  return (
+    <div className="bg-white/5 border border-white/10 rounded-3xl p-8 md:p-12 mt-12">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        <div className="space-y-6">
+          <h3 className="text-3xl font-normal font-['DM_Sans']">Calculadora de Ganhos</h3>
+          <p className="text-zinc-400">Simule quanto você pode ganhar mensalmente indicando nossos serviços.</p>
+          
+          <div className="space-y-4">
+            <label className="text-sm text-zinc-500 uppercase tracking-wider">Número de vendas por mês</label>
+            <div className="flex items-center gap-4">
+              <input 
+                type="range" 
+                min="1" 
+                max="50" 
+                value={sales} 
+                onChange={(e) => setSales(parseInt(e.target.value))}
+                className="w-full h-1.5 bg-white/10 rounded-lg appearance-none cursor-pointer accent-white"
+              />
+              <span className="text-2xl font-medium w-12 text-center">{sales}</span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4">
+            {plans.map((plan) => (
+              <div key={plan.name} className="flex justify-between items-center p-4 rounded-xl bg-white/5 border border-white/5">
+                <span className="text-zinc-300">Se vender {plan.name}:</span>
+                <span className="text-xl font-medium text-white">
+                  Kz {(plan.commission * sales).toLocaleString('pt-PT')},00
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="relative group">
+          <div className="absolute -inset-1 bg-gradient-to-r from-white/20 to-transparent rounded-3xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+          <div className="relative bg-black rounded-2xl p-8 border border-white/10 text-center">
+            <Calculator className="w-12 h-12 text-white mx-auto mb-6 opacity-50" />
+            <div className="text-zinc-500 text-sm mb-2 uppercase tracking-widest">Potencial de Ganho Máximo</div>
+            <div className="text-5xl md:text-6xl font-['DM_Sans'] mb-4">
+              Kz {(70000 * sales).toLocaleString('pt-PT')},00
+            </div>
+            <p className="text-zinc-400 text-sm italic">*Baseado no plano Premium</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export function FeaturesGrid() {
   const steps = [
@@ -99,6 +158,30 @@ export function FeaturesGrid() {
     }
   ];
 
+  const plans = [
+    {
+      title: "Website Essencial",
+      price: "130.000 Kz",
+      commission: "20.000 Kz",
+      icon: Zap,
+      desc: "Ideal para pequenos negócios que precisam de uma presença digital rápida e eficiente."
+    },
+    {
+      title: "Website Profissional",
+      price: "250.000 Kz",
+      commission: "40.000 Kz",
+      icon: ShieldCheck,
+      desc: "A solução completa para empresas em crescimento com funcionalidades avançadas."
+    },
+    {
+      title: "Website Premium",
+      price: "400.000 Kz",
+      commission: "70.000 Kz",
+      icon: Globe,
+      desc: "Experiência digital exclusiva com design personalizado e performance máxima."
+    }
+  ];
+
   return (
     <section id="applications" className="py-24 px-6 container mx-auto">
       <div className="text-center mb-16 space-y-4">
@@ -161,78 +244,48 @@ export function FeaturesGrid() {
         ))}
       </div>
 
-      <div className="text-center my-20">
-         <span className="inline-block px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-medium tracking-wider text-zinc-400 uppercase mb-8">
-          Aplicações
+      <div className="text-center my-24 space-y-4">
+         <span className="inline-block px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-medium tracking-wider text-zinc-400 uppercase">
+          Tabelas de Comissão
         </span>
         <h2 className="text-4xl md:text-5xl font-normal max-w-3xl mx-auto leading-tight font-['DM_Sans']">
-          Para quem lidera, vende, entrevista ou apresenta
+          Quanto você ganha por cada indicação
         </h2>
+        <p className="text-zinc-400 text-lg max-w-2xl mx-auto">
+          Oferecemos comissões generosas em todos os nossos planos de criação de websites.
+        </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-        {[
-          {
-            icon: Tag,
-            title: "Profissionais de Vendas",
-            desc: "Feche mais negócios ao responder objeções com dados e confiança."
-          },
-          {
-            icon: PiggyBank,
-            title: "Empreendedores",
-            desc: "Apresente sua visão de forma convincente e conquiste investidores e clientes."
-          },
-          {
-            icon: TrendingUp,
-            title: "Executivos & Diretores",
-            desc: "Conduza reuniões estratégicas com dados instantâneos ao seu alcance."
-          }
-        ].map((item, i) => (
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+        {plans.map((plan, i) => (
           <motion.div 
             key={i}
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: i * 0.1 }}
-            className="bg-card border border-white/10 rounded-3xl p-8 flex flex-col justify-end h-[320px] hover:bg-white/5 transition-colors group"
+            className="bg-card border border-white/10 rounded-3xl p-8 flex flex-col h-full hover:border-white/20 transition-all group relative overflow-hidden"
           >
-            <item.icon className="w-8 h-8 text-white mb-auto opacity-80 group-hover:opacity-100 transition-opacity" />
-            <div>
-              <h3 className="text-xl font-normal mb-3 font-['DM_Sans']">{item.title}</h3>
-              <p className="text-sm text-zinc-400 leading-relaxed">{item.desc}</p>
+            <div className="mb-8">
+              <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center mb-6 border border-white/10">
+                <plan.icon className="w-6 h-6 text-white" />
+              </div>
+              <h3 className="text-2xl font-normal mb-2 font-['DM_Sans']">{plan.title}</h3>
+              <div className="text-zinc-500 text-sm mb-4">{plan.desc}</div>
+              <div className="text-3xl font-bold text-white mb-6 tracking-tight">{plan.price}</div>
+            </div>
+
+            <div className="mt-auto pt-6 border-t border-white/5">
+              <div className="text-xs text-zinc-500 uppercase tracking-widest mb-1">Comissão do Afiliado</div>
+              <div className="text-2xl font-['DM_Sans'] text-green-400 font-medium">
+                {plan.commission} <span className="text-sm font-normal text-zinc-400">por venda</span>
+              </div>
             </div>
           </motion.div>
         ))}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {[
-          {
-            icon: CheckCircle2,
-            title: "Entrevistadores",
-            desc: "Formule perguntas de impacto e reaja a respostas imprevistas com sugestões de seguimento em tempo real."
-          },
-          {
-            icon: Mic,
-            title: "Qualquer Apresentador",
-            desc: "De entrevistas a conferências, eleve sua performance."
-          }
-        ].map((item, i) => (
-          <motion.div 
-            key={i}
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="bg-card border border-white/10 rounded-3xl p-8 flex flex-col justify-end h-[280px] hover:bg-white/5 transition-colors group"
-          >
-            <item.icon className="w-8 h-8 text-white mb-auto opacity-80 group-hover:opacity-100 transition-opacity" />
-            <div>
-              <h3 className="text-xl font-normal mb-3 font-['DM_Sans']">{item.title}</h3>
-              <p className="text-sm text-zinc-400 leading-relaxed max-w-md">{item.desc}</p>
-            </div>
-          </motion.div>
-        ))}
-      </div>
+      <CommissionCalculator />
     </section>
   );
 }
