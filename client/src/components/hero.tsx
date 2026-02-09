@@ -12,7 +12,7 @@ export function Hero() {
         className="max-w-6xl mx-auto space-y-8"
       >
         <h1 className="text-4xl md:text-6xl font-normal tracking-tight leading-[1.2] font-['DM_Sans'] max-w-5xl mx-auto">
-          Comece a ganhar 20.000 Kz por semana vendendo sites sem precisar criar nenhum site!
+          Comece a ganhar 70.000 Kz por semana vendendo sites sem precisar criar nenhum site!
         </h1>
         
         <p className="text-lg md:text-xl text-zinc-400 max-w-2xl mx-auto leading-relaxed font-['Poppins']">
