@@ -15,7 +15,8 @@ export function ValueProposition() {
             Funcionalidades
           </span>
           <h2 className="text-5xl md:text-7xl font-normal tracking-tight leading-[1.05] font-['DM_Sans']">
-            Venda mais, com menos esforço e mais impacto
+            Ganhe mais comissões,
+            sem complicação e sem criar sites
           </h2>
         </div>
 
@@ -23,23 +24,23 @@ export function ValueProposition() {
           {[
             {
               icon: Flame,
-              title: "Confiança Imbatível",
-              desc: "Nunca fique sem resposta, fale com segurança total."
+              title: "Confiança Total no Processo",
+              desc: "Todas as vendas, pagamentos e comissões ficam registados no sistema, com total transparência e segurança."
             },
             {
               icon: Clock,
-              title: "Produtividade Máxima",
-              desc: "Economize horas automatizando follow-ups e respostas."
+              title: "Venda com mais facilidade",
+              desc: "Use mensagens prontas, serviços definidos e um painel simples para vender mais em menos tempo."
             },
             {
               icon: Zap,
-              title: "Vantagem Competitiva",
-              desc: "Supere concorrentes com apresentações impecáveis e baseadas em IA."
+              title: "Mais Profissionalismo nas Vendas",
+              desc: "Apresente serviços claros, preços definidos e um processo profissional que gera mais confiança no cliente"
             },
             {
               icon: Infinity,
-              title: "Aperfeiçoamento Contínuo",
-              desc: "Analise seu desempenho e melhore a cada apresentação."
+              title: "Acompanhe Seus Ganhos",
+              desc: "Veja suas vendas, comissões e histórico em tempo real e saiba exatamente quanto está a ganhar."
             }
           ].map((item, i) => (
             <div key={i} className="flex gap-6 group">

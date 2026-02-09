@@ -3,8 +3,9 @@ import { Monitor } from "lucide-react";
 
 export function Footer() {
   return (
-    <footer className="pt-24 pb-12 px-6 container mx-auto border-t border-white/5">
+    <footer className="pt-24 pb-12 px-6 container mx-auto relative z-20 border-t border-white/5">
       <div className="bg-card border border-white/10 rounded-[2.5rem] p-12 md:p-24 text-center mb-24 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent pointer-events-none" />
         <div className="relative z-10 max-w-3xl mx-auto space-y-8">
           <h2 className="text-4xl md:text-6xl font-normal tracking-tight leading-[1.1] font-['DM_Sans']">
             Pronto para começar a faturar?
@@ -15,16 +16,13 @@ export function Footer() {
           
           <div className="flex flex-col items-center gap-4 pt-4">
              <Button size="lg" className="h-14 px-8 rounded-full bg-white text-black hover:bg-zinc-200 gap-3 text-base">
-                <span className="font-semibold">Criar conta</span>
+                <span className="font-semibold">Criar conta agora</span>
               </Button>
-               <a href="#" className="text-sm text-zinc-500 hover:text-white transition-colors">
-                Ver todos os downloads
-              </a>
           </div>
         </div>
       </div>
 
-      <div className="flex flex-col md:flex-row justify-between items-start gap-12 text-sm text-zinc-500">
+      <div className="flex flex-col md:flex-row justify-between items-start gap-12 text-sm text-zinc-500 pb-12">
         <div className="max-w-xs space-y-4">
           <div className="flex items-center gap-2 text-white">
             <img 
