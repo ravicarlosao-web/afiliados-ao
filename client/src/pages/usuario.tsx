@@ -660,16 +660,16 @@ export default function UserDashboard() {
                       <SidebarMenuButton 
                         onClick={() => setActiveItem(item.id)}
                         isActive={activeItem === item.id}
-                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-300 ${
+                        className={`w-full flex items-center gap-4 px-5 py-4 rounded-xl transition-all duration-300 ${
                           activeItem === item.id 
                             ? "bg-white/10 text-white shadow-[0_0_20px_rgba(255,255,255,0.05)]" 
                             : "text-white/60 hover:text-white hover:bg-white/5"
                         }`}
                         data-testid={`button-nav-${item.id}`}
                       >
-                        <item.icon className={`w-5 h-5 ${activeItem === item.id ? "text-white" : "text-white/40"}`} />
-                        <span className="font-medium text-xs lg:text-sm">{item.label}</span>
-                        {activeItem === item.id && <ChevronRight className="ml-auto w-4 h-4 opacity-50" />}
+                        <item.icon className={`w-6 h-6 ${activeItem === item.id ? "text-white" : "text-white/40"}`} />
+                        <span className="font-semibold text-base lg:text-lg">{item.label}</span>
+                        {activeItem === item.id && <ChevronRight className="ml-auto w-5 h-5 opacity-50" />}
                       </SidebarMenuButton>
                     </SidebarMenuItem>
                   ))}
