@@ -1,0 +1,206 @@
+🧠 ESTRUTURA IDEAL DO PAINEL ADMINISTRATIVO
+🏠 1. Visão Geral (Dashboard Executivo)
+
+Essa página já existe, mas pode evoluir.
+
+Deve mostrar:
+
+Total de afiliados ativos
+
+Volume total vendido (mês / semana / dia)
+
+Comissão paga
+
+Comissão pendente
+
+Conversão global
+
+Crescimento comparado ao mês anterior
+
+Ticket médio
+
+Top 5 afiliados da semana
+
+Alertas críticos
+
+👉 Essa tela é para você tomar decisões rápidas.
+
+👥 2. Afiliados
+
+Página para gestão total de afiliados.
+
+Deve conter:
+
+Lista de afiliados
+
+Status (ativo, bloqueado, pendente)
+
+Total de vendas
+
+Total de comissão gerada
+
+Comissão paga
+
+Taxa de conversão individual
+
+Nível do afiliado (Iniciante / Pro / Elite)
+
+Ações:
+
+Editar comissão %
+
+Bloquear afiliado
+
+Resetar senha
+
+Ver clientes dele
+
+Histórico de atividades
+
+👤 3. Clientes (ESSENCIAL)
+
+Você ainda não tem isso no admin.
+
+Deveria existir uma área:
+
+Clientes Globais
+
+Onde você vê:
+
+Todos os clientes indicados
+
+Quem indicou
+
+Status do cliente
+
+Plano escolhido
+
+Valor pago
+
+Comissão associada
+
+Histórico de contato
+
+Isso te dá controlo total da operação.
+
+💰 4. Pagamentos
+
+Separar em duas áreas:
+
+Pagamentos de Clientes
+
+Pagamentos recebidos
+
+Método (Transferência / Multicaixa)
+
+Comprovante
+
+Aprovar / Reprovar
+
+Pagamentos de Comissão
+
+Solicitações de saque
+
+Aprovar saque
+
+Histórico de pagamento
+
+Valor total pago por afiliado
+
+📊 5. Comissões
+
+Aqui você controla regras:
+
+% padrão
+
+% por plano
+
+% por nível
+
+Bônus promocionais
+
+Comissão extra temporária
+
+Também pode:
+
+Ajustar comissão manualmente
+
+Criar campanhas de incentivo
+
+📈 6. Analíticos (Mais Profundo)
+
+Aqui é inteligência de negócio.
+
+Taxa de conversão por plano
+
+Plano mais vendido
+
+Tempo médio de fechamento
+
+Afiliados mais ativos
+
+Canais que convertem mais
+
+Receita por dia / semana / mês
+
+Isso ajuda você a crescer estrategicamente.
+
+📨 7. Notificações Globais
+
+Você pode:
+
+Enviar mensagem para todos afiliados
+
+Criar campanhas
+
+Avisar sobre promoções
+
+Alertar sobre aumento de comissão
+
+Tipo:
+
+“Esta semana comissão do Premium é 45%”
+
+🎓 8. Materiais e Campanhas
+
+Admin pode:
+
+Criar textos prontos
+
+Criar imagens promocionais
+
+Atualizar scripts de venda
+
+Criar desafios semanais
+
+Isso aparece automaticamente no painel do afiliado.
+
+🛠 9. Configurações Gerais
+
+Preço dos planos
+
+Nome dos planos
+
+Valor padrão do site
+
+% de comissão
+
+Tempo mínimo para saque
+
+Limite mínimo de saque
+
+Integração WhatsApp
+
+Integração pagamento
+
+SMTP (email)
+
+🔒 10. Controle de Segurança
+
+Logs de acesso
+
+Atividades suspeitas
+
+Tentativas de login
+
+Histórico de ações administrativas
