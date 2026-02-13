@@ -31,6 +31,7 @@ export default function UserDashboard() {
 
   const menuItems = [
     { id: "dashboard", label: "Visão Geral", icon: LayoutDashboard },
+    { id: "wallet", label: "Carteira & Saque", icon: Wallet },
     { id: "clients", label: "Meus Clientes", icon: Users },
     { id: "materials", label: "Materiais de Venda", icon: ImageIcon },
     { id: "ai-tips", label: "Central de Dicas", icon: Sparkles },
@@ -77,7 +78,7 @@ export default function UserDashboard() {
               {[
                 { title: "Vendas Hoje", value: "3", icon: Briefcase, color: "text-blue-400" },
                 { title: "Comissão Hoje", value: "Kz 45.000", icon: DollarSign, color: "text-emerald-400" },
-                { title: "Saldo Disponível", value: "Kz 145.000", icon: Wallet, color: "text-purple-400" },
+                { title: "Saldo Disponível", value: "Kz 145.000", icon: Wallet, color: "text-purple-400", action: true },
                 { title: "Status do Afiliado", value: "Ativo", icon: Award, color: "text-amber-400", sub: "Próximo nível: Top Afiliado" },
               ].map((stat, i) => (
                 <Card key={i} className="bg-white/5 border-white/10 backdrop-blur-md hover:bg-white/[0.07] transition-all duration-300">
@@ -86,7 +87,19 @@ export default function UserDashboard() {
                     <stat.icon className={`w-4 h-4 ${stat.color}`} />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">{stat.value}</div>
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="text-2xl font-bold">{stat.value}</div>
+                      {stat.action && (
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          className="h-7 text-[10px] border-purple-500/20 text-purple-400 hover:bg-purple-500/10"
+                          onClick={() => setActiveItem("wallet")}
+                        >
+                          Sacar
+                        </Button>
+                      )}
+                    </div>
                     {stat.sub && <p className="text-[10px] text-white/40 mt-1">{stat.sub}</p>}
                   </CardContent>
                 </Card>
@@ -160,6 +173,117 @@ export default function UserDashboard() {
                       <span className="flex items-center gap-2"><Copy className="w-4 h-4" /> Copiar Link</span>
                     )}
                   </Button>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        );
+      case "wallet":
+        return (
+          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-white to-white/40 bg-clip-text text-transparent">Minha Carteira</h1>
+                <p className="text-white/40">Gerencie seus ganhos e solicite pagamentos.</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <Card className="bg-gradient-to-br from-purple-500/10 to-transparent border-white/10 backdrop-blur-md">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-white/60">Saldo Disponível</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold">Kz 145.000,00</div>
+                  <p className="text-[10px] text-emerald-400 mt-1">Pronto para saque</p>
+                </CardContent>
+              </Card>
+              <Card className="bg-white/5 border-white/10 backdrop-blur-md">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-white/60">Aguardando Liberação</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold">Kz 35.000,00</div>
+                  <p className="text-[10px] text-white/20 mt-1">Libera em 7 dias</p>
+                </CardContent>
+              </Card>
+              <Card className="bg-white/5 border-white/10 backdrop-blur-md">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-white/60">Total Sacado</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold">Kz 890.000,00</div>
+                  <p className="text-[10px] text-white/20 mt-1">Desde o início</p>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <Card className="bg-white/5 border-white/10 backdrop-blur-md">
+                <CardHeader>
+                  <CardTitle className="text-lg font-semibold flex items-center gap-2">
+                    <DollarSign className="w-5 h-5 text-emerald-400" />
+                    Solicitar Saque
+                  </CardTitle>
+                  <CardDescription>O valor será transferido para sua conta cadastrada.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="space-y-2">
+                    <Label>Valor do Saque (Kz)</Label>
+                    <Input type="number" placeholder="Mínimo Kz 5.000" className="bg-white/5 border-white/10" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Método de Recebimento</Label>
+                    <Select defaultValue="iban">
+                      <SelectTrigger className="bg-white/5 border-white/10">
+                        <SelectValue placeholder="Selecione o método" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-[#121212] border-white/10 text-white">
+                        <SelectItem value="iban">Transferência IBAN</SelectItem>
+                        <SelectItem value="unitel-money">Unitel Money</SelectItem>
+                        <SelectItem value="afrimoney">Afrimoney</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="p-4 bg-emerald-500/5 border border-emerald-500/10 rounded-lg">
+                    <p className="text-xs text-emerald-400 leading-relaxed">
+                      Sua conta IBAN cadastrada termina em **...4590**. O prazo de processamento é de até 48h úteis.
+                    </p>
+                  </div>
+                  <Button className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold h-12 shadow-lg shadow-emerald-500/20">
+                    Confirmar Solicitação de Saque
+                  </Button>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-white/5 border-white/10 backdrop-blur-md">
+                <CardHeader>
+                  <CardTitle className="text-lg font-semibold">Histórico de Pagamentos</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-6">
+                    {[
+                      { id: 1, date: "12 Fev, 2026", amount: "45.000", status: "Pago", type: "IBAN" },
+                      { id: 2, date: "05 Fev, 2026", amount: "120.000", status: "Pago", type: "Unitel Money" },
+                      { id: 3, date: "28 Jan, 2026", amount: "30.000", status: "Pago", type: "IBAN" },
+                    ].map((item) => (
+                      <div key={item.id} className="flex items-center justify-between group">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center">
+                            <History className="w-4 h-4 text-white/40" />
+                          </div>
+                          <div>
+                            <div className="text-sm font-medium">{item.date}</div>
+                            <div className="text-[10px] text-white/40">{item.type}</div>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-sm font-bold text-white">Kz {item.amount}</div>
+                          <Badge className="bg-emerald-500/10 text-emerald-400 border-none text-[10px] h-5 px-2">Sucesso</Badge>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </CardContent>
               </Card>
             </div>
