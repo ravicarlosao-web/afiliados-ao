@@ -554,18 +554,45 @@ export default function UserDashboard() {
             
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               <div className="lg:col-span-1 space-y-6">
-                <Card className="bg-white/5 border-white/10 overflow-hidden">
-                  <div className="h-24 bg-gradient-to-r from-purple-500/20 to-blue-500/20" />
-                  <CardContent className="relative pt-0">
-                    <div className="absolute -top-12 left-6">
-                      <div className="w-24 h-24 rounded-2xl bg-white/10 backdrop-blur-xl border-4 border-[#080808] flex items-center justify-center">
-                        <User className="w-12 h-12 text-white/40" />
+                <Card className="bg-white/5 border-white/10 overflow-hidden shadow-2xl">
+                  <div className="h-32 bg-gradient-to-br from-purple-600/30 via-blue-500/20 to-emerald-400/10 relative">
+                    <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10" />
+                  </div>
+                  <CardContent className="relative pt-0 px-6 pb-6">
+                    <div className="flex flex-col items-center -mt-16 gap-4">
+                      <div className="relative group">
+                        <div className="absolute -inset-1 bg-gradient-to-r from-purple-500 to-blue-500 rounded-2xl blur opacity-30 group-hover:opacity-60 transition duration-500" />
+                        <div className="relative w-32 h-32 rounded-2xl bg-black border-4 border-black overflow-hidden flex items-center justify-center">
+                          <User className="w-16 h-16 text-white/20" />
+                          <div className="absolute inset-0 bg-white/5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                            <Plus className="w-6 h-6 text-white" />
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                    <div className="mt-14 space-y-1">
-                      <h2 className="text-xl font-bold">Afiliado Principal</h2>
-                      <p className="text-sm text-white/40">Membro desde Fev 2026</p>
-                      <Badge className="bg-amber-400 text-black hover:bg-amber-500 font-bold mt-2">Nível: Ativo</Badge>
+                      
+                      <div className="text-center space-y-2">
+                        <h2 className="text-2xl font-bold bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent">
+                          Afiliado Principal
+                        </h2>
+                        <div className="flex items-center justify-center gap-2">
+                          <Badge className="bg-amber-400/10 text-amber-400 border-amber-400/20 hover:bg-amber-400/20 font-bold px-3 py-1">
+                            Nível: Ativo
+                          </Badge>
+                          <span className="text-xs text-white/40">•</span>
+                          <span className="text-xs text-white/40">Membro desde Fev 2026</span>
+                        </div>
+                      </div>
+
+                      <div className="w-full grid grid-cols-2 gap-4 pt-4 border-t border-white/5">
+                        <div className="text-center">
+                          <p className="text-[10px] uppercase tracking-wider text-white/40 font-bold">Vendas</p>
+                          <p className="text-lg font-bold">48</p>
+                        </div>
+                        <div className="text-center border-l border-white/5">
+                          <p className="text-[10px] uppercase tracking-wider text-white/40 font-bold">Leads</p>
+                          <p className="text-lg font-bold">124</p>
+                        </div>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
