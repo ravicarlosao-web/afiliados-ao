@@ -53,6 +53,14 @@ export default function UserDashboard() {
     { id: 4, title: "Nova Campanha", description: "Promoção de Verão: Sites Profissionais com 20% de desconto.", type: "info", icon: Sparkles, time: "Ontem" },
   ];
 
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText("afiliados.ao/ref/usuario_123");
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   const renderContent = () => {
     switch (activeItem) {
       case "dashboard":
@@ -142,7 +150,16 @@ export default function UserDashboard() {
                   <div className="p-3 bg-black/40 border border-white/5 rounded-lg break-all text-xs font-mono text-white/60">
                     afiliados.ao/ref/usuario_123
                   </div>
-                  <Button className="w-full bg-white text-black hover:bg-white/90 font-bold">Copiar Link</Button>
+                  <Button 
+                    onClick={handleCopy}
+                    className={`w-full font-bold transition-all duration-300 ${copied ? 'bg-emerald-500 text-white' : 'bg-white text-black hover:bg-white/90'}`}
+                  >
+                    {copied ? (
+                      <span className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4" /> Copiado!</span>
+                    ) : (
+                      <span className="flex items-center gap-2"><Copy className="w-4 h-4" /> Copiar Link</span>
+                    )}
+                  </Button>
                 </CardContent>
               </Card>
             </div>

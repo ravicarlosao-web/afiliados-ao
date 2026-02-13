@@ -92,15 +92,15 @@ export default function AdminDashboard() {
                 { title: "Comissão Paga", value: "Kz 3.1M", growth: "+18%", icon: Receipt, color: "text-purple-400" },
                 { title: "Comissão Pendente", value: "Kz 845k", growth: "-5%", icon: Clock, color: "text-amber-400" },
               ].map((stat, i) => (
-                <Card key={i} className="bg-white/5 border-white/10 backdrop-blur-md">
+                <Card key={i} className="bg-white/5 border-white/10 backdrop-blur-xl hover:bg-white/[0.08] transition-all duration-300 group">
                   <CardHeader className="flex flex-row items-center justify-between pb-2">
-                    <CardTitle className="text-[10px] font-bold uppercase tracking-widest text-white/40">{stat.title}</CardTitle>
-                    <stat.icon className={`w-4 h-4 ${stat.color}`} />
+                    <CardTitle className="text-xs font-bold uppercase tracking-widest text-white/40 group-hover:text-white/60 transition-colors">{stat.title}</CardTitle>
+                    <stat.icon className={`w-4 h-4 ${stat.color} group-hover:scale-110 transition-transform`} />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-xl font-bold">{stat.value}</div>
+                    <div className="text-2xl font-bold tracking-tight">{stat.value}</div>
                     <div className="flex items-center mt-1">
-                      <span className={`text-[10px] font-bold ${stat.growth.startsWith('+') ? 'text-emerald-400' : 'text-red-400'}`}>
+                      <span className={`text-xs font-bold ${stat.growth.startsWith('+') ? 'text-emerald-400' : 'text-red-400'}`}>
                         {stat.growth}
                       </span>
                       <span className="text-[10px] text-white/20 ml-1">vs mês anterior</span>
