@@ -34,7 +34,7 @@ export default function UserDashboard() {
     { id: "clients", label: "Meus Clientes", icon: Users },
     { id: "materials", label: "Materiais de Venda", icon: ImageIcon },
     { id: "ai-tips", label: "Central de Dicas", icon: Sparkles },
-    { id: "ranking", label: "Ranking & Desafios", icon: Trophy },
+    { id: "goals", label: "Minhas Metas", icon: Trophy },
     { id: "profile", label: "Meu Perfil", icon: User },
     { id: "notifications", label: "Notificações", icon: Bell },
     { id: "settings", label: "Configurações", icon: Settings },
@@ -374,75 +374,108 @@ export default function UserDashboard() {
             </div>
           </div>
         );
-      case "ranking":
+      case "goals":
         return (
           <div className="space-y-8">
             <div>
-              <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-white to-white/40 bg-clip-text text-transparent">Ranking & Desafios</h1>
-              <p className="text-white/40">Compita com outros afiliados e ganhe prêmios extras.</p>
+              <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-white to-white/40 bg-clip-text text-transparent">Minhas Metas</h1>
+              <p className="text-white/40">Alcance níveis de faturação e ganhe suas placas de reconhecimento.</p>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              <Card className="lg:col-span-2 bg-white/5 border-white/10">
-                <CardHeader>
-                  <CardTitle className="text-lg">Top Afiliados da Semana</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {[
-                      { rank: 1, name: "João Silva", points: "1.250 pts", bonus: "Kz 50.000", medal: "🥇" },
-                      { rank: 2, name: "Maria Garcia", points: "980 pts", bonus: "Kz 25.000", medal: "🥈" },
-                      { rank: 3, name: "António Manuel", points: "850 pts", bonus: "Kz 15.000", medal: "🥉" },
-                    ].map((user) => (
-                      <div key={user.rank} className="flex items-center gap-4 p-4 rounded-xl bg-white/5 border border-white/5">
-                        <div className="text-2xl">{user.medal}</div>
-                        <div className="flex-1">
-                          <p className="font-bold">{user.name}</p>
-                          <p className="text-xs text-white/40">{user.points}</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-xs text-white/40">Bónus</p>
-                          <p className="text-sm font-bold text-emerald-400">{user.bonus}</p>
-                        </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {[
+                { 
+                  target: "1.000.000", 
+                  label: "Placa de Bronze", 
+                  current: 1000000, 
+                  progress: 100, 
+                  color: "from-orange-400 to-orange-700",
+                  icon: Award,
+                  status: "Concluído",
+                  date: "Alcançado em Jan 2026"
+                },
+                { 
+                  target: "5.000.000", 
+                  label: "Placa de Prata", 
+                  current: 1450000, 
+                  progress: 29, 
+                  color: "from-slate-300 to-slate-500",
+                  icon: Trophy,
+                  status: "Em progresso",
+                  needed: "Falta Kz 3.550.000"
+                },
+                { 
+                  target: "10.000.000", 
+                  label: "Placa de Ouro", 
+                  current: 1450000, 
+                  progress: 14.5, 
+                  color: "from-amber-200 to-amber-500",
+                  icon: Sparkles,
+                  status: "Bloqueado",
+                  needed: "Falta Kz 8.550.000"
+                },
+              ].map((goal, i) => (
+                <Card key={i} className="bg-white/5 border-white/10 overflow-hidden group hover:bg-white/[0.08] transition-all duration-500">
+                  <div className={`h-48 bg-gradient-to-br ${goal.color} relative flex items-center justify-center p-8 overflow-hidden`}>
+                    <div className="absolute inset-0 bg-black/20 backdrop-blur-[1px]" />
+                    <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20" />
+                    
+                    {/* Trophy/Badge Visual */}
+                    <div className="relative transform group-hover:scale-110 transition-transform duration-500">
+                      <div className="absolute -inset-4 bg-white/20 rounded-full blur-2xl opacity-50" />
+                      <div className="relative w-24 h-32 bg-white/10 backdrop-blur-md border border-white/20 rounded-sm shadow-2xl flex flex-col items-center justify-center text-center p-2">
+                         <goal.icon className="w-10 h-10 mb-2" />
+                         <p className="text-[10px] font-bold uppercase tracking-tighter leading-none">{goal.label}</p>
+                         <p className="text-[8px] mt-1 opacity-60">Kz {goal.target}</p>
                       </div>
-                    ))}
+                    </div>
                   </div>
-                </CardContent>
-              </Card>
-
-              <div className="space-y-6">
-                <Card className="bg-white/5 border-white/10">
-                  <CardHeader>
-                    <CardTitle className="text-sm">Seus Selos</CardTitle>
-                  </CardHeader>
-                  <CardContent className="flex flex-wrap gap-3">
-                    {[
-                      { label: "Primeira Venda", icon: Sparkles, color: "text-amber-400" },
-                      { label: "Vendeu 10 Sites", icon: Trophy, color: "text-blue-400" },
-                      { label: "Consistente", icon: History, color: "text-purple-400" },
-                    ].map((badge, i) => (
-                      <div key={i} className="flex flex-col items-center gap-2">
-                         <div className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center">
-                            <badge.icon className={`w-6 h-6 ${badge.color}`} />
-                         </div>
-                         <span className="text-[10px] text-white/40 text-center">{badge.label}</span>
+                  
+                  <CardContent className="pt-6 space-y-4">
+                    <div className="flex justify-between items-end">
+                      <div>
+                        <p className="text-xs text-white/40 uppercase font-bold tracking-widest">Meta de Faturação</p>
+                        <h3 className="text-xl font-bold">Kz {goal.target}</h3>
                       </div>
-                    ))}
-                  </CardContent>
-                </Card>
+                      <Badge variant={goal.progress === 100 ? "default" : "secondary"} className={goal.progress === 100 ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/20" : "bg-white/5"}>
+                        {goal.status}
+                      </Badge>
+                    </div>
 
-                <Card className="bg-gradient-to-br from-purple-500/20 to-blue-500/20 border-white/10">
-                  <CardHeader>
-                    <CardTitle className="text-sm">Desafio Mensal</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <p className="text-xs text-white/80 font-medium">Faça 20 vendas até o fim do mês e ganhe bónus duplo!</p>
-                    <Progress value={45} className="h-1.5 bg-black/40" />
-                    <p className="text-[10px] text-white/40">9 de 20 vendas feitas</p>
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-[10px] font-medium">
+                        <span className="text-white/40">{goal.progress}% concluído</span>
+                        <span className={goal.progress === 100 ? "text-emerald-400" : "text-white/60"}>
+                          {goal.progress === 100 ? "Meta Batida!" : goal.needed}
+                        </span>
+                      </div>
+                      <Progress value={goal.progress} className="h-1.5 bg-white/5" />
+                    </div>
+
+                    {goal.date && (
+                      <p className="text-[10px] text-emerald-400/60 italic flex items-center gap-1">
+                        <CheckCircle2 className="w-3 h-3" /> {goal.date}
+                      </p>
+                    )}
                   </CardContent>
                 </Card>
-              </div>
+              ))}
             </div>
+
+            <Card className="bg-gradient-to-r from-purple-500/10 to-blue-500/10 border-white/10 backdrop-blur-md">
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Award className="w-5 h-5 text-amber-400" />
+                  Como funcionam as Placas?
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="text-sm text-white/60 space-y-2">
+                <p>Ao atingir cada marco de faturação total (comissões acumuladas), você recebe uma placa física e digital exclusiva de reconhecimento.</p>
+                <p>• <strong>Placa de Bronze:</strong> Kz 1.000.000 em comissões.</p>
+                <p>• <strong>Placa de Prata:</strong> Kz 5.000.000 em comissões.</p>
+                <p>• <strong>Placa de Ouro:</strong> Kz 10.000.000 em comissões.</p>
+              </CardContent>
+            </Card>
           </div>
         );
       case "notifications":
