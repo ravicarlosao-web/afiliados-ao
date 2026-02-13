@@ -39,7 +39,8 @@ import {
   Zap,
   Globe,
   Mail,
-  Smartphone
+  Smartphone,
+  XCircle
 } from "lucide-react";
 import { StarField } from "@/components/star-field";
 import { Button } from "@/components/ui/button";
