@@ -6,6 +6,8 @@ import Home from "@/pages/home";
 import Usuario from "@/pages/usuario";
 import Admin from "@/pages/admin";
 import Login from "@/pages/login";
+import Termos from "@/pages/termos";
+import Privacidade from "@/pages/privacidade";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -13,6 +15,8 @@ function Router() {
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/login" component={Login} />
+      <Route path="/termos" component={Termos} />
+      <Route path="/privacidade" component={Privacidade} />
       <Route path="/usuario" component={Usuario} />
       <Route path="/admin" component={Admin} />
       <Route component={NotFound} />

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useLocation } from "wouter";
+import { useLocation, Link } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -193,7 +193,11 @@ export default function Login() {
 
         <p className="mt-8 text-center text-xs text-white/20">
           Ao entrar, você concorda com nossos <br />
-          <span className="text-white/40 underline cursor-pointer">Termos de Serviço</span> e <span className="text-white/40 underline cursor-pointer">Política de Privacidade</span>.
+          <Link href="/termos">
+            <span className="text-white/40 underline cursor-pointer hover:text-red-400 transition-colors">Termos de Serviço</span>
+          </Link> e <Link href="/privacidade">
+            <span className="text-white/40 underline cursor-pointer hover:text-red-400 transition-colors">Política de Privacidade</span>
+          </Link>.
         </p>
       </div>
     </div>

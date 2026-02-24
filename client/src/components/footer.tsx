@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Monitor } from "lucide-react";
+import { Link } from "wouter";
 
 export function Footer() {
   return (
@@ -39,9 +40,9 @@ export function Footer() {
         </div>
 
         <div className="grid grid-cols-2 gap-x-16 gap-y-4">
-          <a href="#" className="hover:text-white transition-colors">Termos de uso</a>
+          <Link href="/termos" className="hover:text-white transition-colors cursor-pointer">Termos de uso</Link>
           <a href="#" className="hover:text-white transition-colors">Política de cancelamento</a>
-          <a href="#" className="hover:text-white transition-colors">Políticas de privacidade</a>
+          <Link href="/privacidade" className="hover:text-white transition-colors cursor-pointer">Política de privacidade</Link>
           <a href="#" className="hover:text-white transition-colors">Política de reembolso</a>
         </div>
       </div>
