@@ -68,6 +68,12 @@ export default function AdminDashboard() {
     { id: "settings", label: "Configurações", icon: Settings },
   ];
 
+  const handleLogout = () => {
+    localStorage.removeItem("isLogged");
+    localStorage.removeItem("userRole");
+    window.location.href = "/login";
+  };
+
   const renderContent = () => {
     switch (activeItem) {
       case "dashboard":
@@ -813,6 +819,7 @@ export default function AdminDashboard() {
           </SidebarContent>
           <div className="mt-auto p-4 border-t border-white/10">
             <button 
+              onClick={handleLogout}
               className="flex items-center gap-3 w-full px-4 py-4 text-white/20 hover:text-red-400 hover:bg-red-400/5 rounded-lg transition-all duration-300"
               data-testid="button-admin-logout"
             >

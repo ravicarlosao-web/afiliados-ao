@@ -20,11 +20,15 @@ export default function Login() {
     setLoading(true);
     setTimeout(() => {
       setLoading(false);
-      toast({
-        title: "Sucesso!",
-        description: "Login realizado com sucesso. Bem-vindo de volta!",
-      });
-      setLocation("/usuario");
+      // Mock Login Session
+      localStorage.setItem("isLogged", "true");
+      if (e.currentTarget.id === "admin-login") {
+        localStorage.setItem("userRole", "admin");
+        setLocation("/admin");
+      } else {
+        localStorage.setItem("userRole", "user");
+        setLocation("/usuario");
+      }
     }, 1500);
   };
 
