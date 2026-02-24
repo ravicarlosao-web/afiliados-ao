@@ -58,12 +58,16 @@ export function Navbar() {
         </div>
 
         <div className="hidden lg:flex items-center gap-4">
-          <Button variant="ghost" className="text-zinc-400 hover:text-white hover:bg-white/5 rounded-full px-6">
-            Entrar
-          </Button>
-          <Button className="bg-white text-black hover:bg-zinc-200 rounded-full px-6 font-semibold shadow-[0_0_20px_rgba(255,255,255,0.1)] transition-all hover:scale-105 active:scale-95">
-            Cadastrar
-          </Button>
+          <Link href="/login">
+            <Button variant="ghost" className="text-zinc-400 hover:text-white hover:bg-white/5 rounded-full px-6">
+              Entrar
+            </Button>
+          </Link>
+          <Link href="/login">
+            <Button className="bg-white text-black hover:bg-zinc-200 rounded-full px-6 font-semibold shadow-[0_0_20px_rgba(255,255,255,0.1)] transition-all hover:scale-105 active:scale-95">
+              Cadastrar
+            </Button>
+          </Link>
         </div>
 
         {/* Mobile Menu Button */}
@@ -98,12 +102,16 @@ export function Navbar() {
               ))}
               <div className="h-px bg-white/5 my-2" />
               <div className="flex flex-col gap-4">
-                <Button variant="outline" className="border-white/10 text-white hover:bg-white/5 w-full h-12 rounded-xl">
-                  Entrar
-                </Button>
-                <Button className="bg-white text-black hover:bg-zinc-200 w-full h-12 rounded-xl font-bold">
-                  Cadastrar Grátis
-                </Button>
+                <Link href="/login">
+                  <Button variant="outline" className="border-white/10 text-white hover:bg-white/5 w-full h-12 rounded-xl" onClick={() => setIsOpen(false)}>
+                    Entrar
+                  </Button>
+                </Link>
+                <Link href="/login">
+                  <Button className="bg-white text-black hover:bg-zinc-200 w-full h-12 rounded-xl font-bold" onClick={() => setIsOpen(false)}>
+                    Cadastrar Grátis
+                  </Button>
+                </Link>
               </div>
             </div>
           </motion.div>
