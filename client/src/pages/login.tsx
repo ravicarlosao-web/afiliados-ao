@@ -22,7 +22,11 @@ export default function Login() {
       setLoading(false);
       // Mock Login Session
       localStorage.setItem("isLogged", "true");
-      if (e.currentTarget.id === "admin-login") {
+      
+      // Check if it's an admin login attempt (e.g. by checking the phone number)
+      // For the mockup, we can just use a simple check or a hidden field
+      const phoneInput = document.getElementById("phone") as HTMLInputElement;
+      if (phoneInput?.value === "admin") {
         localStorage.setItem("userRole", "admin");
         setLocation("/admin");
       } else {
