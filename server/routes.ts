@@ -1,7 +1,7 @@
 import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import session from "express-session";
-import MemoryStore from "memorystore";
+import { SQLiteSessionStore } from "./session-store";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import hpp from "hpp";
@@ -25,7 +25,6 @@ const upload = multer({
   },
 });
 
-const SessionStore = MemoryStore(session);
 
 const loginAttempts = new Map<string, { count: number; lockedUntil: number | null }>();
 const MAX_LOGIN_ATTEMPTS = 5;
@@ -192,7 +191,7 @@ export async function registerRoutes(
       resave: false,
       saveUninitialized: false,
       name: "__sid",
-      store: new SessionStore({ checkPeriod: 86400000 }),
+      store: new SQLiteSessionStore(),
       cookie: {
         maxAge: 24 * 60 * 60 * 1000,
         httpOnly: true,

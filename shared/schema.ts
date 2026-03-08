@@ -90,6 +90,12 @@ export const securityLogs = sqliteTable("security_logs", {
   createdAt: integer("created_at", { mode: "timestamp" }).notNull().$defaultFn(() => new Date()),
 });
 
+export const sessions = sqliteTable("sessions", {
+  sid: text("sid").primaryKey(),
+  data: text("data").notNull(),
+  expiresAt: integer("expires_at", { mode: "timestamp" }).notNull(),
+});
+
 export const settings = sqliteTable("settings", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
   key: text("key").notNull().unique(),

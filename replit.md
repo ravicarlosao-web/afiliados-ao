@@ -8,7 +8,7 @@ Angola's affiliate marketing platform where affiliates refer businesses for webs
 - **Backend**: Express.js + TypeScript
 - **Database**: Turso (libSQL/SQLite) with Drizzle ORM — local `file:local.db` for dev, remote Turso for production
 - **Image Storage**: Cloudinary for material image uploads
-- **Auth**: express-session (memorystore) with bcrypt password hashing
+- **Auth**: express-session (SQLite/Turso-backed session store) with bcrypt password hashing
 - **Routing**: wouter (frontend), Express routes (backend)
 - **State**: @tanstack/react-query
 
