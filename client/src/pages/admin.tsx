@@ -230,7 +230,7 @@ export default function AdminDashboard() {
                   <div className="space-y-2">
                     <Label className="text-xs">Percentagem Base (%)</Label>
                     <div className="flex gap-2">
-                      <Input defaultValue="30" className="bg-white/5 border-white/10" />
+                      <Input defaultValue="0" className="bg-white/5 border-white/10" />
                       <Button className="bg-white text-black font-bold">Salvar</Button>
                     </div>
                   </div>
@@ -240,7 +240,7 @@ export default function AdminDashboard() {
                       {["Essencial", "Profissional", "Premium"].map((plano) => (
                         <div key={plano} className="flex items-center justify-between">
                           <span className="text-xs text-white/60">{plano}</span>
-                          <Input className="w-20 h-8 bg-white/5 border-white/10 text-center text-xs" defaultValue="30" />
+                          <Input className="w-20 h-8 bg-white/5 border-white/10 text-center text-xs" defaultValue="0" />
                         </div>
                       ))}
                     </div>
@@ -392,19 +392,11 @@ export default function AdminDashboard() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {[
-                    { title: "Abordagem Inicial WhatsApp", type: "Copy" },
-                    { title: "Quebra de Objeção: Preço", type: "Script" },
-                    { title: "Fechamento Matador", type: "Copy" },
-                  ].map((item, i) => (
-                    <div key={i} className="flex items-center justify-between p-3 rounded bg-black/40 border border-white/5">
-                      <div>
-                        <p className="text-xs font-bold">{item.title}</p>
-                        <p className="text-[10px] text-white/20">{item.type}</p>
-                      </div>
-                      <Button variant="ghost" size="sm" className="h-7 w-7 p-0"><MoreVertical className="w-3 h-3" /></Button>
+                  <div className="space-y-4">
+                    <div className="py-8 text-center text-xs text-white/40">
+                      Nenhum material cadastrado.
                     </div>
-                  ))}
+                  </div>
                 </CardContent>
               </Card>
 
@@ -414,15 +406,10 @@ export default function AdminDashboard() {
                     <ImageIcon className="w-4 h-4 text-purple-400" /> Criativos Visuais
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="grid grid-cols-3 gap-2">
-                  {[1, 2, 3, 4, 5, 6].map((i) => (
-                    <div key={i} className="aspect-square bg-white/5 border border-white/10 rounded flex items-center justify-center relative group">
-                      <ImageIcon className="w-4 h-4 text-white/10" />
-                      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity rounded">
-                        <Button size="sm" variant="ghost" className="h-6 w-6 p-0"><XCircle className="w-3 h-3 text-red-400" /></Button>
-                      </div>
-                    </div>
-                  ))}
+                <CardContent>
+                  <div className="py-8 text-center text-xs text-white/40 border border-white/5 bg-white/5 rounded-lg border-dashed">
+                    Nenhum criativo visual cadastrado.
+                  </div>
                 </CardContent>
               </Card>
             </div>
@@ -442,7 +429,7 @@ export default function AdminDashboard() {
                   <CardTitle className="text-[10px] font-bold uppercase text-white/40">Tentativas Bloqueadas</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-red-400">42</div>
+                  <div className="text-2xl font-bold text-red-400">0</div>
                 </CardContent>
               </Card>
               {/* More quick stats... */}
@@ -454,23 +441,9 @@ export default function AdminDashboard() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {[
-                    { action: "Admin Login", user: "Admin #1", ip: "192.168.1.1", time: "Há 2 min", status: "success" },
-                    { action: "Alteração de Comissão", user: "Admin #1", ip: "192.168.1.1", time: "Há 15 min", status: "warning" },
-                    { action: "Tentativa de Login Falhou", user: "Desconhecido", ip: "45.12.89.1", time: "Há 45 min", status: "error" },
-                    { action: "Aprovação de Saque", user: "Admin #2", ip: "192.168.1.12", time: "Há 1h", status: "success" },
-                  ].map((log, i) => (
-                    <div key={i} className="flex items-center justify-between py-2 border-b border-white/5 last:border-0">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-1.5 h-1.5 rounded-full ${log.status === 'success' ? 'bg-emerald-500' : log.status === 'warning' ? 'bg-amber-500' : 'bg-red-500'}`} />
-                        <div>
-                          <p className="text-xs font-bold">{log.action}</p>
-                          <p className="text-[10px] text-white/20">{log.user} • {log.ip}</p>
-                        </div>
-                      </div>
-                      <span className="text-[10px] text-white/40 font-mono">{log.time}</span>
-                    </div>
-                  ))}
+                  <div className="py-8 text-center text-xs text-white/40">
+                    Nenhuma atividade recente registrada.
+                  </div>
                 </div>
               </CardContent>
             </Card>
