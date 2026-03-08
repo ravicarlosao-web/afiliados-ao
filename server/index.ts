@@ -3,6 +3,7 @@ import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
 import { createServer } from "http";
 import { seedAdmin } from "./seed";
+import { runMigrations } from "./db";
 import { DatabaseStorage } from "./storage";
 import { deleteImage, isCloudinaryConfigured } from "./cloudinary";
 
@@ -52,6 +53,8 @@ app.use((req, res, next) => {
 });
 
 (async () => {
+  await runMigrations();
+  log("Database migrations applied");
   await seedAdmin();
   await registerRoutes(httpServer, app);
 

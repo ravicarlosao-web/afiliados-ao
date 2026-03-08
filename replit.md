@@ -27,7 +27,9 @@ Angola's affiliate marketing platform where affiliates refer businesses for webs
 - `server/routes.ts` — API routes (auth, admin, user endpoints) + multer image upload
 - `server/db.ts` — Turso/libSQL database connection
 - `server/cloudinary.ts` — Cloudinary image upload/delete utilities
+- `server/session-store.ts` — SQLite-backed session store (persistent across restarts)
 - `server/seed.ts` — Auto-seeds admin user on startup if none exists
+- `migrations/` — Drizzle migration files; auto-applied on server startup via `runMigrations()` in `server/db.ts`
 - `client/src/App.tsx` — Router with PrivateRoute auth guards
 - `client/src/lib/queryClient.ts` — React Query config with apiRequest helper (supports FormData)
 
