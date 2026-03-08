@@ -83,3 +83,25 @@ Comprehensive SEO implementation targeting "ganhar dinheiro na internet angola" 
 - **seo-content.tsx**: Screen-reader-only semantic content with keyword-rich FAQs and descriptions
 - **Semantic HTML**: aria-labels, itemScope, itemType, itemProp, role attributes on all landing page sections
 - **Animations**: Professional framer-motion animations with overflow-hidden to prevent layout shifts
+
+## Security
+
+Comprehensive security hardening applied to all API routes:
+- **Helmet**: Security headers (X-Frame-Options, Strict-Transport-Security, X-Content-Type-Options, Referrer-Policy, etc.)
+- **Rate Limiting**: General (200 req/15min), auth (15 req/15min), strict operations (5 req/min)
+- **CSRF Protection**: Token-based CSRF on all mutating endpoints; login/register exempt; token returned on login
+- **Account Lockout**: 5 failed login attempts → 15-minute lockout per phone+IP combination
+- **Session Security**: Regenerated on login, randomized secret, httpOnly + sameSite:strict + secure (prod) cookies, renamed cookie `__sid`
+- **Input Sanitization**: XSS protection via HTML entity encoding on all text inputs
+- **Password Policy**: Min 8 chars, 1 uppercase, 1 number required for registration and password change
+- **Enum Validation**: Client status and withdrawal status validated against allowed values (no arbitrary strings)
+- **Settings Whitelist**: Only allowed settings keys can be updated via admin API
+- **UUID Validation**: All path parameter IDs validated as UUID format before database queries
+- **Balance Validation**: Withdrawal amount validated against available balance (commission - previous withdrawals)
+- **Active User Check**: `requireActiveUser` middleware checks `isActive` flag; deactivated accounts can't access user routes
+- **Error Masking**: Internal errors logged server-side but generic message returned to client
+- **Body Size Limit**: 1MB limit on JSON and URL-encoded request bodies
+- **HPP Protection**: HTTP Parameter Pollution prevention via `hpp` middleware
+- **Trust Proxy**: Enabled for proper IP detection behind Replit proxy
+- **Bcrypt Rounds**: Increased from 10 to 12 rounds for stronger password hashing
+- **Admin Toggle**: Endpoint to activate/deactivate affiliates (`PATCH /api/admin/affiliates/:id/toggle`)

@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { StarField } from "@/components/star-field";
 import { Phone, Lock, ArrowRight, RefreshCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, setCsrfToken } from "@/lib/queryClient";
 import { queryClient } from "@/lib/queryClient";
 
 export default function Login() {
@@ -33,6 +33,7 @@ export default function Login() {
         password: loginPassword,
       });
       const data = await res.json();
+      if (data.csrfToken) setCsrfToken(data.csrfToken);
       queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
       if (data.user.role === "admin") {
         setLocation("/admin");
@@ -40,9 +41,17 @@ export default function Login() {
         setLocation("/usuario");
       }
     } catch (error: any) {
+      let description = "Erro no servidor";
+      if (error.message?.includes("401")) description = "Credenciais inválidas";
+      else if (error.message?.includes("429")) description = "Conta temporariamente bloqueada. Tente novamente em 15 minutos.";
+      else if (error.message?.includes("403")) description = "Conta desativada. Contacte o suporte.";
+      try {
+        const parsed = JSON.parse(error.message.split(": ").slice(1).join(": "));
+        if (parsed.message) description = parsed.message;
+      } catch {}
       toast({
         title: "Erro ao entrar",
-        description: error.message?.includes("401") ? "Credenciais inválidas" : "Erro no servidor",
+        description,
         variant: "destructive",
       });
     } finally {
@@ -67,9 +76,15 @@ export default function Login() {
       setRegPhone("");
       setRegPassword("");
     } catch (error: any) {
+      let description = "Erro no servidor";
+      if (error.message?.includes("409")) description = "Este número já está cadastrado";
+      try {
+        const parsed = JSON.parse(error.message.split(": ").slice(1).join(": "));
+        if (parsed.message) description = parsed.message;
+      } catch {}
       toast({
         title: "Erro ao criar conta",
-        description: error.message?.includes("409") ? "Este número já está cadastrado" : "Erro no servidor",
+        description,
         variant: "destructive",
       });
     } finally {
@@ -220,7 +235,7 @@ export default function Login() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="reg-pass">Criar Palavra-passe</Label>
-                    <Input id="reg-pass" data-testid="input-reg-pass" type="password" placeholder="Mínimo 6 caracteres" className="bg-black/40 border-white/10" required value={regPassword} onChange={(e) => setRegPassword(e.target.value)} />
+                    <Input id="reg-pass" data-testid="input-reg-pass" type="password" placeholder="Mín. 8 caracteres, 1 maiúscula, 1 número" className="bg-black/40 border-white/10" required value={regPassword} onChange={(e) => setRegPassword(e.target.value)} />
                   </div>
                 </CardContent>
                 <CardFooter>

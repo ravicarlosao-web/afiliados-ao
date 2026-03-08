@@ -17,6 +17,7 @@ export interface IStorage {
   createUser(user: InsertUser): Promise<User>;
   updateUserProfile(id: string, data: { iban?: string; multicaixaExpress?: string }): Promise<User | undefined>;
   updateUserPassword(id: string, hashedPassword: string): Promise<void>;
+  toggleUserActive(id: string, isActive: boolean): Promise<User | undefined>;
   getAffiliates(): Promise<User[]>;
   getAffiliateCount(): Promise<number>;
 
@@ -81,6 +82,11 @@ export class DatabaseStorage implements IStorage {
 
   async updateUserPassword(id: string, hashedPassword: string): Promise<void> {
     await db.update(users).set({ password: hashedPassword }).where(eq(users.id, id));
+  }
+
+  async toggleUserActive(id: string, isActive: boolean): Promise<User | undefined> {
+    const [updated] = await db.update(users).set({ isActive }).where(eq(users.id, id)).returning();
+    return updated;
   }
 
   async getAffiliates(): Promise<User[]> {
