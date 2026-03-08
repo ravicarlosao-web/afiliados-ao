@@ -68,13 +68,15 @@ export default function Login() {
         phone: regPhone,
         password: regPassword,
       });
-      toast({
-        title: "Conta criada!",
-        description: "Sua conta foi criada com sucesso. Faça login para continuar.",
+      const loginRes = await apiRequest("POST", "/api/auth/login", {
+        phone: regPhone,
+        password: regPassword,
       });
-      setRegName("");
-      setRegPhone("");
-      setRegPassword("");
+      const data = await loginRes.json();
+      if (data.csrfToken) setCsrfToken(data.csrfToken);
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+      toast({ title: "Conta criada com sucesso!" });
+      setLocation("/usuario");
     } catch (error: any) {
       let description = "Erro no servidor";
       if (error.message?.includes("409")) description = "Este número já está cadastrado";
