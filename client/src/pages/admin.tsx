@@ -7,7 +7,7 @@ import {
   CheckCircle2, Clock, Briefcase, FileText, Plus, Search, ArrowUpRight,
   UserCheck, MoreVertical, Download, Eye, Lock, Ban, Receipt, Target, Percent,
   Megaphone, Layout, Shield, MessageSquare, Image as ImageIcon, Zap, Globe, Mail,
-  Smartphone, XCircle, LineChart, Filter, Bell
+  Smartphone, XCircle, LineChart, Filter, Bell, ChevronLeft, ChevronRight
 } from "lucide-react";
 import { StarField } from "@/components/star-field";
 import { Button } from "@/components/ui/button";
@@ -61,6 +61,42 @@ const statusColors: Record<string, string> = {
   pago: "bg-emerald-500/10 text-emerald-400",
   recusado: "bg-red-500/10 text-red-400",
 };
+
+function PaginationControls({ page, totalItems, perPage, onPageChange }: { page: number; totalItems: number; perPage: number; onPageChange: (p: number) => void }) {
+  const totalPages = Math.ceil(totalItems / perPage);
+  if (totalPages <= 1) return null;
+  return (
+    <div className="flex items-center justify-between pt-4 px-1">
+      <span className="text-[11px] text-white/30">
+        {Math.min((page - 1) * perPage + 1, totalItems)}–{Math.min(page * perPage, totalItems)} de {totalItems}
+      </span>
+      <div className="flex items-center gap-1">
+        <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-white/40 hover:text-white" disabled={page <= 1} onClick={() => onPageChange(page - 1)} data-testid="button-prev-page">
+          <ChevronLeft className="w-4 h-4" />
+        </Button>
+        {Array.from({ length: totalPages }, (_, i) => i + 1)
+          .filter(p => p === 1 || p === totalPages || Math.abs(p - page) <= 1)
+          .reduce<(number | string)[]>((acc, p, i, arr) => {
+            if (i > 0 && p - (arr[i - 1] as number) > 1) acc.push("...");
+            acc.push(p);
+            return acc;
+          }, [])
+          .map((p, i) =>
+            typeof p === "string" ? (
+              <span key={`ellipsis-${i}`} className="text-white/20 text-xs px-1">…</span>
+            ) : (
+              <Button key={p} variant="ghost" size="sm" className={`h-8 w-8 p-0 text-xs font-bold ${p === page ? "bg-white/10 text-white" : "text-white/40 hover:text-white"}`} onClick={() => onPageChange(p)} data-testid={`button-page-${p}`}>
+                {p}
+              </Button>
+            )
+          )}
+        <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-white/40 hover:text-white" disabled={page >= totalPages} onClick={() => onPageChange(page + 1)} data-testid="button-next-page">
+          <ChevronRight className="w-4 h-4" />
+        </Button>
+      </div>
+    </div>
+  );
+}
 
 export default function AdminDashboard() {
   const [activeItem, setActiveItem] = useState("dashboard");
@@ -176,6 +212,19 @@ export default function AdminDashboard() {
       toast({ title: "Nota guardada" });
     },
   });
+
+  const ITEMS_PER_PAGE = 15;
+  const [affiliatesPage, setAffiliatesPage] = useState(1);
+  const [clientsPage, setClientsPage] = useState(1);
+  const [withdrawalsPage, setWithdrawalsPage] = useState(1);
+
+  useEffect(() => { setAffiliatesPage(1); }, [activeItem]);
+  useEffect(() => { setClientsPage(1); }, [activeItem]);
+  useEffect(() => { setWithdrawalsPage(1); }, [activeItem]);
+
+  useEffect(() => { const max = Math.max(1, Math.ceil(affiliates.length / ITEMS_PER_PAGE)); setAffiliatesPage(p => Math.min(p, max)); }, [affiliates.length]);
+  useEffect(() => { const max = Math.max(1, Math.ceil(allClients.length / ITEMS_PER_PAGE)); setClientsPage(p => Math.min(p, max)); }, [allClients.length]);
+  useEffect(() => { const max = Math.max(1, Math.ceil(allWithdrawals.length / ITEMS_PER_PAGE)); setWithdrawalsPage(p => Math.min(p, max)); }, [allWithdrawals.length]);
 
   const [selectedClient, setSelectedClient] = useState<any | null>(null);
   const [clientDetailOpen, setClientDetailOpen] = useState(false);
@@ -472,7 +521,7 @@ export default function AdminDashboard() {
                     <tbody className="divide-y divide-white/5">
                       {affiliates.length === 0 ? (
                         <tr><td colSpan={5} className="py-8 text-center text-xs text-white/40">Nenhum afiliado encontrado no sistema.</td></tr>
-                      ) : affiliates.map((af: any) => {
+                      ) : affiliates.slice((affiliatesPage - 1) * ITEMS_PER_PAGE, affiliatesPage * ITEMS_PER_PAGE).map((af: any) => {
                         const affSales = allClients.filter((c: any) => c.affiliateId === af.id && c.status === "pagamento_feito").length;
                         return (
                           <tr key={af.id} className="group hover:bg-white/[0.02]" data-testid={`row-affiliate-${af.id}`}>
@@ -494,6 +543,7 @@ export default function AdminDashboard() {
                     </tbody>
                   </table>
                 </div>
+                <PaginationControls page={affiliatesPage} totalItems={affiliates.length} perPage={ITEMS_PER_PAGE} onPageChange={setAffiliatesPage} />
               </CardContent>
             </Card>
           </div>
@@ -522,7 +572,7 @@ export default function AdminDashboard() {
                     <tbody className="divide-y divide-white/5">
                       {allClients.length === 0 ? (
                         <tr><td colSpan={5} className="py-8 text-center text-xs text-white/40">Nenhum cliente registado no momento.</td></tr>
-                      ) : allClients.map((cl: any) => (
+                      ) : allClients.slice((clientsPage - 1) * ITEMS_PER_PAGE, clientsPage * ITEMS_PER_PAGE).map((cl: any) => (
                         <tr key={cl.id} className="group hover:bg-white/[0.02] cursor-pointer" onClick={() => openClientDetail(cl)} data-testid={`row-client-${cl.id}`}>
                           <td className="py-4">
                             <p className="font-bold text-white/90 text-xs">{cl.name}</p>
@@ -548,6 +598,7 @@ export default function AdminDashboard() {
                     </tbody>
                   </table>
                 </div>
+                <PaginationControls page={clientsPage} totalItems={allClients.length} perPage={ITEMS_PER_PAGE} onPageChange={setClientsPage} />
               </CardContent>
             </Card>
 
@@ -1196,7 +1247,7 @@ export default function AdminDashboard() {
                   </div>
                   {allWithdrawals.length === 0 ? (
                     <div className="p-4 text-center"><p className="text-sm text-white/40">Nenhuma solicitação de saque no momento.</p></div>
-                  ) : allWithdrawals.map((w: any) => (
+                  ) : allWithdrawals.slice((withdrawalsPage - 1) * ITEMS_PER_PAGE, withdrawalsPage * ITEMS_PER_PAGE).map((w: any) => (
                     <div key={w.id} className="p-3 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/5 last:border-0 hover:bg-white/[0.01]" data-testid={`row-withdrawal-${w.id}`}>
                       <div className="flex items-center gap-3 sm:gap-4">
                         <div className="w-8 h-8 rounded-full bg-red-500/10 flex items-center justify-center text-[10px] font-bold text-red-400 border border-red-500/20 shrink-0">
@@ -1219,6 +1270,7 @@ export default function AdminDashboard() {
                       </div>
                     </div>
                   ))}
+                  <PaginationControls page={withdrawalsPage} totalItems={allWithdrawals.length} perPage={ITEMS_PER_PAGE} onPageChange={setWithdrawalsPage} />
                 </Card>
               </TabsContent>
             </Tabs>

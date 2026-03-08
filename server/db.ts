@@ -11,6 +11,8 @@ const client = createClient({
 
 export const db = drizzle(client, { schema });
 
+const BASELINE_TABLES = ["clients", "users", "materials", "notifications", "sessions", "settings", "withdrawals", "security_logs", "conversation_screenshots"];
+
 async function ensureBaselineMigration() {
   await db.run(sql`CREATE TABLE IF NOT EXISTS __drizzle_migrations (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -22,10 +24,13 @@ async function ensureBaselineMigration() {
     sql`SELECT hash FROM __drizzle_migrations WHERE hash = '0000_right_donald_blake'`
   );
   if (existing.length === 0) {
-    const tablesExist = await db.all<{ name: string }>(
-      sql`SELECT name FROM sqlite_master WHERE type='table' AND name='clients'`
+    const allTables = await db.all<{ name: string }>(
+      sql`SELECT name FROM sqlite_master WHERE type='table'`
     );
-    if (tablesExist.length > 0) {
+    const tableNames = new Set(allTables.map(t => t.name));
+    const allBaselineExist = BASELINE_TABLES.every(t => tableNames.has(t));
+
+    if (allBaselineExist) {
       await db.run(
         sql`INSERT INTO __drizzle_migrations (hash, created_at) VALUES ('0000_right_donald_blake', ${Date.now()})`
       );
