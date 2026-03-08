@@ -609,14 +609,11 @@ export default function UserDashboard() {
                           toast({ title: "Preencha pelo menos o nome da empresa ou da pessoa", variant: "destructive" });
                           return;
                         }
-                        const planInfo = planPrices[newClientPlan];
                         const clientName = newClientCompany || newClientContactPerson;
                         createClientMutation.mutate({
                           name: clientName,
                           contact: newClientContact,
                           plan: newClientPlan,
-                          price: planInfo.price,
-                          commission: planInfo.commission,
                           companyName: newClientCompany || undefined,
                           contactPerson: newClientContactPerson || undefined,
                           socialMedia: newClientSocial || undefined,

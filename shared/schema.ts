@@ -97,7 +97,7 @@ export const settings = sqliteTable("settings", {
 });
 
 export const insertUserSchema = createInsertSchema(users).omit({ id: true, createdAt: true, referralCode: true });
-export const insertClientSchema = createInsertSchema(clients).omit({ id: true, createdAt: true });
+export const insertClientSchema = createInsertSchema(clients).omit({ id: true, createdAt: true, status: true, price: true, commission: true, adminNote: true, siteStarted: true });
 export const insertWithdrawalSchema = createInsertSchema(withdrawals).omit({ id: true, createdAt: true });
 export const insertMaterialSchema = createInsertSchema(materials).omit({ id: true, createdAt: true, cloudinaryPublicId: true });
 export const insertNotificationSchema = createInsertSchema(notifications).omit({ id: true, createdAt: true, isRead: true });

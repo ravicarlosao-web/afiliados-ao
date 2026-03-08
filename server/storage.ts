@@ -24,7 +24,7 @@ export interface IStorage {
 
   getClients(): Promise<Client[]>;
   getClientsByAffiliate(affiliateId: string): Promise<Client[]>;
-  createClient(client: InsertClient): Promise<Client>;
+  createClient(client: InsertClient & { status: string; price: string; commission: string }): Promise<Client>;
   getClient(id: string): Promise<Client | undefined>;
   updateClientStatus(id: string, status: string | undefined, adminNote?: string): Promise<Client | undefined>;
   updateClientSiteStarted(id: string, siteStarted: boolean): Promise<Client | undefined>;
@@ -116,7 +116,7 @@ export class DatabaseStorage implements IStorage {
     return db.select().from(clients).where(eq(clients.affiliateId, affiliateId)).orderBy(desc(clients.createdAt));
   }
 
-  async createClient(client: InsertClient): Promise<Client> {
+  async createClient(client: InsertClient & { status: string; price: string; commission: string }): Promise<Client> {
     const [newClient] = await db.insert(clients).values(client).returning();
     return newClient;
   }

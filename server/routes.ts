@@ -946,6 +946,25 @@ ganhar dinheiro na internet angola, marketing de afiliados angola, renda extra a
       const parsed = insertClientSchema.safeParse(data);
       if (!parsed.success) return res.status(400).json({ message: "Dados inválidos" });
 
+      const allowedPlans = ["Essencial", "Profissional", "Premium"];
+      if (!allowedPlans.includes(parsed.data.plan)) {
+        return res.status(400).json({ message: "Plano inválido" });
+      }
+
+      const defaultPrices: Record<string, { price: string; commission: string }> = {
+        Essencial: { price: "130000", commission: "20000" },
+        Profissional: { price: "250000", commission: "40000" },
+        Premium: { price: "400000", commission: "70000" },
+      };
+
+      const priceKey = `price_${parsed.data.plan.toLowerCase()}`;
+      const commKey = `commission_${parsed.data.plan.toLowerCase()}`;
+      const customPrice = await storage.getSetting(priceKey);
+      const customComm = await storage.getSetting(commKey);
+
+      const price = customPrice || defaultPrices[parsed.data.plan].price;
+      const commission = customComm || defaultPrices[parsed.data.plan].commission;
+
       const sanitizedData = {
         ...parsed.data,
         name: sanitizeString(parsed.data.name.trim()),
@@ -956,7 +975,12 @@ ganhar dinheiro na internet angola, marketing de afiliados angola, renda extra a
         return res.status(400).json({ message: "Nome do cliente inválido" });
       }
 
-      const client = await storage.createClient(sanitizedData);
+      const client = await storage.createClient({
+        ...sanitizedData,
+        status: "em_analise",
+        price,
+        commission,
+      });
       res.status(201).json(client);
     } catch (error: any) {
       console.error("Create client error:", error);
