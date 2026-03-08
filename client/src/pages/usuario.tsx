@@ -227,6 +227,7 @@ export default function UserDashboard() {
     { id: "dashboard", label: "Visão Geral", icon: LayoutDashboard },
     { id: "wallet", label: "Carteira & Saque", icon: Wallet },
     { id: "clients", label: "Meus Clientes", icon: Users },
+    { id: "messages", label: "Mensagens", icon: MessageSquare },
     { id: "materials", label: "Materiais de Venda", icon: ImageIcon },
     { id: "goals", label: "Minhas Metas", icon: Trophy },
     { id: "profile", label: "Meu Perfil", icon: User },
@@ -661,6 +662,78 @@ export default function UserDashboard() {
             </Card>
           </div>
         );
+      case "messages": {
+        const clientMessages = myNotifications.filter((n: any) =>
+          n.title?.includes("Cliente") || n.title?.includes("cliente") || n.title?.includes("Site do cliente") || n.title?.includes("Mensagem sobre cliente")
+        );
+        return (
+          <div className="space-y-6 sm:space-y-8">
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight bg-gradient-to-r from-white to-white/40 bg-clip-text text-transparent">Mensagens</h1>
+              <p className="text-white/40 text-sm">Mensagens da equipa sobre os seus clientes indicados.</p>
+            </div>
+
+            <Card className="bg-white/5 border-white/10">
+              <CardContent className="p-0">
+                {clientMessages.length === 0 ? (
+                  <div className="p-12 text-center">
+                    <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-4">
+                      <MessageSquare className="w-7 h-7 text-white/20" />
+                    </div>
+                    <p className="text-sm text-white/40 font-medium">Nenhuma mensagem ainda</p>
+                    <p className="text-xs text-white/20 mt-1">Quando a equipa enviar uma mensagem sobre um dos seus clientes, ela aparecerá aqui.</p>
+                  </div>
+                ) : (
+                  <div className="divide-y divide-white/5">
+                    {clientMessages.map((msg: any) => {
+                      const isWarning = msg.type === "warning";
+                      const isSuccess = msg.type === "success";
+                      return (
+                        <div key={msg.id} className="p-5 hover:bg-white/[0.02] transition-colors" data-testid={`row-message-${msg.id}`}>
+                          <div className="flex gap-4">
+                            <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${
+                              isWarning ? "bg-red-500/10 text-red-400" :
+                              isSuccess ? "bg-emerald-500/10 text-emerald-400" :
+                              "bg-blue-500/10 text-blue-400"
+                            }`}>
+                              {isWarning ? <XCircle className="w-5 h-5" /> :
+                               isSuccess ? <CheckCircle2 className="w-5 h-5" /> :
+                               <MessageSquare className="w-5 h-5" />}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-start justify-between gap-3 mb-1.5">
+                                <h4 className="text-sm font-bold text-white/90 truncate">{msg.title}</h4>
+                                <span className="text-[10px] text-white/30 whitespace-nowrap shrink-0">{timeAgo(msg.createdAt)}</span>
+                              </div>
+                              <div className={`rounded-lg p-3 text-xs leading-relaxed ${
+                                isWarning ? "bg-red-500/5 border border-red-500/10 text-red-300/80" :
+                                isSuccess ? "bg-emerald-500/5 border border-emerald-500/10 text-emerald-300/80" :
+                                "bg-white/[0.03] border border-white/5 text-white/60"
+                              }`}>
+                                {msg.description}
+                              </div>
+                              <div className="flex items-center gap-2 mt-2">
+                                <Badge className={`text-[8px] px-1.5 h-4 rounded-full ${
+                                  isWarning ? "bg-red-500/10 text-red-400 border-red-500/20" :
+                                  isSuccess ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" :
+                                  "bg-blue-500/10 text-blue-400 border-blue-500/20"
+                                }`}>
+                                  {isWarning ? "Atenção" : isSuccess ? "Sucesso" : "Informação"}
+                                </Badge>
+                                <span className="text-[10px] text-white/20">Equipa AFILIADOS.AO</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        );
+      }
       case "materials":
         return (
           <div className="space-y-6 sm:space-y-8">
@@ -1110,6 +1183,15 @@ export default function UserDashboard() {
                       >
                         <item.icon className={`w-6 h-6 shrink-0 ${activeItem === item.id ? "text-white" : "text-white/40"}`} />
                         <span className="font-semibold text-base lg:text-lg truncate">{item.label}</span>
+                        {item.id === "messages" && myNotifications.filter((n: any) =>
+                          n.title?.includes("Cliente") || n.title?.includes("cliente") || n.title?.includes("Site do cliente") || n.title?.includes("Mensagem sobre cliente")
+                        ).length > 0 && (
+                          <span className="ml-auto mr-1 bg-red-500 text-white text-[9px] font-bold rounded-full w-5 h-5 flex items-center justify-center shrink-0">
+                            {myNotifications.filter((n: any) =>
+                              n.title?.includes("Cliente") || n.title?.includes("cliente") || n.title?.includes("Site do cliente") || n.title?.includes("Mensagem sobre cliente")
+                            ).length}
+                          </span>
+                        )}
                         {activeItem === item.id && <ChevronRight className="ml-auto w-5 h-5 shrink-0 opacity-50" />}
                       </SidebarMenuButton>
                     </SidebarMenuItem>
