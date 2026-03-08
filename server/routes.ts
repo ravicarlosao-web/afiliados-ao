@@ -101,7 +101,7 @@ const VALID_CLIENT_STATUSES = ["em_analise", "em_contacto", "pagamento_feito", "
 const VALID_WITHDRAWAL_STATUSES = ["pendente", "processando", "pago", "recusado"] as const;
 const VALID_WITHDRAWAL_METHODS = ["Transferência IBAN", "Unitel Money", "Afrimoney"] as const;
 const ALLOWED_SETTINGS_KEYS = [
-  "commission_essencial", "commission_profissional", "commission_premium",
+  "commission_base", "commission_essencial", "commission_profissional", "commission_premium",
   "price_essencial", "price_profissional", "price_premium",
   "min_withdrawal", "platform_name", "support_email", "support_phone",
 ] as const;

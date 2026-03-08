@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
@@ -211,10 +211,19 @@ export default function AdminDashboard() {
   const [matContent, setMatContent] = useState("");
   const [matImage, setMatImage] = useState<File | null>(null);
 
-  const [commBase, setCommBase] = useState(adminSettings?.commission_base || "0");
-  const [commEssencial, setCommEssencial] = useState(adminSettings?.commission_essencial || "0");
-  const [commProfissional, setCommProfissional] = useState(adminSettings?.commission_profissional || "0");
-  const [commPremium, setCommPremium] = useState(adminSettings?.commission_premium || "0");
+  const [commBase, setCommBase] = useState("0");
+  const [commEssencial, setCommEssencial] = useState("0");
+  const [commProfissional, setCommProfissional] = useState("0");
+  const [commPremium, setCommPremium] = useState("0");
+
+  useEffect(() => {
+    if (adminSettings) {
+      setCommBase(adminSettings.commission_base || "0");
+      setCommEssencial(adminSettings.commission_essencial || "0");
+      setCommProfissional(adminSettings.commission_profissional || "0");
+      setCommPremium(adminSettings.commission_premium || "0");
+    }
+  }, [adminSettings]);
 
   const paidClients = allClients.filter((c: any) => c.status === "pagamento_feito");
   const topAffiliates = affiliates
