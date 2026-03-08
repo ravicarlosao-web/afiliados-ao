@@ -184,7 +184,13 @@ export function FeaturesGrid() {
 
   return (
     <section id="applications" className="py-16 sm:py-20 md:py-24 px-4 sm:px-6 container mx-auto">
-      <div className="text-center mb-10 sm:mb-16 space-y-3 sm:space-y-4">
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-80px" }}
+        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+        className="text-center mb-10 sm:mb-16 space-y-3 sm:space-y-4"
+      >
         <span className="inline-block px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-medium tracking-wider text-zinc-400 uppercase">
           COMO FUNCIONA
         </span>
@@ -194,15 +200,16 @@ export function FeaturesGrid() {
         <p className="text-zinc-400 text-sm sm:text-lg max-w-2xl mx-auto">
           Um processo simples, transparente e feito para você ganhar sem complicação.
         </p>
-      </div>
+      </motion.div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-12 sm:mb-24">
         {steps.slice(0, 2).map((step, i) => (
           <motion.div 
             key={i}
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
+            viewport={{ once: true, margin: "-60px" }}
+            transition={{ duration: 0.6, delay: i * 0.15, ease: [0.22, 1, 0.36, 1] }}
             className="bg-card border border-white/10 rounded-2xl sm:rounded-3xl p-5 sm:p-8 md:p-12 flex flex-col justify-between min-h-[320px] sm:min-h-[400px] md:min-h-[450px] relative overflow-hidden group hover:border-white/20 transition-colors"
           >
             <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -225,10 +232,10 @@ export function FeaturesGrid() {
         {steps.slice(2).map((step, i) => (
           <motion.div 
             key={i}
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: i * 0.1 }}
+            viewport={{ once: true, margin: "-60px" }}
+            transition={{ duration: 0.6, delay: i * 0.12, ease: [0.22, 1, 0.36, 1] }}
             className="bg-card border border-white/10 rounded-2xl sm:rounded-3xl p-5 sm:p-8 flex flex-col justify-between min-h-[300px] sm:min-h-[380px] md:min-h-[420px] hover:bg-white/5 transition-colors group relative overflow-hidden"
           >
             <div className="relative w-full bg-white/5 rounded-xl h-24 sm:h-28 md:h-32 flex items-center justify-center mb-4 sm:mb-6 border border-white/5 p-3 sm:p-4">
@@ -244,7 +251,13 @@ export function FeaturesGrid() {
         ))}
       </div>
 
-      <div className="text-center my-14 sm:my-20 md:my-24 space-y-3 sm:space-y-4">
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-80px" }}
+        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+        className="text-center my-14 sm:my-20 md:my-24 space-y-3 sm:space-y-4"
+      >
          <span className="inline-block px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-medium tracking-wider text-zinc-400 uppercase">
           Tabelas de Comissão
         </span>
@@ -254,16 +267,16 @@ export function FeaturesGrid() {
         <p className="text-zinc-400 text-sm sm:text-lg max-w-2xl mx-auto">
           Oferecemos comissões generosas em todos os nossos planos de criação de websites.
         </p>
-      </div>
+      </motion.div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 mb-8 sm:mb-12">
         {plans.map((plan, i) => (
           <motion.div 
             key={i}
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: i * 0.1 }}
+            initial={{ opacity: 0, y: 40, scale: 0.97 }}
+            whileInView={{ opacity: 1, y: 0, scale: 1 }}
+            viewport={{ once: true, margin: "-60px" }}
+            transition={{ duration: 0.6, delay: i * 0.12, ease: [0.22, 1, 0.36, 1] }}
             className="bg-card border border-white/10 rounded-2xl sm:rounded-3xl p-5 sm:p-8 flex flex-col h-full hover:border-white/20 transition-all group relative overflow-hidden"
           >
             <div className="mb-5 sm:mb-8">

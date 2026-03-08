@@ -24,7 +24,10 @@ export function Navbar() {
   ];
 
   return (
-    <nav 
+    <motion.nav
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
       className={`fixed top-0 w-full z-50 transition-all duration-300 ${
         scrolled ? "bg-black/90 backdrop-blur-lg py-3 border-b border-white/10" : "bg-transparent py-5"
       }`}
@@ -43,21 +46,28 @@ export function Navbar() {
           </span>
         </Link>
 
-        {/* Desktop Navigation */}
         <div className="hidden lg:flex items-center gap-8 text-sm font-medium text-zinc-400">
-          {navLinks.map((link) => (
-            <a 
+          {navLinks.map((link, i) => (
+            <motion.a 
               key={link.href}
               href={link.href} 
               className="hover:text-white transition-colors relative group py-2"
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.3 + i * 0.08, ease: [0.22, 1, 0.36, 1] }}
             >
               {link.label}
               <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-white transition-all duration-300 group-hover:w-full" />
-            </a>
+            </motion.a>
           ))}
         </div>
 
-        <div className="hidden lg:flex items-center gap-4">
+        <motion.div 
+          className="hidden lg:flex items-center gap-4"
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.6, ease: [0.22, 1, 0.36, 1] }}
+        >
           <Link href="/login">
             <Button variant="ghost" className="text-zinc-400 hover:text-white hover:bg-white/5 rounded-full px-6">
               Entrar
@@ -68,9 +78,8 @@ export function Navbar() {
               Cadastrar
             </Button>
           </Link>
-        </div>
+        </motion.div>
 
-        {/* Mobile Menu Button */}
         <button 
           className="lg:hidden p-2 text-zinc-400 hover:text-white transition-colors"
           onClick={() => setIsOpen(!isOpen)}
@@ -80,7 +89,6 @@ export function Navbar() {
         </button>
       </div>
 
-      {/* Mobile Navigation Overlay */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -117,6 +125,6 @@ export function Navbar() {
           </motion.div>
         )}
       </AnimatePresence>
-    </nav>
+    </motion.nav>
   );
 }
