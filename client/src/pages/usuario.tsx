@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider } from "@/components/ui/sidebar";
+import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { 
-  LayoutDashboard, User, Settings, Wallet, Bell, LogOut, ChevronRight, 
+  LayoutDashboard, User, Settings, Wallet, Bell, LogOut, ChevronRight,
   TrendingUp, DollarSign, Users, Briefcase, Plus, Search,
   Target, Award, CreditCard, History, ShieldCheck, FileText, CheckCircle2,
   Clock, XCircle, Sparkles, Image as ImageIcon, MessageSquare, 
@@ -1080,8 +1080,15 @@ export default function UserDashboard() {
           </div>
         </Sidebar>
 
-        <main className="flex-1 relative z-10 overflow-y-auto p-4 sm:p-6 lg:p-12">
-          <div className="max-w-7xl mx-auto">
+        <main className="flex-1 relative z-10 overflow-y-auto">
+          <div className="sticky top-0 z-30 md:hidden bg-black/90 backdrop-blur-lg border-b border-white/10 px-4 py-3 flex items-center justify-between">
+            <SidebarTrigger className="h-9 w-9 text-white/60 hover:text-white hover:bg-white/10" data-testid="button-mobile-menu" />
+            <span className="text-sm font-bold tracking-tight text-white/80">
+              afiliados<span className="text-white/40">.ao</span>
+            </span>
+            <div className="w-9" />
+          </div>
+          <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-12">
             {renderContent()}
           </div>
         </main>
