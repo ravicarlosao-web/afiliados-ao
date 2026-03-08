@@ -25,6 +25,9 @@ export const clients = sqliteTable("clients", {
   affiliateId: text("affiliate_id").notNull().references(() => users.id),
   price: text("price").notNull().default("0"),
   commission: text("commission").notNull().default("0"),
+  companyName: text("company_name"),
+  contactPerson: text("contact_person"),
+  socialMedia: text("social_media"),
   createdAt: integer("created_at", { mode: "timestamp" }).notNull().$defaultFn(() => new Date()),
 });
 

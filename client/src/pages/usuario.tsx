@@ -131,6 +131,9 @@ export default function UserDashboard() {
   const [newClientName, setNewClientName] = useState("");
   const [newClientContact, setNewClientContact] = useState("");
   const [newClientPlan, setNewClientPlan] = useState("");
+  const [newClientCompany, setNewClientCompany] = useState("");
+  const [newClientContactPerson, setNewClientContactPerson] = useState("");
+  const [newClientSocial, setNewClientSocial] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
 
   const createClientMutation = useMutation({
@@ -143,6 +146,9 @@ export default function UserDashboard() {
       setNewClientName("");
       setNewClientContact("");
       setNewClientPlan("");
+      setNewClientCompany("");
+      setNewClientContactPerson("");
+      setNewClientSocial("");
       setDialogOpen(false);
     },
     onError: () => {
@@ -489,19 +495,29 @@ export default function UserDashboard() {
                     <Plus className="w-4 h-4" /> Adicionar Novo Cliente
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="bg-[#121212] border-white/10 text-white">
+                <DialogContent className="bg-[#121212] border-white/10 text-white max-h-[90vh] overflow-y-auto">
                   <DialogHeader>
                     <DialogTitle>Novo Cliente</DialogTitle>
                   </DialogHeader>
                   <div className="space-y-4 py-4">
                     <div className="space-y-2">
-                      <Label>Nome da Empresa / Pessoa</Label>
+                      <Label>Nome da Empresa</Label>
                       <Input
                         placeholder="Ex: Tech Solutions"
                         className="bg-white/5 border-white/10"
-                        value={newClientName}
-                        onChange={(e) => setNewClientName(e.target.value)}
-                        data-testid="input-client-name"
+                        value={newClientCompany}
+                        onChange={(e) => setNewClientCompany(e.target.value)}
+                        data-testid="input-client-company"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Nome da Pessoa de Contacto</Label>
+                      <Input
+                        placeholder="Ex: João Silva"
+                        className="bg-white/5 border-white/10"
+                        value={newClientContactPerson}
+                        onChange={(e) => setNewClientContactPerson(e.target.value)}
+                        data-testid="input-client-contact-person"
                       />
                     </div>
                     <div className="space-y-2">
@@ -512,6 +528,16 @@ export default function UserDashboard() {
                         value={newClientContact}
                         onChange={(e) => setNewClientContact(e.target.value)}
                         data-testid="input-client-contact"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Rede Social <span className="text-white/30 text-[10px]">(opcional)</span></Label>
+                      <Input
+                        placeholder="Ex: @empresa no Instagram ou link do Facebook"
+                        className="bg-white/5 border-white/10"
+                        value={newClientSocial}
+                        onChange={(e) => setNewClientSocial(e.target.value)}
+                        data-testid="input-client-social"
                       />
                     </div>
                     <div className="space-y-2">
@@ -527,21 +553,30 @@ export default function UserDashboard() {
                         </SelectContent>
                       </Select>
                     </div>
+                    <p className="text-[10px] text-white/30 italic pt-2">Todas as informações ajudam o nosso time a fechar melhor cada cliente.</p>
                   </div>
                   <DialogFooter>
                     <Button
                       onClick={() => {
-                        if (!newClientName || !newClientContact || !newClientPlan) {
-                          toast({ title: "Preencha todos os campos", variant: "destructive" });
+                        if (!newClientContact || !newClientPlan) {
+                          toast({ title: "Preencha o contacto e selecione o plano", variant: "destructive" });
+                          return;
+                        }
+                        if (!newClientCompany && !newClientContactPerson) {
+                          toast({ title: "Preencha pelo menos o nome da empresa ou da pessoa", variant: "destructive" });
                           return;
                         }
                         const planInfo = planPrices[newClientPlan];
+                        const clientName = newClientCompany || newClientContactPerson;
                         createClientMutation.mutate({
-                          name: newClientName,
+                          name: clientName,
                           contact: newClientContact,
                           plan: newClientPlan,
                           price: planInfo.price,
                           commission: planInfo.commission,
+                          companyName: newClientCompany || undefined,
+                          contactPerson: newClientContactPerson || undefined,
+                          socialMedia: newClientSocial || undefined,
                         });
                       }}
                       disabled={createClientMutation.isPending}
