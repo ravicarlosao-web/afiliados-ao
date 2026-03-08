@@ -950,10 +950,10 @@ ganhar dinheiro na internet angola, marketing de afiliados angola, renda extra a
         return res.status(400).json({ message: "Plano inválido" });
       }
 
-      const defaultPrices: Record<string, { price: string; commission: string }> = {
-        Essencial: { price: "130000", commission: "20000" },
-        Profissional: { price: "250000", commission: "40000" },
-        Premium: { price: "400000", commission: "70000" },
+      const defaultPrices: Record<string, { price: number; commission: number }> = {
+        Essencial: { price: 130000, commission: 20000 },
+        Profissional: { price: 250000, commission: 40000 },
+        Premium: { price: 400000, commission: 70000 },
       };
 
       const priceKey = `price_${parsed.data.plan.toLowerCase()}`;
@@ -961,8 +961,8 @@ ganhar dinheiro na internet angola, marketing de afiliados angola, renda extra a
       const customPrice = await storage.getSetting(priceKey);
       const customComm = await storage.getSetting(commKey);
 
-      const price = customPrice || defaultPrices[parsed.data.plan].price;
-      const commission = customComm || defaultPrices[parsed.data.plan].commission;
+      const price = customPrice ? parseInt(customPrice, 10) : defaultPrices[parsed.data.plan].price;
+      const commission = customComm ? parseInt(customComm, 10) : defaultPrices[parsed.data.plan].commission;
 
       const sanitizedData = {
         ...parsed.data,
@@ -1004,8 +1004,8 @@ ganhar dinheiro na internet angola, marketing de afiliados angola, renda extra a
       const parsed = insertWithdrawalSchema.safeParse(data);
       if (!parsed.success) return res.status(400).json({ message: "Dados inválidos" });
 
-      const amount = parseFloat(parsed.data.amount);
-      if (isNaN(amount) || amount <= 0 || amount > 10000000) {
+      const amount = parsed.data.amount;
+      if (!Number.isInteger(amount) || amount <= 0 || amount > 10000000) {
         return res.status(400).json({ message: "Valor de saque inválido" });
       }
 
@@ -1021,12 +1021,12 @@ ganhar dinheiro na internet angola, marketing de afiliados angola, renda extra a
       const userClients = await storage.getClientsByAffiliate(req.session.userId!);
       const totalCommission = userClients
         .filter(c => c.status === "pagamento_feito")
-        .reduce((sum, c) => sum + parseFloat(c.commission), 0);
+        .reduce((sum, c) => sum + (c.commission || 0), 0);
 
       const userWithdrawals = await storage.getWithdrawalsByAffiliate(req.session.userId!);
       const totalWithdrawn = userWithdrawals
         .filter(w => w.status !== "recusado")
-        .reduce((sum, w) => sum + parseFloat(w.amount), 0);
+        .reduce((sum, w) => sum + (w.amount || 0), 0);
 
       const availableBalance = totalCommission - totalWithdrawn;
 

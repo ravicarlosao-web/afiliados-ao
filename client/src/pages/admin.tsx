@@ -331,7 +331,7 @@ export default function AdminDashboard() {
     .map((aff: any) => ({
       ...aff,
       totalSales: allClients.filter((c: any) => c.affiliateId === aff.id && c.status === "pagamento_feito")
-        .reduce((sum: number, c: any) => sum + parseFloat(c.price || "0"), 0),
+        .reduce((sum: number, c: any) => sum + (Number(c.price) || 0), 0),
     }))
     .sort((a: any, b: any) => b.totalSales - a.totalSales)
     .slice(0, 5);
@@ -856,7 +856,7 @@ export default function AdminDashboard() {
                 <CardHeader><CardTitle className="text-xs uppercase tracking-widest text-white/40 font-bold">Ticket Médio</CardTitle></CardHeader>
                 <CardContent>
                   {(() => {
-                    const total = paidClients.reduce((s: number, c: any) => s + parseFloat(c.price || "0"), 0);
+                    const total = paidClients.reduce((s: number, c: any) => s + (Number(c.price) || 0), 0);
                     const avg = paidClients.length > 0 ? total / paidClients.length : 0;
                     return (
                       <>

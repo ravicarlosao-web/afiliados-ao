@@ -24,7 +24,7 @@ export interface IStorage {
 
   getClients(): Promise<Client[]>;
   getClientsByAffiliate(affiliateId: string): Promise<Client[]>;
-  createClient(client: InsertClient & { status: string; price: string; commission: string }): Promise<Client>;
+  createClient(client: InsertClient & { status: string; price: number; commission: number }): Promise<Client>;
   getClient(id: string): Promise<Client | undefined>;
   updateClientStatus(id: string, status: string | undefined, adminNote?: string): Promise<Client | undefined>;
   updateClientSiteStarted(id: string, siteStarted: boolean): Promise<Client | undefined>;
@@ -116,7 +116,7 @@ export class DatabaseStorage implements IStorage {
     return db.select().from(clients).where(eq(clients.affiliateId, affiliateId)).orderBy(desc(clients.createdAt));
   }
 
-  async createClient(client: InsertClient & { status: string; price: string; commission: string }): Promise<Client> {
+  async createClient(client: InsertClient & { status: string; price: number; commission: number }): Promise<Client> {
     const [newClient] = await db.insert(clients).values(client).returning();
     return newClient;
   }
@@ -312,22 +312,22 @@ export class DatabaseStorage implements IStorage {
     const affiliateCount = await this.getAffiliateCount();
 
     const volumeResult = await db.select({
-      total: sql<string>`COALESCE(SUM(CAST(price AS REAL)), 0)`,
+      total: sql<number>`COALESCE(SUM(price), 0)`,
     }).from(clients).where(eq(clients.status, "pagamento_feito"));
 
     const commPaidResult = await db.select({
-      total: sql<string>`COALESCE(SUM(CAST(commission AS REAL)), 0)`,
+      total: sql<number>`COALESCE(SUM(commission), 0)`,
     }).from(clients).where(eq(clients.status, "pagamento_feito"));
 
     const pendingResult = await db.select({
-      total: sql<string>`COALESCE(SUM(CAST(commission AS REAL)), 0)`,
+      total: sql<number>`COALESCE(SUM(commission), 0)`,
     }).from(clients).where(sql`${clients.status} IN ('em_analise', 'em_contacto')`);
 
     return {
       activeAffiliates: affiliateCount,
-      totalVolume: String(volumeResult[0].total),
-      totalCommissionPaid: String(commPaidResult[0].total),
-      pendingCommission: String(pendingResult[0].total),
+      totalVolume: String(volumeResult[0].total || 0),
+      totalCommissionPaid: String(commPaidResult[0].total || 0),
+      pendingCommission: String(pendingResult[0].total || 0),
     };
   }
 }

@@ -112,14 +112,14 @@ export default function UserDashboard() {
   const paidClients = myClients.filter((c: any) => c.status === "pagamento_feito");
   const pendingClients = myClients.filter((c: any) => c.status === "em_analise" || c.status === "em_contacto");
 
-  const totalEarned = paidClients.reduce((s: number, c: any) => s + parseFloat(c.commission || "0"), 0);
-  const pendingCommission = pendingClients.reduce((s: number, c: any) => s + parseFloat(c.commission || "0"), 0);
+  const totalEarned = paidClients.reduce((s: number, c: any) => s + (Number(c.commission) || 0), 0);
+  const pendingCommission = pendingClients.reduce((s: number, c: any) => s + (Number(c.commission) || 0), 0);
   const totalWithdrawn = myWithdrawals
     .filter((w: any) => w.status === "pago")
-    .reduce((s: number, w: any) => s + parseFloat(w.amount || "0"), 0);
+    .reduce((s: number, w: any) => s + (Number(w.amount) || 0), 0);
   const pendingWithdrawals = myWithdrawals
     .filter((w: any) => w.status === "pendente" || w.status === "processando")
-    .reduce((s: number, w: any) => s + parseFloat(w.amount || "0"), 0);
+    .reduce((s: number, w: any) => s + (Number(w.amount) || 0), 0);
   const availableBalance = totalEarned - totalWithdrawn - pendingWithdrawals;
 
   const statusCounts = {
@@ -465,8 +465,8 @@ export default function UserDashboard() {
                   </div>
                   <Button
                     onClick={() => {
-                      const amount = parseFloat(withdrawAmount);
-                      if (!amount || amount < 5000) {
+                      const amount = parseInt(withdrawAmount, 10);
+                      if (!amount || isNaN(amount) || amount < 5000) {
                         toast({ title: "O valor mínimo para saque é Kz 5.000", variant: "destructive" });
                         return;
                       }
@@ -475,7 +475,7 @@ export default function UserDashboard() {
                         return;
                       }
                       createWithdrawalMutation.mutate({
-                        amount: withdrawAmount,
+                        amount: amount,
                         method: withdrawMethod,
                         accountInfo: withdrawAccount,
                       });
