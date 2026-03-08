@@ -61,3 +61,12 @@ Angola's affiliate marketing platform where affiliates refer businesses for webs
 - Transferência IBAN
 - Unitel Money
 - Afrimoney
+
+## Responsiveness
+
+All pages are fully responsive with mobile-first breakpoints:
+- **Landing page**: hero, navbar (mobile menu), features-grid (min-h instead of fixed h), ai-tip-card, value-proposition, faq, footer — all scale from 320px+
+- **Admin dashboard**: sidebar collapses via shadcn SidebarProvider, stat grids 2-col on mobile → 4-col on lg, tables with horizontal scroll (min-w + overflow-x-auto), all headers/text scale down on sm
+- **User dashboard**: same responsive patterns as admin, profile avatar/cards scale, action buttons full-width on mobile
+- **Login page**: already responsive with max-w-[400px] centered card
+- Custom thin scrollbar styles for horizontal scroll areas in index.css

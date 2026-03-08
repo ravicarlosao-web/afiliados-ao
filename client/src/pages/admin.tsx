@@ -220,20 +220,20 @@ export default function AdminDashboard() {
     switch (activeItem) {
       case "dashboard":
         return (
-          <div className="space-y-8 animate-in fade-in duration-500">
-            <div className="flex items-center justify-between">
+          <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-500">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="flex flex-col gap-1">
-                <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-white to-red-400 bg-clip-text text-transparent">
+                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight bg-gradient-to-r from-white to-red-400 bg-clip-text text-transparent">
                   Dashboard Executivo
                 </h1>
-                <p className="text-white/40">Visão estratégica da operação em tempo real.</p>
+                <p className="text-white/40 text-sm">Visão estratégica da operação em tempo real.</p>
               </div>
-              <Button variant="outline" className="bg-white/5 border-white/10 text-xs">
+              <Button variant="outline" className="bg-white/5 border-white/10 text-xs w-full sm:w-auto">
                 <Download className="w-3 h-3 mr-2" /> Exportar Relatório
               </Button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
               {[
                 { title: "Afiliados Ativos", value: dashboardStats?.activeAffiliates?.toString() || "0", icon: Users, color: "text-blue-400" },
                 { title: "Volume Total", value: formatKz(dashboardStats?.totalVolume || "0"), icon: Briefcase, color: "text-emerald-400" },
@@ -241,12 +241,12 @@ export default function AdminDashboard() {
                 { title: "Comissão Pendente", value: formatKz(dashboardStats?.pendingCommission || "0"), icon: Clock, color: "text-amber-400" },
               ].map((stat, i) => (
                 <Card key={i} className="bg-white/5 border-white/10 backdrop-blur-xl hover:bg-white/[0.08] transition-all duration-300 group" data-testid={`card-dashboard-stat-${i}`}>
-                  <CardHeader className="flex flex-row items-center justify-between pb-2">
-                    <CardTitle className="text-xs font-bold uppercase tracking-widest text-white/40 group-hover:text-white/60 transition-colors">{stat.title}</CardTitle>
-                    <stat.icon className={`w-4 h-4 ${stat.color} group-hover:scale-110 transition-transform`} />
+                  <CardHeader className="flex flex-row items-center justify-between pb-2 p-3 sm:p-6">
+                    <CardTitle className="text-[9px] sm:text-xs font-bold uppercase tracking-widest text-white/40 group-hover:text-white/60 transition-colors">{stat.title}</CardTitle>
+                    <stat.icon className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${stat.color} group-hover:scale-110 transition-transform`} />
                   </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold tracking-tight">{stat.value}</div>
+                  <CardContent className="p-3 sm:p-6 pt-0 sm:pt-0">
+                    <div className="text-lg sm:text-2xl font-bold tracking-tight truncate">{stat.value}</div>
                   </CardContent>
                 </Card>
               ))}
@@ -322,24 +322,24 @@ export default function AdminDashboard() {
         );
       case "affiliates":
         return (
-          <div className="space-y-8 animate-in fade-in duration-500">
+          <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-500">
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-white to-red-400 bg-clip-text text-transparent">Gestão de Afiliados</h1>
-                <p className="text-white/40">Controle total da rede de parceiros.</p>
+                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight bg-gradient-to-r from-white to-red-400 bg-clip-text text-transparent">Gestão de Afiliados</h1>
+                <p className="text-white/40 text-sm">Controle total da rede de parceiros.</p>
               </div>
             </div>
 
             <Card className="bg-white/5 border-white/10">
-              <CardHeader>
+              <CardHeader className="p-3 sm:p-6">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
                   <Input placeholder="Buscar por nome ou telefone..." className="pl-10 bg-white/5 border-white/10" />
                 </div>
               </CardHeader>
-              <CardContent>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
+              <CardContent className="p-3 sm:p-6 pt-0">
+                <div className="overflow-x-auto -mx-3 sm:mx-0">
+                  <table className="w-full text-sm min-w-[500px]">
                     <thead>
                       <tr className="text-left border-b border-white/10 text-white/40 text-[10px] uppercase tracking-widest">
                         <th className="pb-4 font-bold">Afiliado</th>
@@ -380,16 +380,16 @@ export default function AdminDashboard() {
         );
       case "clients":
         return (
-          <div className="space-y-8 animate-in fade-in duration-500">
+          <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-500">
             <div>
-              <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-white to-red-400 bg-clip-text text-transparent">Clientes Globais</h1>
-              <p className="text-white/40">Monitoramento centralizado de todas as indicações.</p>
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight bg-gradient-to-r from-white to-red-400 bg-clip-text text-transparent">Clientes Globais</h1>
+              <p className="text-white/40 text-sm">Monitoramento centralizado de todas as indicações.</p>
             </div>
 
             <Card className="bg-white/5 border-white/10">
-              <CardContent className="pt-6">
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
+              <CardContent className="p-3 sm:p-6">
+                <div className="overflow-x-auto -mx-3 sm:mx-0">
+                  <table className="w-full text-sm min-w-[560px]">
                     <thead>
                       <tr className="text-left border-b border-white/10 text-white/40 text-[10px] uppercase tracking-widest">
                         <th className="pb-4 font-bold">Cliente</th>
@@ -441,13 +441,13 @@ export default function AdminDashboard() {
         );
       case "commissions":
         return (
-          <div className="space-y-8 animate-in fade-in duration-500">
+          <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-500">
             <div>
-              <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-white to-red-400 bg-clip-text text-transparent">Regras de Comissões</h1>
-              <p className="text-white/40">Defina as percentagens e bónus do sistema.</p>
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight bg-gradient-to-r from-white to-red-400 bg-clip-text text-transparent">Regras de Comissões</h1>
+              <p className="text-white/40 text-sm">Defina as percentagens e bónus do sistema.</p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
               <Card className="bg-white/5 border-white/10">
                 <CardHeader>
                   <CardTitle className="text-lg">Comissão Padrão</CardTitle>
@@ -518,13 +518,13 @@ export default function AdminDashboard() {
         );
       case "analytics":
         return (
-          <div className="space-y-8 animate-in fade-in duration-500">
+          <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-500">
             <div>
-              <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-white to-red-400 bg-clip-text text-transparent">Inteligência de Negócio</h1>
-              <p className="text-white/40">Análise profunda de tendências e comportamentos.</p>
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight bg-gradient-to-r from-white to-red-400 bg-clip-text text-transparent">Inteligência de Negócio</h1>
+              <p className="text-white/40 text-sm">Análise profunda de tendências e comportamentos.</p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
               <Card className="bg-white/5 border-white/10">
                 <CardHeader><CardTitle className="text-xs uppercase tracking-widest text-white/40 font-bold">Plano Mais Vendido</CardTitle></CardHeader>
                 <CardContent>
@@ -573,10 +573,10 @@ export default function AdminDashboard() {
         );
       case "notifications":
         return (
-          <div className="space-y-8 animate-in fade-in duration-500">
+          <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-500">
             <div>
-              <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-white to-red-400 bg-clip-text text-transparent">Notificações Globais</h1>
-              <p className="text-white/40">Comunique-se diretamente com todos os seus afiliados.</p>
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight bg-gradient-to-r from-white to-red-400 bg-clip-text text-transparent">Notificações Globais</h1>
+              <p className="text-white/40 text-sm">Comunique-se diretamente com todos os seus afiliados.</p>
             </div>
 
             <Card className="bg-white/5 border-white/10 max-w-2xl">
@@ -609,11 +609,11 @@ export default function AdminDashboard() {
         );
       case "materials":
         return (
-          <div className="space-y-8 animate-in fade-in duration-500">
+          <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-500">
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-white to-red-400 bg-clip-text text-transparent">Materiais & Campanhas</h1>
-                <p className="text-white/40">Gestão de ativos para os afiliados venderem mais.</p>
+                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight bg-gradient-to-r from-white to-red-400 bg-clip-text text-transparent">Materiais & Campanhas</h1>
+                <p className="text-white/40 text-sm">Gestão de ativos para os afiliados venderem mais.</p>
               </div>
             </div>
 
@@ -677,13 +677,13 @@ export default function AdminDashboard() {
         );
       case "security":
         return (
-          <div className="space-y-8 animate-in fade-in duration-500">
+          <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-500">
             <div>
-              <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-white to-red-400 bg-clip-text text-transparent">Segurança & Logs</h1>
-              <p className="text-white/40">Monitoramento de integridade e auditoria do sistema.</p>
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight bg-gradient-to-r from-white to-red-400 bg-clip-text text-transparent">Segurança & Logs</h1>
+              <p className="text-white/40 text-sm">Monitoramento de integridade e auditoria do sistema.</p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 gap-4">
               <Card className="bg-white/5 border-white/10">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-[10px] font-bold uppercase text-white/40">Tentativas Bloqueadas</CardTitle>
@@ -721,21 +721,21 @@ export default function AdminDashboard() {
         );
       case "payments":
         return (
-          <div className="space-y-8 animate-in fade-in duration-500">
+          <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-500">
             <div>
-              <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-white to-red-400 bg-clip-text text-transparent">Fluxo de Pagamentos</h1>
-              <p className="text-white/40">Gestão financeira de recebimentos e saques.</p>
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight bg-gradient-to-r from-white to-red-400 bg-clip-text text-transparent">Fluxo de Pagamentos</h1>
+              <p className="text-white/40 text-sm">Gestão financeira de recebimentos e saques.</p>
             </div>
 
             <Tabs defaultValue="affiliate-payouts" className="w-full">
-              <TabsList className="bg-white/5 border border-white/10 h-11 p-1">
-                <TabsTrigger value="affiliate-payouts" className="gap-2 data-[state=active]:bg-white/10 text-xs font-bold uppercase tracking-wider">
+              <TabsList className="bg-white/5 border border-white/10 h-10 sm:h-11 p-1 w-full sm:w-auto">
+                <TabsTrigger value="affiliate-payouts" className="gap-2 data-[state=active]:bg-white/10 text-xs font-bold uppercase tracking-wider w-full">
                   <DollarSign className="w-4 h-4" /> Saques de Afiliados
                 </TabsTrigger>
               </TabsList>
 
-              <TabsContent value="affiliate-payouts" className="mt-6 space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <TabsContent value="affiliate-payouts" className="mt-4 sm:mt-6 space-y-4 sm:space-y-6">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
                   {[
                     { label: "Solicitações Pendentes", value: withdrawalStats?.active?.toString() || "0", sub: "Aguardando aprovação" },
                     { label: "Total Pago", value: formatKz(withdrawalStats?.totalPaid || "0"), sub: "Desde o início" },
@@ -758,21 +758,21 @@ export default function AdminDashboard() {
                   {allWithdrawals.length === 0 ? (
                     <div className="p-4 text-center"><p className="text-sm text-white/40">Nenhuma solicitação de saque no momento.</p></div>
                   ) : allWithdrawals.map((w: any) => (
-                    <div key={w.id} className="p-4 flex items-center justify-between border-b border-white/5 last:border-0 hover:bg-white/[0.01]" data-testid={`row-withdrawal-${w.id}`}>
-                      <div className="flex items-center gap-4">
-                        <div className="w-8 h-8 rounded-full bg-red-500/10 flex items-center justify-center text-[10px] font-bold text-red-400 border border-red-500/20">
+                    <div key={w.id} className="p-3 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/5 last:border-0 hover:bg-white/[0.01]" data-testid={`row-withdrawal-${w.id}`}>
+                      <div className="flex items-center gap-3 sm:gap-4">
+                        <div className="w-8 h-8 rounded-full bg-red-500/10 flex items-center justify-center text-[10px] font-bold text-red-400 border border-red-500/20 shrink-0">
                           <DollarSign className="w-4 h-4" />
                         </div>
-                        <div>
+                        <div className="min-w-0">
                           <p className="text-xs font-bold">{w.method}</p>
-                          <p className="text-[10px] text-white/40">{w.accountInfo || "N/D"} • {timeAgo(w.createdAt)}</p>
+                          <p className="text-[10px] text-white/40 truncate">{w.accountInfo || "N/D"} • {timeAgo(w.createdAt)}</p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-6">
+                      <div className="flex items-center gap-3 sm:gap-6 pl-11 sm:pl-0">
                         <span className="text-sm font-bold text-emerald-400">{formatKz(w.amount)}</span>
                         <Badge className={`text-[9px] ${statusColors[w.status] || ""}`}>{statusLabels[w.status] || w.status}</Badge>
                         {w.status === "pendente" && (
-                          <div className="flex gap-2">
+                          <div className="flex gap-2 ml-auto sm:ml-0">
                             <Button size="sm" variant="ghost" className="text-[10px] h-7 hover:text-red-400" onClick={() => updateWithdrawalMutation.mutate({ id: w.id, status: "recusado" })}>Recusar</Button>
                             <Button size="sm" className="text-[10px] h-7 bg-white text-black hover:bg-white/90" onClick={() => updateWithdrawalMutation.mutate({ id: w.id, status: "pago" })}>Aprovar</Button>
                           </div>
@@ -787,13 +787,13 @@ export default function AdminDashboard() {
         );
       case "settings":
         return (
-          <div className="space-y-8 animate-in fade-in duration-500">
+          <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-500">
             <div>
-              <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-white to-red-400 bg-clip-text text-transparent">Configurações</h1>
-              <p className="text-white/40">Configurações gerais do sistema.</p>
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight bg-gradient-to-r from-white to-red-400 bg-clip-text text-transparent">Configurações</h1>
+              <p className="text-white/40 text-sm">Configurações gerais do sistema.</p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8">
               <Card className="bg-white/5 border-white/10">
                 <CardHeader>
                   <CardTitle className="text-lg flex items-center gap-2"><Smartphone className="w-4 h-4 text-emerald-400" /> Configurações de Planos</CardTitle>
@@ -897,7 +897,7 @@ export default function AdminDashboard() {
           </div>
         </Sidebar>
 
-        <main className="flex-1 relative z-10 overflow-y-auto p-8 lg:p-12">
+        <main className="flex-1 relative z-10 overflow-y-auto p-4 sm:p-6 lg:p-12">
           <div className="max-w-7xl mx-auto">
             {renderContent()}
           </div>

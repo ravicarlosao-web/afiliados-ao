@@ -232,15 +232,15 @@ export default function UserDashboard() {
     switch (activeItem) {
       case "dashboard":
         return (
-          <div className="space-y-8">
+          <div className="space-y-6 sm:space-y-8">
             <div className="flex flex-col gap-1">
-              <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-white to-white/40 bg-clip-text text-transparent">
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight bg-gradient-to-r from-white to-white/40 bg-clip-text text-transparent">
                 Olá, {currentUser?.name || "Afiliado"}!
               </h1>
-              <p className="text-white/40">Aqui está o resumo dos seus ganhos e indicações.</p>
+              <p className="text-white/40 text-sm">Aqui está o resumo dos seus ganhos e indicações.</p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
               {[
                 { title: "Total de Clientes", value: myClients.length.toString(), icon: Briefcase, color: "text-blue-400" },
                 { title: "Comissões Ganhas", value: formatKz(totalEarned), icon: DollarSign, color: "text-emerald-400" },
@@ -248,13 +248,13 @@ export default function UserDashboard() {
                 { title: "Status do Afiliado", value: currentUser?.isActive ? "Ativo" : "Inativo", icon: Award, color: "text-amber-400" },
               ].map((stat, i) => (
                 <Card key={i} className="bg-white/5 border-white/10 backdrop-blur-md hover:bg-white/[0.07] transition-all duration-300" data-testid={`card-user-stat-${i}`}>
-                  <CardHeader className="flex flex-row items-center justify-between pb-2">
-                    <CardTitle className="text-sm font-medium text-white/60">{stat.title}</CardTitle>
-                    <stat.icon className={`w-4 h-4 ${stat.color}`} />
+                  <CardHeader className="flex flex-row items-center justify-between pb-2 p-3 sm:p-6">
+                    <CardTitle className="text-[10px] sm:text-sm font-medium text-white/60">{stat.title}</CardTitle>
+                    <stat.icon className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${stat.color}`} />
                   </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="text-2xl font-bold">{stat.value}</div>
+                  <CardContent className="p-3 sm:p-6 pt-0 sm:pt-0">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2">
+                      <div className="text-lg sm:text-2xl font-bold truncate">{stat.value}</div>
                       {stat.action && (
                         <Button 
                           size="sm" 
@@ -272,10 +272,10 @@ export default function UserDashboard() {
               ))}
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-8">
               <Card className="lg:col-span-2 bg-white/5 border-white/10 backdrop-blur-md">
                 <CardHeader>
-                  <CardTitle className="text-lg font-semibold">Indicações Recentes</CardTitle>
+                  <CardTitle className="text-base sm:text-lg font-semibold">Indicações Recentes</CardTitle>
                 </CardHeader>
                 <CardContent>
                   {myClients.length === 0 ? (
@@ -334,46 +334,46 @@ export default function UserDashboard() {
         );
       case "wallet":
         return (
-          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <div className="space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div>
-              <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-white to-white/40 bg-clip-text text-transparent">Minha Carteira</h1>
-              <p className="text-white/40">Gerencie seus ganhos e solicite pagamentos.</p>
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight bg-gradient-to-r from-white to-white/40 bg-clip-text text-transparent">Minha Carteira</h1>
+              <p className="text-white/40 text-sm">Gerencie seus ganhos e solicite pagamentos.</p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
               <Card className="bg-gradient-to-br from-purple-500/10 to-transparent border-white/10 backdrop-blur-md">
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-white/60">Saldo Disponível</CardTitle>
+                  <CardTitle className="text-xs sm:text-sm font-medium text-white/60">Saldo Disponível</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold" data-testid="text-available-balance">{formatKz(availableBalance)}</div>
+                  <div className="text-2xl sm:text-3xl font-bold" data-testid="text-available-balance">{formatKz(availableBalance)}</div>
                   <p className="text-[10px] text-emerald-400 mt-1">Pronto para saque</p>
                 </CardContent>
               </Card>
               <Card className="bg-white/5 border-white/10 backdrop-blur-md">
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-white/60">Aguardando Liberação</CardTitle>
+                  <CardTitle className="text-xs sm:text-sm font-medium text-white/60">Aguardando Liberação</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold" data-testid="text-pending-commission">{formatKz(pendingCommission)}</div>
+                  <div className="text-2xl sm:text-3xl font-bold" data-testid="text-pending-commission">{formatKz(pendingCommission)}</div>
                   <p className="text-[10px] text-white/20 mt-1">Clientes em análise/contacto</p>
                 </CardContent>
               </Card>
               <Card className="bg-white/5 border-white/10 backdrop-blur-md">
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-white/60">Total Sacado</CardTitle>
+                  <CardTitle className="text-xs sm:text-sm font-medium text-white/60">Total Sacado</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold" data-testid="text-total-withdrawn">{formatKz(totalWithdrawn)}</div>
+                  <div className="text-2xl sm:text-3xl font-bold" data-testid="text-total-withdrawn">{formatKz(totalWithdrawn)}</div>
                   <p className="text-[10px] text-white/20 mt-1">Desde o início</p>
                 </CardContent>
               </Card>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-8">
               <Card className="bg-white/5 border-white/10 backdrop-blur-md">
                 <CardHeader>
-                  <CardTitle className="text-lg font-semibold flex items-center gap-2">
+                  <CardTitle className="text-base sm:text-lg font-semibold flex items-center gap-2">
                     <DollarSign className="w-5 h-5 text-emerald-400" />
                     Solicitar Saque
                   </CardTitle>
@@ -477,15 +477,15 @@ export default function UserDashboard() {
         );
       case "clients":
         return (
-          <div className="space-y-8">
-            <div className="flex items-center justify-between">
+          <div className="space-y-6 sm:space-y-8">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-white to-white/40 bg-clip-text text-transparent">Meus Clientes</h1>
-                <p className="text-white/40">Gerencie suas indicações e acompanhe o status.</p>
+                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight bg-gradient-to-r from-white to-white/40 bg-clip-text text-transparent">Meus Clientes</h1>
+                <p className="text-white/40 text-sm">Gerencie suas indicações e acompanhe o status.</p>
               </div>
               <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button className="bg-emerald-500 hover:bg-emerald-600 text-white font-bold gap-2" data-testid="button-add-client">
+                  <Button className="bg-emerald-500 hover:bg-emerald-600 text-white font-bold gap-2 w-full sm:w-auto" data-testid="button-add-client">
                     <Plus className="w-4 h-4" /> Adicionar Novo Cliente
                   </Button>
                 </DialogTrigger>
@@ -555,7 +555,7 @@ export default function UserDashboard() {
               </Dialog>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
               {[
                 { label: "Em análise", count: statusCounts.em_analise, icon: Clock, color: "text-amber-400" },
                 { label: "Em contacto", count: statusCounts.em_contacto, icon: History, color: "text-blue-400" },
@@ -575,9 +575,9 @@ export default function UserDashboard() {
             </div>
 
             <Card className="bg-white/5 border-white/10 backdrop-blur-md">
-              <CardContent className="pt-6">
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
+              <CardContent className="p-3 sm:p-6">
+                <div className="overflow-x-auto -mx-3 sm:mx-0">
+                  <table className="w-full text-sm min-w-[520px]">
                     <thead>
                       <tr className="text-left border-b border-white/10 text-white/40">
                         <th className="pb-4 font-medium">Nome</th>
@@ -622,10 +622,10 @@ export default function UserDashboard() {
         );
       case "materials":
         return (
-          <div className="space-y-8">
+          <div className="space-y-6 sm:space-y-8">
             <div>
-              <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-white to-white/40 bg-clip-text text-transparent">Materiais de Venda</h1>
-              <p className="text-white/40">Tudo o que você precisa para convencer seus clientes.</p>
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight bg-gradient-to-r from-white to-white/40 bg-clip-text text-transparent">Materiais de Venda</h1>
+              <p className="text-white/40 text-sm">Tudo o que você precisa para convencer seus clientes.</p>
             </div>
 
             {myMaterials.length === 0 ? (
@@ -687,13 +687,13 @@ export default function UserDashboard() {
         );
       case "goals":
         return (
-          <div className="space-y-8">
+          <div className="space-y-6 sm:space-y-8">
             <div>
-              <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-white to-white/40 bg-clip-text text-transparent">Minhas Metas</h1>
-              <p className="text-white/40">Alcance níveis de faturação e ganhe suas placas de reconhecimento.</p>
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight bg-gradient-to-r from-white to-white/40 bg-clip-text text-transparent">Minhas Metas</h1>
+              <p className="text-white/40 text-sm">Alcance níveis de faturação e ganhe suas placas de reconhecimento.</p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-8">
               {[
                 { 
                   targetValue: goalBronze,
@@ -780,10 +780,10 @@ export default function UserDashboard() {
         );
       case "notifications":
         return (
-          <div className="space-y-8">
+          <div className="space-y-6 sm:space-y-8">
             <div>
-              <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-white to-white/40 bg-clip-text text-transparent">Notificações</h1>
-              <p className="text-white/40">Fique por dentro de tudo o que acontece.</p>
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight bg-gradient-to-r from-white to-white/40 bg-clip-text text-transparent">Notificações</h1>
+              <p className="text-white/40 text-sm">Fique por dentro de tudo o que acontece.</p>
             </div>
 
             <Card className="bg-white/5 border-white/10">
@@ -818,10 +818,10 @@ export default function UserDashboard() {
         );
       case "settings":
         return (
-          <div className="space-y-8">
-            <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-white to-white/40 bg-clip-text text-transparent">Configurações</h1>
+          <div className="space-y-6 sm:space-y-8">
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight bg-gradient-to-r from-white to-white/40 bg-clip-text text-transparent">Configurações</h1>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8">
               <Card className="bg-white/5 border-white/10">
                 <CardHeader>
                   <CardTitle className="text-lg flex items-center gap-2">
@@ -894,24 +894,24 @@ export default function UserDashboard() {
         );
       case "profile":
         return (
-          <div className="space-y-8">
-            <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-white to-white/40 bg-clip-text text-transparent">Meu Perfil</h1>
+          <div className="space-y-6 sm:space-y-8">
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight bg-gradient-to-r from-white to-white/40 bg-clip-text text-transparent">Meu Perfil</h1>
             
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-8">
               <div className="lg:col-span-1 space-y-6">
                 <Card className="bg-white/5 border-white/10 overflow-hidden shadow-2xl">
-                  <div className="h-32 bg-gradient-to-br from-purple-600/30 via-blue-500/20 to-emerald-400/10 relative" />
-                  <CardContent className="relative pt-0 px-6 pb-6">
-                    <div className="flex flex-col items-center -mt-16 gap-4">
+                  <div className="h-24 sm:h-32 bg-gradient-to-br from-purple-600/30 via-blue-500/20 to-emerald-400/10 relative" />
+                  <CardContent className="relative pt-0 px-4 sm:px-6 pb-4 sm:pb-6">
+                    <div className="flex flex-col items-center -mt-12 sm:-mt-16 gap-3 sm:gap-4">
                       <div className="relative group">
                         <div className="absolute -inset-1 bg-gradient-to-r from-purple-500 to-blue-500 rounded-2xl blur opacity-30 group-hover:opacity-60 transition duration-500" />
-                        <div className="relative w-32 h-32 rounded-2xl bg-black border-4 border-black overflow-hidden flex items-center justify-center">
-                          <User className="w-16 h-16 text-white/20" />
+                        <div className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-2xl bg-black border-4 border-black overflow-hidden flex items-center justify-center">
+                          <User className="w-12 h-12 sm:w-16 sm:h-16 text-white/20" />
                         </div>
                       </div>
                       
                       <div className="text-center space-y-2">
-                        <h2 className="text-2xl font-bold bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent" data-testid="text-profile-name">
+                        <h2 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent" data-testid="text-profile-name">
                           {currentUser?.name || "Carregando..."}
                         </h2>
                         <div className="flex items-center justify-center gap-2">
@@ -944,7 +944,7 @@ export default function UserDashboard() {
                     <CardTitle className="text-sm">Ganhos Totais</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-3xl font-bold" data-testid="text-profile-earnings">{formatKz(totalEarned)}</div>
+                    <div className="text-2xl sm:text-3xl font-bold" data-testid="text-profile-earnings">{formatKz(totalEarned)}</div>
                     <p className="text-xs text-white/40 mt-2">Desde o início da conta</p>
                   </CardContent>
                 </Card>
@@ -1080,7 +1080,7 @@ export default function UserDashboard() {
           </div>
         </Sidebar>
 
-        <main className="flex-1 relative z-10 overflow-y-auto p-8 lg:p-12">
+        <main className="flex-1 relative z-10 overflow-y-auto p-4 sm:p-6 lg:p-12">
           <div className="max-w-7xl mx-auto">
             {renderContent()}
           </div>
