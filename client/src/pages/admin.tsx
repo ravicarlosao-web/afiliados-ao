@@ -1,46 +1,13 @@
 import { useState } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider } from "@/components/ui/sidebar";
 import { 
-  ShieldCheck, 
-  Users, 
-  Activity, 
-  AlertTriangle, 
-  Settings, 
-  LogOut, 
-  ChevronRight, 
-  LineChart, 
-  DollarSign,
-  TrendingUp,
-  History,
-  CheckCircle2,
-  Clock,
-  Briefcase,
-  FileText,
-  Plus,
-  Search,
-  ArrowUpRight,
-  UserCheck,
-  Filter,
-  MoreVertical,
-  Download,
-  Eye,
-  Lock,
-  Ban,
-  Receipt,
-  Target,
-  Percent,
-  Megaphone,
-  Layout,
-  Shield,
-  Bell,
-  MessageSquare,
-  Image as ImageIcon,
-  Zap,
-  Globe,
-  Mail,
-  Smartphone,
-  XCircle
+  ShieldCheck, Users, Settings, LogOut, DollarSign, TrendingUp, History,
+  CheckCircle2, Clock, Briefcase, FileText, Plus, Search, ArrowUpRight,
+  UserCheck, MoreVertical, Download, Eye, Lock, Ban, Receipt, Target, Percent,
+  Megaphone, Layout, Shield, MessageSquare, Image as ImageIcon, Zap, Globe, Mail,
+  Smartphone, XCircle, LineChart, Filter
 } from "lucide-react";
 import { StarField } from "@/components/star-field";
 import { Button } from "@/components/ui/button";
@@ -51,9 +18,51 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { apiRequest, queryClient, getQueryFn } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+
+function formatKz(value: string | number): string {
+  const num = typeof value === "string" ? parseFloat(value) : value;
+  if (isNaN(num) || num === 0) return "Kz 0,00";
+  return `Kz ${num.toLocaleString("pt-AO", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+
+function timeAgo(dateStr: string): string {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return "Agora";
+  if (mins < 60) return `Há ${mins} min`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `Há ${hours}h`;
+  const days = Math.floor(hours / 24);
+  return `Há ${days} dias`;
+}
+
+const statusLabels: Record<string, string> = {
+  em_analise: "Em análise",
+  em_contacto: "Em contacto",
+  pagamento_feito: "Pagamento feito",
+  reprovado: "Reprovado",
+  pendente: "Pendente",
+  processando: "Processando",
+  pago: "Pago",
+  recusado: "Recusado",
+};
+
+const statusColors: Record<string, string> = {
+  em_analise: "bg-amber-500/10 text-amber-400 border-amber-500/20",
+  em_contacto: "bg-blue-500/10 text-blue-400 border-blue-500/20",
+  pagamento_feito: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+  reprovado: "bg-red-500/10 text-red-400 border-red-500/20",
+  pendente: "bg-amber-500/10 text-amber-400",
+  processando: "bg-blue-500/10 text-blue-400",
+  pago: "bg-emerald-500/10 text-emerald-400",
+  recusado: "bg-red-500/10 text-red-400",
+};
 
 export default function AdminDashboard() {
   const [activeItem, setActiveItem] = useState("dashboard");
+  const { toast } = useToast();
 
   const menuItems = [
     { id: "dashboard", label: "Visão Geral", icon: ShieldCheck },
@@ -68,11 +77,144 @@ export default function AdminDashboard() {
     { id: "settings", label: "Configurações", icon: Settings },
   ];
 
-  const handleLogout = () => {
-    localStorage.removeItem("isLogged");
-    localStorage.removeItem("userRole");
+  const handleLogout = async () => {
+    await apiRequest("POST", "/api/auth/logout");
+    queryClient.clear();
     window.location.href = "/login";
   };
+
+  const { data: dashboardStats } = useQuery<any>({
+    queryKey: ["/api/admin/dashboard"],
+    queryFn: getQueryFn({ on401: "throw" }),
+    enabled: activeItem === "dashboard",
+  });
+
+  const { data: affiliates = [] } = useQuery<any[]>({
+    queryKey: ["/api/admin/affiliates"],
+    queryFn: getQueryFn({ on401: "throw" }),
+    enabled: activeItem === "affiliates" || activeItem === "dashboard",
+  });
+
+  const { data: allClients = [] } = useQuery<any[]>({
+    queryKey: ["/api/admin/clients"],
+    queryFn: getQueryFn({ on401: "throw" }),
+    enabled: activeItem === "clients" || activeItem === "dashboard" || activeItem === "analytics",
+  });
+
+  const { data: allWithdrawals = [] } = useQuery<any[]>({
+    queryKey: ["/api/admin/withdrawals"],
+    queryFn: getQueryFn({ on401: "throw" }),
+    enabled: activeItem === "payments",
+  });
+
+  const { data: withdrawalStats } = useQuery<any>({
+    queryKey: ["/api/admin/withdrawals/stats"],
+    queryFn: getQueryFn({ on401: "throw" }),
+    enabled: activeItem === "payments",
+  });
+
+  const { data: allMaterials = [] } = useQuery<any[]>({
+    queryKey: ["/api/admin/materials"],
+    queryFn: getQueryFn({ on401: "throw" }),
+    enabled: activeItem === "materials",
+  });
+
+  const { data: securityLogs = [] } = useQuery<any[]>({
+    queryKey: ["/api/admin/security-logs"],
+    queryFn: getQueryFn({ on401: "throw" }),
+    enabled: activeItem === "security",
+  });
+
+  const { data: adminSettings = {} } = useQuery<Record<string, string>>({
+    queryKey: ["/api/admin/settings"],
+    queryFn: getQueryFn({ on401: "throw" }),
+    enabled: activeItem === "commissions" || activeItem === "settings",
+  });
+
+  const updateWithdrawalMutation = useMutation({
+    mutationFn: async ({ id, status }: { id: string; status: string }) => {
+      await apiRequest("PATCH", `/api/admin/withdrawals/${id}/status`, { status });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/withdrawals"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/withdrawals/stats"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/security-logs"] });
+      toast({ title: "Saque atualizado" });
+    },
+  });
+
+  const updateClientStatusMutation = useMutation({
+    mutationFn: async ({ id, status }: { id: string; status: string }) => {
+      await apiRequest("PATCH", `/api/admin/clients/${id}/status`, { status });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/clients"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/dashboard"] });
+      toast({ title: "Status do cliente atualizado" });
+    },
+  });
+
+  const saveSettingsMutation = useMutation({
+    mutationFn: async (data: Record<string, string>) => {
+      await apiRequest("PATCH", "/api/admin/settings", data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/settings"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/security-logs"] });
+      toast({ title: "Configurações salvas" });
+    },
+  });
+
+  const sendNotificationMutation = useMutation({
+    mutationFn: async (data: any) => {
+      await apiRequest("POST", "/api/admin/notifications", data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/notifications"] });
+      toast({ title: "Notificação enviada" });
+    },
+  });
+
+  const createMaterialMutation = useMutation({
+    mutationFn: async (data: any) => {
+      await apiRequest("POST", "/api/admin/materials", data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/materials"] });
+      toast({ title: "Material adicionado" });
+    },
+  });
+
+  const deleteMaterialMutation = useMutation({
+    mutationFn: async (id: string) => {
+      await apiRequest("DELETE", `/api/admin/materials/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/materials"] });
+      toast({ title: "Material removido" });
+    },
+  });
+
+  const [notifTitle, setNotifTitle] = useState("");
+  const [notifBody, setNotifBody] = useState("");
+  const [matTitle, setMatTitle] = useState("");
+  const [matType, setMatType] = useState("copy");
+  const [matContent, setMatContent] = useState("");
+
+  const [commBase, setCommBase] = useState(adminSettings?.commission_base || "0");
+  const [commEssencial, setCommEssencial] = useState(adminSettings?.commission_essencial || "0");
+  const [commProfissional, setCommProfissional] = useState(adminSettings?.commission_profissional || "0");
+  const [commPremium, setCommPremium] = useState(adminSettings?.commission_premium || "0");
+
+  const paidClients = allClients.filter((c: any) => c.status === "pagamento_feito");
+  const topAffiliates = affiliates
+    .map((aff: any) => ({
+      ...aff,
+      totalSales: allClients.filter((c: any) => c.affiliateId === aff.id && c.status === "pagamento_feito")
+        .reduce((sum: number, c: any) => sum + parseFloat(c.price || "0"), 0),
+    }))
+    .sort((a: any, b: any) => b.totalSales - a.totalSales)
+    .slice(0, 5);
 
   const renderContent = () => {
     switch (activeItem) {
@@ -93,24 +235,18 @@ export default function AdminDashboard() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               {[
-                { title: "Afiliados Ativos", value: "0", growth: "0%", icon: Users, color: "text-blue-400" },
-                { title: "Volume Total", value: "Kz 0,00", growth: "0%", icon: Briefcase, color: "text-emerald-400" },
-                { title: "Comissão Paga", value: "Kz 0,00", growth: "0%", icon: Receipt, color: "text-purple-400" },
-                { title: "Comissão Pendente", value: "Kz 0,00", growth: "0%", icon: Clock, color: "text-amber-400" },
+                { title: "Afiliados Ativos", value: dashboardStats?.activeAffiliates?.toString() || "0", icon: Users, color: "text-blue-400" },
+                { title: "Volume Total", value: formatKz(dashboardStats?.totalVolume || "0"), icon: Briefcase, color: "text-emerald-400" },
+                { title: "Comissão Paga", value: formatKz(dashboardStats?.totalCommissionPaid || "0"), icon: Receipt, color: "text-purple-400" },
+                { title: "Comissão Pendente", value: formatKz(dashboardStats?.pendingCommission || "0"), icon: Clock, color: "text-amber-400" },
               ].map((stat, i) => (
-                <Card key={i} className="bg-white/5 border-white/10 backdrop-blur-xl hover:bg-white/[0.08] transition-all duration-300 group">
+                <Card key={i} className="bg-white/5 border-white/10 backdrop-blur-xl hover:bg-white/[0.08] transition-all duration-300 group" data-testid={`card-dashboard-stat-${i}`}>
                   <CardHeader className="flex flex-row items-center justify-between pb-2">
                     <CardTitle className="text-xs font-bold uppercase tracking-widest text-white/40 group-hover:text-white/60 transition-colors">{stat.title}</CardTitle>
                     <stat.icon className={`w-4 h-4 ${stat.color} group-hover:scale-110 transition-transform`} />
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold tracking-tight">{stat.value}</div>
-                    <div className="flex items-center mt-1">
-                      <span className={`text-xs font-bold ${stat.growth.startsWith('+') ? 'text-emerald-400' : 'text-red-400'}`}>
-                        {stat.growth}
-                      </span>
-                      <span className="text-[10px] text-white/20 ml-1">vs mês anterior</span>
-                    </div>
                   </CardContent>
                 </Card>
               ))}
@@ -118,20 +254,28 @@ export default function AdminDashboard() {
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <Card className="lg:col-span-2 bg-white/5 border-white/10">
-                <CardHeader className="flex flex-row items-center justify-between">
-                  <div>
-                    <CardTitle className="text-lg">Performance de Vendas</CardTitle>
-                    <CardDescription className="text-xs text-white/40">Ticket Médio: Kz 0,00</CardDescription>
-                  </div>
-                  <Badge variant="outline" className="text-[10px] border-emerald-500/20 text-emerald-400">Conversão Global: 0.0%</Badge>
+                <CardHeader>
+                  <CardTitle className="text-lg">Vendas Recentes</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="h-[240px] flex items-end justify-center gap-2 px-2 pb-2 border-b border-white/5">
-                     <p className="text-xs text-white/40 mb-10">Sem dados suficientes para o gráfico</p>
-                  </div>
-                  <div className="flex justify-between mt-4 text-[10px] text-white/40 uppercase font-bold px-2">
-                    <span>Jan</span><span>Fev</span><span>Mar</span><span>Abr</span><span>Mai</span><span>Jun</span><span>Jul</span><span>Ago</span><span>Set</span><span>Out</span><span>Nov</span><span>Dez</span>
-                  </div>
+                  {paidClients.length === 0 ? (
+                    <p className="text-xs text-white/40 text-center py-8">Nenhuma venda registrada ainda.</p>
+                  ) : (
+                    <div className="space-y-4">
+                      {paidClients.slice(0, 5).map((client: any) => (
+                        <div key={client.id} className="flex items-center justify-between py-2 border-b border-white/5 last:border-0">
+                          <div>
+                            <p className="text-sm font-bold">{client.name}</p>
+                            <p className="text-[10px] text-white/40">{client.plan} • {timeAgo(client.createdAt)}</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-sm font-bold text-emerald-400">{formatKz(client.price)}</p>
+                            <p className="text-[10px] text-white/40">Comissão: {formatKz(client.commission)}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
 
@@ -144,9 +288,19 @@ export default function AdminDashboard() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                     <div className="text-center py-4">
-                        <p className="text-xs text-white/40">Ainda não há vendas registradas esta semana.</p>
-                     </div>
+                    {topAffiliates.length === 0 ? (
+                      <p className="text-xs text-white/40 text-center py-4">Ainda não há vendas registradas.</p>
+                    ) : (
+                      topAffiliates.map((af: any, i: number) => (
+                        <div key={af.id} className="flex items-center justify-between group">
+                          <div className="flex items-center gap-3">
+                            <span className="text-xs font-bold text-white/20 w-4">{i + 1}.</span>
+                            <span className="text-xs font-medium text-white/80 group-hover:text-white">{af.name}</span>
+                          </div>
+                          <span className="text-xs font-bold text-emerald-400">{formatKz(af.totalSales)}</span>
+                        </div>
+                      ))
+                    )}
                   </CardContent>
                 </Card>
 
@@ -158,7 +312,7 @@ export default function AdminDashboard() {
                   </CardHeader>
                   <CardContent>
                     <p className="text-xs text-white/40 leading-relaxed">
-                      Todos os sistemas operacionais. Nenhuma solicitação pendente.
+                      Todos os sistemas operacionais. {affiliates.length} afiliados registrados.
                     </p>
                   </CardContent>
                 </Card>
@@ -174,17 +328,13 @@ export default function AdminDashboard() {
                 <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-white to-red-400 bg-clip-text text-transparent">Gestão de Afiliados</h1>
                 <p className="text-white/40">Controle total da rede de parceiros.</p>
               </div>
-              <div className="flex gap-2">
-                <Button variant="outline" className="bg-white/5 border-white/10"><Filter className="w-4 h-4 mr-2" /> Filtros</Button>
-                <Button className="bg-red-500 hover:bg-red-600 font-bold"><Plus className="w-4 h-4 mr-2" /> Novo Afiliado</Button>
-              </div>
             </div>
 
             <Card className="bg-white/5 border-white/10">
               <CardHeader>
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
-                  <Input placeholder="Buscar por nome, email ou ID..." className="pl-10 bg-white/5 border-white/10" />
+                  <Input placeholder="Buscar por nome ou telefone..." className="pl-10 bg-white/5 border-white/10" />
                 </div>
               </CardHeader>
               <CardContent>
@@ -193,19 +343,95 @@ export default function AdminDashboard() {
                     <thead>
                       <tr className="text-left border-b border-white/10 text-white/40 text-[10px] uppercase tracking-widest">
                         <th className="pb-4 font-bold">Afiliado</th>
-                        <th className="pb-4 font-bold text-center">Nível</th>
+                        <th className="pb-4 font-bold text-center">Telefone</th>
                         <th className="pb-4 font-bold text-center">Vendas</th>
-                        <th className="pb-4 font-bold text-center">Conv.</th>
-                        <th className="pb-4 font-bold">Comissões (Total/Paga)</th>
+                        <th className="pb-4 font-bold text-center">Status</th>
+                        <th className="pb-4 font-bold text-right">Registado em</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-white/5">
+                      {affiliates.length === 0 ? (
+                        <tr><td colSpan={5} className="py-8 text-center text-xs text-white/40">Nenhum afiliado encontrado no sistema.</td></tr>
+                      ) : affiliates.map((af: any) => {
+                        const affSales = allClients.filter((c: any) => c.affiliateId === af.id && c.status === "pagamento_feito").length;
+                        return (
+                          <tr key={af.id} className="group hover:bg-white/[0.02]" data-testid={`row-affiliate-${af.id}`}>
+                            <td className="py-4">
+                              <p className="font-bold text-white/90 text-xs">{af.name}</p>
+                              <p className="text-[10px] text-white/20">Ref: {af.referralCode}</p>
+                            </td>
+                            <td className="py-4 text-center text-xs text-white/60">{af.phone}</td>
+                            <td className="py-4 text-center font-mono text-xs text-white/60">{affSales}</td>
+                            <td className="py-4 text-center">
+                              <Badge className={af.isActive ? "bg-emerald-500/10 text-emerald-400" : "bg-red-500/10 text-red-400"}>
+                                {af.isActive ? "Ativo" : "Inativo"}
+                              </Badge>
+                            </td>
+                            <td className="py-4 text-right text-xs text-white/40">{new Date(af.createdAt).toLocaleDateString("pt-AO")}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        );
+      case "clients":
+        return (
+          <div className="space-y-8 animate-in fade-in duration-500">
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-white to-red-400 bg-clip-text text-transparent">Clientes Globais</h1>
+              <p className="text-white/40">Monitoramento centralizado de todas as indicações.</p>
+            </div>
+
+            <Card className="bg-white/5 border-white/10">
+              <CardContent className="pt-6">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="text-left border-b border-white/10 text-white/40 text-[10px] uppercase tracking-widest">
+                        <th className="pb-4 font-bold">Cliente</th>
+                        <th className="pb-4 font-bold">Plano / Valor</th>
+                        <th className="pb-4 font-bold">Comissão</th>
+                        <th className="pb-4 font-bold text-center">Status</th>
                         <th className="pb-4 font-bold text-right">Ações</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-white/5">
-                        <tr>
-                            <td colSpan={6} className="py-8 text-center text-xs text-white/40">
-                                Nenhum afiliado encontrado no sistema.
-                            </td>
+                      {allClients.length === 0 ? (
+                        <tr><td colSpan={5} className="py-8 text-center text-xs text-white/40">Nenhum cliente registado no momento.</td></tr>
+                      ) : allClients.map((cl: any) => (
+                        <tr key={cl.id} className="group hover:bg-white/[0.02]" data-testid={`row-client-${cl.id}`}>
+                          <td className="py-4">
+                            <p className="font-bold text-white/90 text-xs">{cl.name}</p>
+                            <p className="text-[10px] text-white/20">{cl.contact}</p>
+                          </td>
+                          <td className="py-4">
+                            <p className="text-xs font-bold">{cl.plan}</p>
+                            <p className="text-[10px] text-white/40">{formatKz(cl.price)}</p>
+                          </td>
+                          <td className="py-4 font-bold text-emerald-400 text-xs">{formatKz(cl.commission)}</td>
+                          <td className="py-4 text-center">
+                            <Badge className={`text-[9px] px-2 h-5 rounded-full ${statusColors[cl.status] || ""}`}>
+                              {statusLabels[cl.status] || cl.status}
+                            </Badge>
+                          </td>
+                          <td className="py-4 text-right">
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="sm" className="h-8 w-8 p-0"><MoreVertical className="w-4 h-4" /></Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="bg-black border-white/10 text-white">
+                                <DropdownMenuItem onClick={() => updateClientStatusMutation.mutate({ id: cl.id, status: "em_contacto" })} className="gap-2 text-xs"><History className="w-3.5 h-3.5" /> Em Contacto</DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => updateClientStatusMutation.mutate({ id: cl.id, status: "pagamento_feito" })} className="gap-2 text-xs"><CheckCircle2 className="w-3.5 h-3.5" /> Pagamento Feito</DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => updateClientStatusMutation.mutate({ id: cl.id, status: "reprovado" })} className="gap-2 text-xs text-red-400"><XCircle className="w-3.5 h-3.5" /> Reprovar</DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </td>
                         </tr>
+                      ))}
                     </tbody>
                   </table>
                 </div>
@@ -230,19 +456,30 @@ export default function AdminDashboard() {
                   <div className="space-y-2">
                     <Label className="text-xs">Percentagem Base (%)</Label>
                     <div className="flex gap-2">
-                      <Input defaultValue="0" className="bg-white/5 border-white/10" />
-                      <Button className="bg-white text-black font-bold">Salvar</Button>
+                      <Input value={commBase} onChange={(e) => setCommBase(e.target.value)} className="bg-white/5 border-white/10" />
+                      <Button onClick={() => saveSettingsMutation.mutate({
+                        commission_base: commBase,
+                        commission_essencial: commEssencial,
+                        commission_profissional: commProfissional,
+                        commission_premium: commPremium,
+                      })} className="bg-white text-black font-bold">Salvar</Button>
                     </div>
                   </div>
                   <div className="pt-4 border-t border-white/5 space-y-4">
                     <h4 className="text-xs font-bold uppercase tracking-widest text-white/40">Por Plano</h4>
                     <div className="space-y-3">
-                      {["Essencial", "Profissional", "Premium"].map((plano) => (
-                        <div key={plano} className="flex items-center justify-between">
-                          <span className="text-xs text-white/60">{plano}</span>
-                          <Input className="w-20 h-8 bg-white/5 border-white/10 text-center text-xs" defaultValue="0" />
-                        </div>
-                      ))}
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-white/60">Essencial</span>
+                        <Input className="w-20 h-8 bg-white/5 border-white/10 text-center text-xs" value={commEssencial} onChange={(e) => setCommEssencial(e.target.value)} />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-white/60">Profissional</span>
+                        <Input className="w-20 h-8 bg-white/5 border-white/10 text-center text-xs" value={commProfissional} onChange={(e) => setCommProfissional(e.target.value)} />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-white/60">Premium</span>
+                        <Input className="w-20 h-8 bg-white/5 border-white/10 text-center text-xs" value={commPremium} onChange={(e) => setCommPremium(e.target.value)} />
+                      </div>
                     </div>
                   </div>
                 </CardContent>
@@ -268,7 +505,7 @@ export default function AdminDashboard() {
                         <p className="text-xs font-bold">Bónus por Volume</p>
                         <p className="text-[10px] text-white/40">Bónus para cada 10 vendas (Valor a definir)</p>
                       </div>
-                      <Switch defaultChecked />
+                      <Switch />
                     </div>
                   </div>
                   <Button variant="outline" className="w-full border-white/10 text-xs gap-2">
@@ -289,85 +526,82 @@ export default function AdminDashboard() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <Card className="bg-white/5 border-white/10">
-                <CardHeader>
-                  <CardTitle className="text-xs uppercase tracking-widest text-white/40 font-bold">Plano Mais Vendido</CardTitle>
-                </CardHeader>
+                <CardHeader><CardTitle className="text-xs uppercase tracking-widest text-white/40 font-bold">Plano Mais Vendido</CardTitle></CardHeader>
                 <CardContent>
-                  <div className="text-xl font-bold">N/D</div>
-                  <p className="text-[10px] text-white/40">Sem dados de vendas</p>
+                  {(() => {
+                    const planCounts: Record<string, number> = {};
+                    paidClients.forEach((c: any) => { planCounts[c.plan] = (planCounts[c.plan] || 0) + 1; });
+                    const topPlan = Object.entries(planCounts).sort((a, b) => b[1] - a[1])[0];
+                    return topPlan ? (
+                      <>
+                        <div className="text-xl font-bold">{topPlan[0]}</div>
+                        <p className="text-[10px] text-emerald-400">{topPlan[1]} vendas</p>
+                      </>
+                    ) : (
+                      <>
+                        <div className="text-xl font-bold">N/D</div>
+                        <p className="text-[10px] text-white/40">Sem dados de vendas</p>
+                      </>
+                    );
+                  })()}
                 </CardContent>
               </Card>
               <Card className="bg-white/5 border-white/10">
-                <CardHeader>
-                  <CardTitle className="text-xs uppercase tracking-widest text-white/40 font-bold">Tempo Médio Fechamento</CardTitle>
-                </CardHeader>
+                <CardHeader><CardTitle className="text-xs uppercase tracking-widest text-white/40 font-bold">Total de Clientes</CardTitle></CardHeader>
                 <CardContent>
-                  <div className="text-xl font-bold">0 dias</div>
-                  <p className="text-[10px] text-white/20">Desde o registo do lead</p>
+                  <div className="text-xl font-bold">{allClients.length}</div>
+                  <p className="text-[10px] text-white/20">Todos os status</p>
                 </CardContent>
               </Card>
               <Card className="bg-white/5 border-white/10">
-                <CardHeader>
-                  <CardTitle className="text-xs uppercase tracking-widest text-white/40 font-bold">Ticket Médio</CardTitle>
-                </CardHeader>
+                <CardHeader><CardTitle className="text-xs uppercase tracking-widest text-white/40 font-bold">Ticket Médio</CardTitle></CardHeader>
                 <CardContent>
-                  <div className="text-xl font-bold">Kz 0,00</div>
-                  <p className="text-[10px] text-white/40">Sem dados este mês</p>
+                  {(() => {
+                    const total = paidClients.reduce((s: number, c: any) => s + parseFloat(c.price || "0"), 0);
+                    const avg = paidClients.length > 0 ? total / paidClients.length : 0;
+                    return (
+                      <>
+                        <div className="text-xl font-bold">{formatKz(avg)}</div>
+                        <p className="text-[10px] text-white/40">{paidClients.length} vendas concluídas</p>
+                      </>
+                    );
+                  })()}
                 </CardContent>
               </Card>
             </div>
-
-            <Card className="bg-white/5 border-white/10">
-              <CardHeader>
-                <CardTitle className="text-lg">Canais que Mais Convertem</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="py-8 text-center">
-                    <p className="text-sm text-white/40">Aguardando os primeiros dados de conversão de canais.</p>
-                </div>
-              </CardContent>
-            </Card>
           </div>
         );
       case "notifications":
         return (
           <div className="space-y-8 animate-in fade-in duration-500">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-white to-red-400 bg-clip-text text-transparent">Notificações Globais</h1>
-                <p className="text-white/40">Comunique-se diretamente com todos os seus afiliados.</p>
-              </div>
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-white to-red-400 bg-clip-text text-transparent">Notificações Globais</h1>
+              <p className="text-white/40">Comunique-se diretamente com todos os seus afiliados.</p>
             </div>
 
             <Card className="bg-white/5 border-white/10 max-w-2xl">
-              <CardHeader>
-                <CardTitle className="text-lg">Nova Mensagem</CardTitle>
-              </CardHeader>
+              <CardHeader><CardTitle className="text-lg">Nova Mensagem</CardTitle></CardHeader>
               <CardContent className="space-y-6">
                 <div className="space-y-2">
                   <Label className="text-xs">Título da Notificação</Label>
-                  <Input placeholder="Ex: Comissão do Premium a 45%!" className="bg-white/5 border-white/10" />
+                  <Input placeholder="Ex: Comissão do Premium a 45%!" className="bg-white/5 border-white/10" value={notifTitle} onChange={(e) => setNotifTitle(e.target.value)} data-testid="input-notif-title" />
                 </div>
                 <div className="space-y-2">
                   <Label className="text-xs">Corpo da Mensagem</Label>
-                  <textarea className="w-full min-h-[120px] bg-white/5 border border-white/10 rounded-lg p-3 text-sm focus:outline-none focus:ring-1 focus:ring-red-500/50" placeholder="Escreva o aviso para os afiliados..." />
+                  <textarea className="w-full min-h-[120px] bg-white/5 border border-white/10 rounded-lg p-3 text-sm focus:outline-none focus:ring-1 focus:ring-red-500/50" placeholder="Escreva o aviso para os afiliados..." value={notifBody} onChange={(e) => setNotifBody(e.target.value)} data-testid="input-notif-body" />
                 </div>
-                <div className="flex gap-4">
-                  <div className="flex items-center gap-2">
-                    <Switch id="push" />
-                    <Label htmlFor="push" className="text-xs">Push App</Label>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Switch id="wa" />
-                    <Label htmlFor="wa" className="text-xs">WhatsApp</Label>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Switch id="dash" defaultChecked />
-                    <Label htmlFor="dash" className="text-xs">Painel</Label>
-                  </div>
-                </div>
-                <Button className="w-full bg-red-500 hover:bg-red-600 font-bold gap-2">
-                  <Megaphone className="w-4 h-4" /> Disparar Notificação
+                <Button
+                  onClick={() => {
+                    if (!notifTitle || !notifBody) return;
+                    sendNotificationMutation.mutate({ title: notifTitle, description: notifBody, type: "info", targetRole: "user" });
+                    setNotifTitle("");
+                    setNotifBody("");
+                  }}
+                  disabled={sendNotificationMutation.isPending}
+                  className="w-full bg-red-500 hover:bg-red-600 font-bold gap-2"
+                  data-testid="button-send-notification"
+                >
+                  <Megaphone className="w-4 h-4" /> {sendNotificationMutation.isPending ? "Enviando..." : "Disparar Notificação"}
                 </Button>
               </CardContent>
             </Card>
@@ -381,38 +615,64 @@ export default function AdminDashboard() {
                 <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-white to-red-400 bg-clip-text text-transparent">Materiais & Campanhas</h1>
                 <p className="text-white/40">Gestão de ativos para os afiliados venderem mais.</p>
               </div>
-              <Button className="bg-white text-black font-bold gap-2"><Plus className="w-4 h-4" /> Adicionar Ativo</Button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Card className="bg-white/5 border-white/10">
-                <CardHeader>
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <FileText className="w-4 h-4 text-blue-400" /> Scripts & Textos
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-4">
-                    <div className="py-8 text-center text-xs text-white/40">
-                      Nenhum material cadastrado.
+            <Card className="bg-white/5 border-white/10 max-w-2xl">
+              <CardHeader><CardTitle className="text-lg">Adicionar Material</CardTitle></CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label className="text-xs">Título</Label>
+                  <Input value={matTitle} onChange={(e) => setMatTitle(e.target.value)} placeholder="Ex: Abordagem WhatsApp" className="bg-white/5 border-white/10" data-testid="input-material-title" />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs">Tipo</Label>
+                  <Select value={matType} onValueChange={setMatType}>
+                    <SelectTrigger className="bg-white/5 border-white/10"><SelectValue /></SelectTrigger>
+                    <SelectContent className="bg-[#121212] border-white/10 text-white">
+                      <SelectItem value="copy">Texto / Copy</SelectItem>
+                      <SelectItem value="script">Script de Venda</SelectItem>
+                      <SelectItem value="image">Imagem / Criativo</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs">Conteúdo</Label>
+                  <textarea className="w-full min-h-[80px] bg-white/5 border border-white/10 rounded-lg p-3 text-sm focus:outline-none focus:ring-1 focus:ring-red-500/50" value={matContent} onChange={(e) => setMatContent(e.target.value)} placeholder="Escreva o conteúdo aqui..." data-testid="input-material-content" />
+                </div>
+                <Button
+                  onClick={() => {
+                    if (!matTitle) return;
+                    createMaterialMutation.mutate({ title: matTitle, type: matType, content: matContent || null });
+                    setMatTitle("");
+                    setMatContent("");
+                  }}
+                  disabled={createMaterialMutation.isPending}
+                  className="w-full bg-white text-black font-bold"
+                  data-testid="button-add-material"
+                >
+                  <Plus className="w-4 h-4 mr-2" /> {createMaterialMutation.isPending ? "Adicionando..." : "Adicionar Material"}
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white/5 border-white/10">
+              <CardHeader><CardTitle className="text-lg flex items-center gap-2"><FileText className="w-4 h-4 text-blue-400" /> Materiais Cadastrados</CardTitle></CardHeader>
+              <CardContent className="space-y-4">
+                {allMaterials.length === 0 ? (
+                  <div className="py-8 text-center text-xs text-white/40">Nenhum material cadastrado.</div>
+                ) : allMaterials.map((mat: any) => (
+                  <div key={mat.id} className="flex items-center justify-between p-3 rounded bg-black/40 border border-white/5" data-testid={`card-material-${mat.id}`}>
+                    <div>
+                      <p className="text-xs font-bold">{mat.title}</p>
+                      <p className="text-[10px] text-white/20">{mat.type === "copy" ? "Texto" : mat.type === "script" ? "Script" : "Imagem"} • {timeAgo(mat.createdAt)}</p>
                     </div>
+                    <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-red-400 hover:bg-red-500/10" onClick={() => deleteMaterialMutation.mutate(mat.id)}>
+                      <XCircle className="w-3 h-3" />
+                    </Button>
                   </div>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-white/5 border-white/10">
-                <CardHeader>
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <ImageIcon className="w-4 h-4 text-purple-400" /> Criativos Visuais
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="py-8 text-center text-xs text-white/40 border border-white/5 bg-white/5 rounded-lg border-dashed">
-                    Nenhum criativo visual cadastrado.
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+                ))}
+              </CardContent>
+            </Card>
           </div>
         );
       case "security":
@@ -429,32 +689,108 @@ export default function AdminDashboard() {
                   <CardTitle className="text-[10px] font-bold uppercase text-white/40">Tentativas Bloqueadas</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-red-400">0</div>
+                  <div className="text-2xl font-bold text-red-400">
+                    {securityLogs.filter((l: any) => l.status === "error").length}
+                  </div>
                 </CardContent>
               </Card>
-              {/* More quick stats... */}
             </div>
 
             <Card className="bg-white/5 border-white/10">
-              <CardHeader>
-                <CardTitle className="text-lg">Atividade Recente</CardTitle>
-              </CardHeader>
+              <CardHeader><CardTitle className="text-lg">Atividade Recente</CardTitle></CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <div className="py-8 text-center text-xs text-white/40">
-                    Nenhuma atividade recente registrada.
-                  </div>
+                  {securityLogs.length === 0 ? (
+                    <div className="py-8 text-center text-xs text-white/40">Nenhuma atividade recente registrada.</div>
+                  ) : securityLogs.map((log: any) => (
+                    <div key={log.id} className="flex items-center justify-between py-2 border-b border-white/5 last:border-0">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-1.5 h-1.5 rounded-full ${log.status === 'success' ? 'bg-emerald-500' : log.status === 'warning' ? 'bg-amber-500' : 'bg-red-500'}`} />
+                        <div>
+                          <p className="text-xs font-bold">{log.action}</p>
+                          <p className="text-[10px] text-white/20">{log.userLabel || "Desconhecido"} • {log.ip}</p>
+                        </div>
+                      </div>
+                      <span className="text-[10px] text-white/40 font-mono">{timeAgo(log.createdAt)}</span>
+                    </div>
+                  ))}
                 </div>
               </CardContent>
             </Card>
+          </div>
+        );
+      case "payments":
+        return (
+          <div className="space-y-8 animate-in fade-in duration-500">
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-white to-red-400 bg-clip-text text-transparent">Fluxo de Pagamentos</h1>
+              <p className="text-white/40">Gestão financeira de recebimentos e saques.</p>
+            </div>
+
+            <Tabs defaultValue="affiliate-payouts" className="w-full">
+              <TabsList className="bg-white/5 border border-white/10 h-11 p-1">
+                <TabsTrigger value="affiliate-payouts" className="gap-2 data-[state=active]:bg-white/10 text-xs font-bold uppercase tracking-wider">
+                  <DollarSign className="w-4 h-4" /> Saques de Afiliados
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="affiliate-payouts" className="mt-6 space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {[
+                    { label: "Solicitações Pendentes", value: withdrawalStats?.active?.toString() || "0", sub: "Aguardando aprovação" },
+                    { label: "Total Pago", value: formatKz(withdrawalStats?.totalPaid || "0"), sub: "Desde o início" },
+                    { label: "Em Processamento", value: formatKz(withdrawalStats?.reserved || "0"), sub: "Em trânsito" },
+                  ].map((s, i) => (
+                    <Card key={i} className="bg-white/5 border-white/10">
+                      <CardContent className="pt-6">
+                        <p className="text-[10px] font-bold text-white/40 uppercase mb-1">{s.label}</p>
+                        <p className="text-xl font-bold">{s.value}</p>
+                        <p className="text-[10px] text-emerald-400/60 font-bold">{s.sub}</p>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+
+                <Card className="bg-white/5 border-white/10 overflow-hidden">
+                  <div className="p-4 border-b border-white/10 bg-white/[0.02]">
+                    <h3 className="text-[10px] font-bold uppercase tracking-widest text-white/40">Solicitações de Saque</h3>
+                  </div>
+                  {allWithdrawals.length === 0 ? (
+                    <div className="p-4 text-center"><p className="text-sm text-white/40">Nenhuma solicitação de saque no momento.</p></div>
+                  ) : allWithdrawals.map((w: any) => (
+                    <div key={w.id} className="p-4 flex items-center justify-between border-b border-white/5 last:border-0 hover:bg-white/[0.01]" data-testid={`row-withdrawal-${w.id}`}>
+                      <div className="flex items-center gap-4">
+                        <div className="w-8 h-8 rounded-full bg-red-500/10 flex items-center justify-center text-[10px] font-bold text-red-400 border border-red-500/20">
+                          <DollarSign className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <p className="text-xs font-bold">{w.method}</p>
+                          <p className="text-[10px] text-white/40">{w.accountInfo || "N/D"} • {timeAgo(w.createdAt)}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-6">
+                        <span className="text-sm font-bold text-emerald-400">{formatKz(w.amount)}</span>
+                        <Badge className={`text-[9px] ${statusColors[w.status] || ""}`}>{statusLabels[w.status] || w.status}</Badge>
+                        {w.status === "pendente" && (
+                          <div className="flex gap-2">
+                            <Button size="sm" variant="ghost" className="text-[10px] h-7 hover:text-red-400" onClick={() => updateWithdrawalMutation.mutate({ id: w.id, status: "recusado" })}>Recusar</Button>
+                            <Button size="sm" className="text-[10px] h-7 bg-white text-black hover:bg-white/90" onClick={() => updateWithdrawalMutation.mutate({ id: w.id, status: "pago" })}>Aprovar</Button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </Card>
+              </TabsContent>
+            </Tabs>
           </div>
         );
       case "settings":
         return (
           <div className="space-y-8 animate-in fade-in duration-500">
             <div>
-              <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-white to-red-400 bg-clip-text text-transparent">Configurações Gerais</h1>
-              <p className="text-white/40">Parâmetros globais do ecossistema.</p>
+              <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-white to-red-400 bg-clip-text text-transparent">Configurações</h1>
+              <p className="text-white/40">Configurações gerais do sistema.</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -463,26 +799,17 @@ export default function AdminDashboard() {
                   <CardTitle className="text-lg flex items-center gap-2"><Smartphone className="w-4 h-4 text-emerald-400" /> Configurações de Planos</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label className="text-[10px] uppercase font-bold tracking-widest text-white/40">Plano Essencial</Label>
-                      <Input defaultValue="0" className="bg-white/5 border-white/10 h-9" />
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="text-[10px] uppercase font-bold tracking-widest text-white/40">Plano Premium</Label>
-                      <Input defaultValue="0" className="bg-white/5 border-white/10 h-9" />
-                    </div>
-                  </div>
                   <div className="pt-4 border-t border-white/5 space-y-4">
                     <div className="flex items-center justify-between">
                       <Label className="text-xs">Tempo Mínimo para Saque (Dias)</Label>
-                      <Input defaultValue="7" className="w-20 bg-white/5 border-white/10 h-8 text-center" />
+                      <Input defaultValue={adminSettings?.min_withdrawal_days || "7"} className="w-20 bg-white/5 border-white/10 h-8 text-center" />
                     </div>
                     <div className="flex items-center justify-between">
                       <Label className="text-xs">Limite Mínimo de Saque (Kz)</Label>
-                      <Input defaultValue="10.000" className="w-32 bg-white/5 border-white/10 h-8 text-center" />
+                      <Input defaultValue={adminSettings?.min_withdrawal_amount || "10000"} className="w-32 bg-white/5 border-white/10 h-8 text-center" />
                     </div>
                   </div>
+                  <Button className="w-full bg-white text-black font-bold">Salvar Configurações</Button>
                 </CardContent>
               </Card>
 
@@ -497,148 +824,19 @@ export default function AdminDashboard() {
                         <MessageSquare className="w-4 h-4 text-emerald-400" />
                         <span className="text-xs font-bold">API WhatsApp</span>
                       </div>
-                      <Badge className="bg-emerald-500/10 text-emerald-400 h-5">Conectado</Badge>
+                      <Badge variant="outline" className="text-white/20 h-5">Não configurado</Badge>
                     </div>
                     <div className="p-3 rounded bg-black/40 border border-white/5 flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <Mail className="w-4 h-4 text-blue-400" />
                         <span className="text-xs font-bold">SMTP Email</span>
                       </div>
-                      <Badge variant="outline" className="text-white/20 h-5">Desconectado</Badge>
+                      <Badge variant="outline" className="text-white/20 h-5">Não configurado</Badge>
                     </div>
                   </div>
-                  <Button className="w-full bg-white text-black font-bold h-9">Configurar Credenciais</Button>
                 </CardContent>
               </Card>
             </div>
-          </div>
-        );
-      case "clients":
-        return (
-          <div className="space-y-8 animate-in fade-in duration-500">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-white to-red-400 bg-clip-text text-transparent">Clientes Globais</h1>
-                <p className="text-white/40">Monitoramento centralizado de todas as indicações.</p>
-              </div>
-            </div>
-
-            <Card className="bg-white/5 border-white/10">
-              <CardHeader className="flex flex-row items-center justify-between gap-4">
-                <div className="relative flex-1 max-w-sm">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
-                  <Input placeholder="Buscar cliente ou afiliado..." className="pl-10 bg-white/5 border-white/10" />
-                </div>
-                <Select>
-                  <SelectTrigger className="w-[180px] bg-white/5 border-white/10 text-xs h-9">
-                    <SelectValue placeholder="Status" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-black border-white/10 text-white">
-                    <SelectItem value="active">Pagamento Feito</SelectItem>
-                    <SelectItem value="pending">Em Análise</SelectItem>
-                    <SelectItem value="contact">Em Contacto</SelectItem>
-                  </SelectContent>
-                </Select>
-              </CardHeader>
-              <CardContent>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="text-left border-b border-white/10 text-white/40 text-[10px] uppercase tracking-widest">
-                        <th className="pb-4 font-bold">Cliente</th>
-                        <th className="pb-4 font-bold">Indicado por</th>
-                        <th className="pb-4 font-bold">Plano / Valor</th>
-                        <th className="pb-4 font-bold">Comissão</th>
-                        <th className="pb-4 font-bold text-center">Status</th>
-                        <th className="pb-4 font-bold text-right">Ações</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-white/5">
-                        <tr>
-                            <td colSpan={6} className="py-8 text-center text-xs text-white/40">
-                                Nenhum cliente registado no momento.
-                            </td>
-                        </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        );
-      case "payments":
-        return (
-          <div className="space-y-8 animate-in fade-in duration-500">
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-white to-red-400 bg-clip-text text-transparent">Fluxo de Pagamentos</h1>
-              <p className="text-white/40">Gestão financeira de recebimentos e saques.</p>
-            </div>
-
-            <Tabs defaultValue="client-payments" className="w-full">
-              <TabsList className="bg-white/5 border border-white/10 h-11 p-1">
-                <TabsTrigger value="client-payments" className="gap-2 data-[state=active]:bg-white/10 text-xs font-bold uppercase tracking-wider">
-                  <Receipt className="w-4 h-4" /> Pagamentos Clientes
-                </TabsTrigger>
-                <TabsTrigger value="affiliate-payouts" className="gap-2 data-[state=active]:bg-white/10 text-xs font-bold uppercase tracking-wider">
-                  <DollarSign className="w-4 h-4" /> Pagamentos Comissão
-                </TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="client-payments" className="mt-6 space-y-4">
-                <Card className="bg-white/5 border-white/10 overflow-hidden">
-                  <div className="p-4 border-b border-white/10 bg-white/[0.02] flex justify-between items-center">
-                    <h3 className="text-[10px] font-bold uppercase tracking-widest text-white/40">Comprovativos Pendentes</h3>
-                  </div>
-                  {[1, 2].map((i) => (
-                    <div key={i} className="p-4 flex items-center justify-between border-b border-white/5 last:border-0 hover:bg-white/[0.01]">
-                      <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 rounded bg-white/5 flex items-center justify-center border border-white/10">
-                          <FileText className="w-5 h-5 text-white/20" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-bold">Empresa XYZ Ltda</p>
-                          <p className="text-[10px] text-white/40">Transferência • Kz 0,00</p>
-                        </div>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button size="sm" variant="outline" className="text-[10px] h-8 border-white/10">Ver Prova</Button>
-                        <Button size="sm" variant="ghost" className="text-[10px] h-8 text-red-400 hover:bg-red-400/10">Reprovar</Button>
-                        <Button size="sm" className="text-[10px] h-8 bg-emerald-500 hover:bg-emerald-600">Aprovar</Button>
-                      </div>
-                    </div>
-                  ))}
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="affiliate-payouts" className="mt-6 space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {[
-                    { label: "Solicitações Ativas", value: "0", sub: "Kz 0,00" },
-                    { label: "Total Pago", value: "Kz 0,00", sub: "Mês corrente" },
-                    { label: "Saldo em Reserva", value: "Kz 0,00", sub: "Comissões futuras" },
-                  ].map((s, i) => (
-                    <Card key={i} className="bg-white/5 border-white/10">
-                      <CardContent className="pt-6">
-                        <p className="text-[10px] font-bold text-white/40 uppercase mb-1">{s.label}</p>
-                        <p className="text-xl font-bold">{s.value}</p>
-                        <p className="text-[10px] text-emerald-400/60 font-bold">{s.sub}</p>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-
-                <Card className="bg-white/5 border-white/10 overflow-hidden">
-                   <div className="p-4 border-b border-white/10 bg-white/[0.02] flex justify-between items-center">
-                    <h3 className="text-[10px] font-bold uppercase tracking-widest text-white/40">Solicitações de Saque</h3>
-                  </div>
-                  {[1].map((i) => (
-                    <div key={i} className="p-4 flex items-center justify-center border-b border-white/5 last:border-0 hover:bg-white/[0.01]">
-                        <p className="text-sm text-white/40">Nenhuma solicitação de saque no momento.</p>
-                    </div>
-                  ))}
-                </Card>
-              </TabsContent>
-            </Tabs>
           </div>
         );
       default:
@@ -708,5 +906,3 @@ export default function AdminDashboard() {
     </SidebarProvider>
   );
 }
-
-

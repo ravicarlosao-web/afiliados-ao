@@ -6,8 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { StarField } from "@/components/star-field";
-import { Phone, Lock, ArrowRight, CheckCircle2, AlertCircle, RefreshCw } from "lucide-react";
+import { Phone, Lock, ArrowRight, RefreshCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
+import { queryClient } from "@/lib/queryClient";
 
 export default function Login() {
   const [, setLocation] = useLocation();
@@ -15,37 +17,64 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [showForgot, setShowForgot] = useState(false);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const [loginPhone, setLoginPhone] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
+
+  const [regName, setRegName] = useState("");
+  const [regPhone, setRegPhone] = useState("");
+  const [regPassword, setRegPassword] = useState("");
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      // Mock Login Session
-      localStorage.setItem("isLogged", "true");
-      
-      // Check if it's an admin login attempt (e.g. by checking the phone number)
-      // For the mockup, we can just use a simple check or a hidden field
-      const phoneInput = document.getElementById("phone") as HTMLInputElement;
-      if (phoneInput?.value === "admin") {
-        localStorage.setItem("userRole", "admin");
+    try {
+      const res = await apiRequest("POST", "/api/auth/login", {
+        phone: loginPhone,
+        password: loginPassword,
+      });
+      const data = await res.json();
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+      if (data.user.role === "admin") {
         setLocation("/admin");
       } else {
-        localStorage.setItem("userRole", "user");
         setLocation("/usuario");
       }
-    }, 1500);
+    } catch (error: any) {
+      toast({
+        title: "Erro ao entrar",
+        description: error.message?.includes("401") ? "Credenciais inválidas" : "Erro no servidor",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      await apiRequest("POST", "/api/auth/register", {
+        name: regName,
+        phone: regPhone,
+        password: regPassword,
+      });
       toast({
         title: "Conta criada!",
         description: "Sua conta foi criada com sucesso. Faça login para continuar.",
       });
-    }, 1500);
+      setRegName("");
+      setRegPhone("");
+      setRegPassword("");
+    } catch (error: any) {
+      toast({
+        title: "Erro ao criar conta",
+        description: error.message?.includes("409") ? "Este número já está cadastrado" : "Erro no servidor",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleRecover = (e: React.FormEvent) => {
@@ -100,7 +129,6 @@ export default function Login() {
     <div className="min-h-screen bg-black text-white selection:bg-red-500/30 flex items-center justify-center p-4 relative overflow-hidden">
       <StarField />
       
-      {/* Decorative Blur Elements */}
       <div className="absolute top-1/4 -left-20 w-80 h-80 bg-red-600/20 rounded-full blur-[120px]" />
       <div className="absolute bottom-1/4 -right-20 w-80 h-80 bg-blue-600/10 rounded-full blur-[120px]" />
 
@@ -132,9 +160,12 @@ export default function Login() {
                       <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
                       <Input 
                         id="phone" 
+                        data-testid="input-phone"
                         placeholder="+244 9XX XXX XXX" 
                         className="pl-10 bg-black/40 border-white/10 focus:border-red-500/50 transition-colors" 
-                        required 
+                        required
+                        value={loginPhone}
+                        onChange={(e) => setLoginPhone(e.target.value)}
                       />
                     </div>
                   </div>
@@ -147,16 +178,19 @@ export default function Login() {
                       <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
                       <Input 
                         id="password" 
+                        data-testid="input-password"
                         type="password" 
                         placeholder="••••••••" 
                         className="pl-10 bg-black/40 border-white/10 focus:border-red-500/50 transition-colors" 
-                        required 
+                        required
+                        value={loginPassword}
+                        onChange={(e) => setLoginPassword(e.target.value)}
                       />
                     </div>
                   </div>
                 </CardContent>
                 <CardFooter>
-                  <Button disabled={loading} className="w-full bg-red-600 hover:bg-red-700 text-white font-bold h-11 group">
+                  <Button data-testid="button-login" disabled={loading} className="w-full bg-red-600 hover:bg-red-700 text-white font-bold h-11 group">
                     {loading ? "Entrando..." : (
                       <span className="flex items-center gap-2">
                         Entrar no Painel <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -178,19 +212,19 @@ export default function Login() {
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="reg-name">Nome Completo</Label>
-                    <Input id="reg-name" placeholder="Seu nome" className="bg-black/40 border-white/10" required />
+                    <Input id="reg-name" data-testid="input-reg-name" placeholder="Seu nome" className="bg-black/40 border-white/10" required value={regName} onChange={(e) => setRegName(e.target.value)} />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="reg-phone">Telefone</Label>
-                    <Input id="reg-phone" placeholder="+244" className="bg-black/40 border-white/10" required />
+                    <Input id="reg-phone" data-testid="input-reg-phone" placeholder="+244" className="bg-black/40 border-white/10" required value={regPhone} onChange={(e) => setRegPhone(e.target.value)} />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="reg-pass">Criar Palavra-passe</Label>
-                    <Input id="reg-pass" type="password" placeholder="Mínimo 6 caracteres" className="bg-black/40 border-white/10" required />
+                    <Input id="reg-pass" data-testid="input-reg-pass" type="password" placeholder="Mínimo 6 caracteres" className="bg-black/40 border-white/10" required value={regPassword} onChange={(e) => setRegPassword(e.target.value)} />
                   </div>
                 </CardContent>
                 <CardFooter>
-                  <Button disabled={loading} className="w-full bg-white text-black hover:bg-white/90 font-bold h-11">
+                  <Button data-testid="button-register" disabled={loading} className="w-full bg-white text-black hover:bg-white/90 font-bold h-11">
                     {loading ? "Criando conta..." : "Criar Minha Conta"}
                   </Button>
                 </CardFooter>
