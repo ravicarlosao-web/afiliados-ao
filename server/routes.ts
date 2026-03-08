@@ -789,22 +789,38 @@ ganhar dinheiro na internet angola, marketing de afiliados angola, renda extra a
     try {
       const allNotifs = await storage.getNotifications();
       const requests = allNotifs.filter((n: any) => n.title?.startsWith("Pedido de Print"));
+      const allClientsForLookup = await storage.getClients();
       const enriched = await Promise.all(requests.map(async (req: any) => {
         let affiliateId = null, clientId = null, affiliateName = null, clientName = null, clientContact = null;
         try {
           const parsed = req.channels ? JSON.parse(req.channels) : {};
           affiliateId = parsed.affiliateId || null;
           clientId = parsed.clientId || null;
-          if (affiliateId) {
-            const aff = await storage.getUser(affiliateId);
-            affiliateName = aff?.name || null;
-          }
-          if (clientId) {
-            const cl = await storage.getClient(clientId);
-            clientName = cl?.name || null;
-            clientContact = cl?.contact || null;
-          }
         } catch {}
+
+        if (!affiliateId || !clientId) {
+          const titleMatch = req.title?.match(/Cliente "(.+?)"/);
+          if (titleMatch) {
+            const foundClient = allClientsForLookup.find((c: any) => c.name === titleMatch[1]);
+            if (foundClient) {
+              clientId = clientId || foundClient.id;
+              affiliateId = affiliateId || foundClient.affiliateId;
+              clientName = foundClient.name;
+              clientContact = foundClient.contact;
+            }
+          }
+        }
+
+        if (affiliateId && !affiliateName) {
+          const aff = await storage.getUser(affiliateId);
+          affiliateName = aff?.name || null;
+        }
+        if (clientId && !clientName) {
+          const cl = await storage.getClient(clientId);
+          clientName = cl?.name || null;
+          clientContact = cl?.contact || null;
+        }
+
         return { ...req, affiliateId, clientId, affiliateName, clientName, clientContact };
       }));
       res.json(enriched);
