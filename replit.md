@@ -47,7 +47,7 @@ Angola's affiliate marketing platform where affiliates refer businesses for webs
 
 ## Credentials
 
-- Admin: phone=`admin`, password=`admin123`
+- Admin: phone=`900000000`, password=`admin123` (auto-seeded on startup if no admin exists)
 - Users: created via register flow
 
 ## Plans & Commissions
