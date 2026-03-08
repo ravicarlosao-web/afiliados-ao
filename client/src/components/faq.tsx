@@ -6,7 +6,7 @@ import {
 } from "@/components/ui/accordion";
 import { motion } from "framer-motion";
 
-const ease = [0.22, 1, 0.36, 1];
+const ease = [0.16, 1, 0.3, 1];
 
 export function FAQ() {
   const items = [
@@ -33,7 +33,7 @@ export function FAQ() {
   ];
 
   return (
-    <section id="faq" className="py-16 sm:py-20 md:py-24 px-4 sm:px-6 container mx-auto">
+    <section id="faq" className="py-16 sm:py-20 md:py-24 px-4 sm:px-6 container mx-auto overflow-hidden">
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -41,9 +41,15 @@ export function FAQ() {
         transition={{ duration: 0.6, ease }}
         className="text-center mb-10 sm:mb-16 space-y-4 sm:space-y-6"
       >
-        <span className="inline-block px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-medium tracking-wider text-zinc-400 uppercase">
+        <motion.span
+          initial={{ opacity: 0, scale: 0.8 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.1, ease }}
+          className="inline-block px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-medium tracking-wider text-zinc-400 uppercase"
+        >
           Perguntas Frequentes
-        </span>
+        </motion.span>
         <h2 className="text-3xl sm:text-4xl md:text-5xl font-normal font-['DM_Sans']">
           Alguma dúvida? Aqui está a resposta
         </h2>
@@ -58,10 +64,10 @@ export function FAQ() {
           {items.map((item, i) => (
             <motion.div
               key={item.value}
-              initial={{ opacity: 0, y: 25 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0, x: i % 2 === 0 ? -50 : 50, rotate: i % 2 === 0 ? 1 : -1 }}
+              whileInView={{ opacity: 1, x: 0, rotate: 0 }}
               viewport={{ once: true, margin: "-40px" }}
-              transition={{ duration: 0.5, delay: i * 0.1, ease }}
+              transition={{ duration: 0.6, delay: i * 0.1, ease }}
             >
               <AccordionItem value={item.value} className="bg-card border border-white/10 rounded-xl sm:rounded-2xl px-4 sm:px-6">
                 <AccordionTrigger className="text-base sm:text-lg font-medium hover:no-underline py-4 sm:py-6 text-left">

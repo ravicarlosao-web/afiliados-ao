@@ -2,6 +2,8 @@ import { UserPlus, Search, PenSquare, CreditCard, Wallet, Calculator, ShieldChec
 import { motion } from "framer-motion";
 import { useState } from "react";
 
+const ease = [0.16, 1, 0.3, 1];
+
 const AudioWave = () => (
   <div className="flex items-center gap-1 h-12">
     {[...Array(20)].map((_, i) => (
@@ -27,9 +29,21 @@ function CommissionCalculator() {
   ];
 
   return (
-    <div className="bg-white/5 border border-white/10 rounded-2xl sm:rounded-3xl p-5 sm:p-8 md:p-12 mt-8 sm:mt-12">
+    <motion.div
+      initial={{ opacity: 0, y: 50 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-80px" }}
+      transition={{ duration: 0.8, ease }}
+      className="bg-white/5 border border-white/10 rounded-2xl sm:rounded-3xl p-5 sm:p-8 md:p-12 mt-8 sm:mt-12"
+    >
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 items-center">
-        <div className="space-y-5 sm:space-y-6">
+        <motion.div
+          initial={{ opacity: 0, x: -50 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.7, delay: 0.2, ease }}
+          className="space-y-5 sm:space-y-6"
+        >
           <h3 className="text-2xl sm:text-3xl font-normal font-['DM_Sans']">Calculadora de Ganhos</h3>
           <p className="text-zinc-400 text-sm sm:text-base">Simule quanto você pode ganhar mensalmente indicando nossos serviços.</p>
           
@@ -49,18 +63,32 @@ function CommissionCalculator() {
           </div>
 
           <div className="grid grid-cols-1 gap-3 sm:gap-4">
-            {plans.map((plan) => (
-              <div key={plan.name} className="flex justify-between items-center p-3 sm:p-4 rounded-xl bg-white/5 border border-white/5">
+            {plans.map((plan, i) => (
+              <motion.div
+                key={plan.name}
+                initial={{ opacity: 0, x: -30 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: 0.4 + i * 0.1, ease }}
+                className="flex justify-between items-center p-3 sm:p-4 rounded-xl bg-white/5 border border-white/5"
+              >
                 <span className="text-zinc-300 text-sm sm:text-base">Se vender {plan.name}:</span>
                 <span className="text-lg sm:text-xl font-medium text-white">
                   Kz {(plan.commission * sales).toLocaleString('pt-PT')},00
                 </span>
-              </div>
+              </motion.div>
             ))}
           </div>
-        </div>
+        </motion.div>
 
-        <div className="relative group">
+        <motion.div
+          initial={{ opacity: 0, x: 60, rotateY: -6 }}
+          whileInView={{ opacity: 1, x: 0, rotateY: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8, delay: 0.3, ease }}
+          className="relative group"
+          style={{ perspective: 1000 }}
+        >
           <div className="absolute -inset-1 bg-gradient-to-r from-white/20 to-transparent rounded-3xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
           <div className="relative bg-black rounded-2xl p-6 sm:p-8 border border-white/10 text-center">
             <Calculator className="w-10 h-10 sm:w-12 sm:h-12 text-white mx-auto mb-4 sm:mb-6 opacity-50" />
@@ -70,9 +98,9 @@ function CommissionCalculator() {
             </div>
             <p className="text-zinc-400 text-xs sm:text-sm italic">*Baseado no plano Premium</p>
           </div>
-        </div>
+        </motion.div>
       </div>
-    </div>
+    </motion.div>
   );
 }
 
@@ -183,17 +211,23 @@ export function FeaturesGrid() {
   ];
 
   return (
-    <section id="applications" className="py-16 sm:py-20 md:py-24 px-4 sm:px-6 container mx-auto">
+    <section id="applications" className="py-16 sm:py-20 md:py-24 px-4 sm:px-6 container mx-auto overflow-hidden">
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-80px" }}
-        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+        transition={{ duration: 0.6, ease }}
         className="text-center mb-10 sm:mb-16 space-y-3 sm:space-y-4"
       >
-        <span className="inline-block px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-medium tracking-wider text-zinc-400 uppercase">
+        <motion.span
+          initial={{ opacity: 0, scale: 0.8 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.1, ease }}
+          className="inline-block px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-medium tracking-wider text-zinc-400 uppercase"
+        >
           COMO FUNCIONA
-        </span>
+        </motion.span>
         <h2 className="text-3xl sm:text-4xl md:text-5xl font-normal max-w-3xl mx-auto leading-tight font-['DM_Sans']">
           Como funciona o Afiliados.ao
         </h2>
@@ -206,11 +240,13 @@ export function FeaturesGrid() {
         {steps.slice(0, 2).map((step, i) => (
           <motion.div 
             key={i}
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, x: i === 0 ? -60 : 60, rotateY: i === 0 ? 5 : -5 }}
+            whileInView={{ opacity: 1, x: 0, rotateY: 0 }}
             viewport={{ once: true, margin: "-60px" }}
-            transition={{ duration: 0.6, delay: i * 0.15, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 0.8, delay: i * 0.15, ease }}
+            whileHover={{ y: -6, transition: { duration: 0.3 } }}
             className="bg-card border border-white/10 rounded-2xl sm:rounded-3xl p-5 sm:p-8 md:p-12 flex flex-col justify-between min-h-[320px] sm:min-h-[400px] md:min-h-[450px] relative overflow-hidden group hover:border-white/20 transition-colors"
+            style={{ perspective: 1000 }}
           >
             <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
             
@@ -229,38 +265,53 @@ export function FeaturesGrid() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 mb-8 sm:mb-12">
-        {steps.slice(2).map((step, i) => (
-          <motion.div 
-            key={i}
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-60px" }}
-            transition={{ duration: 0.6, delay: i * 0.12, ease: [0.22, 1, 0.36, 1] }}
-            className="bg-card border border-white/10 rounded-2xl sm:rounded-3xl p-5 sm:p-8 flex flex-col justify-between min-h-[300px] sm:min-h-[380px] md:min-h-[420px] hover:bg-white/5 transition-colors group relative overflow-hidden"
-          >
-            <div className="relative w-full bg-white/5 rounded-xl h-24 sm:h-28 md:h-32 flex items-center justify-center mb-4 sm:mb-6 border border-white/5 p-3 sm:p-4">
-               {step.visual}
-            </div>
-            
-            <div className="relative z-10">
-              <step.icon className="w-5 h-5 sm:w-6 sm:h-6 text-white mb-3 sm:mb-4 opacity-80 group-hover:opacity-100 transition-opacity" />
-              <h3 className="text-lg sm:text-xl font-normal mb-2 sm:mb-3 font-['DM_Sans']">{step.title}</h3>
-              <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed">{step.desc}</p>
-            </div>
-          </motion.div>
-        ))}
+        {steps.slice(2).map((step, i) => {
+          const directions = [
+            { x: -50, rotate: 2 },
+            { y: 50, rotate: 0 },
+            { x: 50, rotate: -2 },
+          ];
+          const dir = directions[i] || directions[0];
+          return (
+            <motion.div 
+              key={i}
+              initial={{ opacity: 0, x: dir.x || 0, y: dir.y || 0, rotate: dir.rotate }}
+              whileInView={{ opacity: 1, x: 0, y: 0, rotate: 0 }}
+              viewport={{ once: true, margin: "-60px" }}
+              transition={{ duration: 0.7, delay: i * 0.12, ease }}
+              whileHover={{ y: -6, transition: { duration: 0.3 } }}
+              className="bg-card border border-white/10 rounded-2xl sm:rounded-3xl p-5 sm:p-8 flex flex-col justify-between min-h-[300px] sm:min-h-[380px] md:min-h-[420px] hover:bg-white/5 transition-colors group relative overflow-hidden"
+            >
+              <div className="relative w-full bg-white/5 rounded-xl h-24 sm:h-28 md:h-32 flex items-center justify-center mb-4 sm:mb-6 border border-white/5 p-3 sm:p-4">
+                 {step.visual}
+              </div>
+              
+              <div className="relative z-10">
+                <step.icon className="w-5 h-5 sm:w-6 sm:h-6 text-white mb-3 sm:mb-4 opacity-80 group-hover:opacity-100 transition-opacity" />
+                <h3 className="text-lg sm:text-xl font-normal mb-2 sm:mb-3 font-['DM_Sans']">{step.title}</h3>
+                <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed">{step.desc}</p>
+              </div>
+            </motion.div>
+          );
+        })}
       </div>
 
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-80px" }}
-        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+        transition={{ duration: 0.6, ease }}
         className="text-center my-14 sm:my-20 md:my-24 space-y-3 sm:space-y-4"
       >
-         <span className="inline-block px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-medium tracking-wider text-zinc-400 uppercase">
+        <motion.span
+          initial={{ opacity: 0, scale: 0.8 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.1, ease }}
+          className="inline-block px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-medium tracking-wider text-zinc-400 uppercase"
+        >
           Tabelas de Comissão
-        </span>
+        </motion.span>
         <h2 className="text-3xl sm:text-4xl md:text-5xl font-normal max-w-3xl mx-auto leading-tight font-['DM_Sans']">
           Quanto você ganha por cada indicação
         </h2>
@@ -270,32 +321,45 @@ export function FeaturesGrid() {
       </motion.div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 mb-8 sm:mb-12">
-        {plans.map((plan, i) => (
-          <motion.div 
-            key={i}
-            initial={{ opacity: 0, y: 40, scale: 0.97 }}
-            whileInView={{ opacity: 1, y: 0, scale: 1 }}
-            viewport={{ once: true, margin: "-60px" }}
-            transition={{ duration: 0.6, delay: i * 0.12, ease: [0.22, 1, 0.36, 1] }}
-            className="bg-card border border-white/10 rounded-2xl sm:rounded-3xl p-5 sm:p-8 flex flex-col h-full hover:border-white/20 transition-all group relative overflow-hidden"
-          >
-            <div className="mb-5 sm:mb-8">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-white/5 flex items-center justify-center mb-4 sm:mb-6 border border-white/10">
-                <plan.icon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+        {plans.map((plan, i) => {
+          const directions = [
+            { x: -60, rotate: 2 },
+            { y: 50, rotate: 0 },
+            { x: 60, rotate: -2 },
+          ];
+          const dir = directions[i];
+          return (
+            <motion.div 
+              key={i}
+              initial={{ opacity: 0, x: dir.x || 0, y: dir.y || 0, rotate: dir.rotate, scale: 0.95 }}
+              whileInView={{ opacity: 1, x: 0, y: 0, rotate: 0, scale: 1 }}
+              viewport={{ once: true, margin: "-60px" }}
+              transition={{ duration: 0.7, delay: i * 0.12, ease }}
+              whileHover={{ y: -8, scale: 1.02, transition: { duration: 0.3, ease: "easeOut" } }}
+              className="bg-card border border-white/10 rounded-2xl sm:rounded-3xl p-5 sm:p-8 flex flex-col h-full hover:border-white/20 transition-all group relative overflow-hidden"
+            >
+              <div className="mb-5 sm:mb-8">
+                <motion.div
+                  whileHover={{ rotate: 12, scale: 1.1 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 15 }}
+                  className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-white/5 flex items-center justify-center mb-4 sm:mb-6 border border-white/10"
+                >
+                  <plan.icon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                </motion.div>
+                <h3 className="text-xl sm:text-2xl font-normal mb-2 font-['DM_Sans']">{plan.title}</h3>
+                <div className="text-zinc-500 text-xs sm:text-sm mb-3 sm:mb-4">{plan.desc}</div>
+                <div className="text-2xl sm:text-3xl font-bold text-white mb-4 sm:mb-6 tracking-tight">{plan.price}</div>
               </div>
-              <h3 className="text-xl sm:text-2xl font-normal mb-2 font-['DM_Sans']">{plan.title}</h3>
-              <div className="text-zinc-500 text-xs sm:text-sm mb-3 sm:mb-4">{plan.desc}</div>
-              <div className="text-2xl sm:text-3xl font-bold text-white mb-4 sm:mb-6 tracking-tight">{plan.price}</div>
-            </div>
 
-            <div className="mt-auto pt-4 sm:pt-6 border-t border-white/5">
-              <div className="text-[10px] sm:text-xs text-zinc-500 uppercase tracking-widest mb-1">Comissão do Afiliado</div>
-              <div className="text-xl sm:text-2xl font-['DM_Sans'] text-green-400 font-medium">
-                {plan.commission} <span className="text-xs sm:text-sm font-normal text-zinc-400">por venda</span>
+              <div className="mt-auto pt-4 sm:pt-6 border-t border-white/5">
+                <div className="text-[10px] sm:text-xs text-zinc-500 uppercase tracking-widest mb-1">Comissão do Afiliado</div>
+                <div className="text-xl sm:text-2xl font-['DM_Sans'] text-green-400 font-medium">
+                  {plan.commission} <span className="text-xs sm:text-sm font-normal text-zinc-400">por venda</span>
+                </div>
               </div>
-            </div>
-          </motion.div>
-        ))}
+            </motion.div>
+          );
+        })}
       </div>
 
       <CommissionCalculator />
