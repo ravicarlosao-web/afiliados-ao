@@ -6,8 +6,9 @@ Angola's affiliate marketing platform where affiliates refer businesses for webs
 
 - **Frontend**: React + Vite + TypeScript + shadcn/ui + Tailwind CSS
 - **Backend**: Express.js + TypeScript
-- **Database**: PostgreSQL with Drizzle ORM
-- **Auth**: express-session with bcrypt password hashing
+- **Database**: Turso (libSQL/SQLite) with Drizzle ORM — local `file:local.db` for dev, remote Turso for production
+- **Image Storage**: Cloudinary for material image uploads
+- **Auth**: express-session (memorystore) with bcrypt password hashing
 - **Routing**: wouter (frontend), Express routes (backend)
 - **State**: @tanstack/react-query
 
@@ -21,12 +22,22 @@ Angola's affiliate marketing platform where affiliates refer businesses for webs
 
 ## Key Files
 
-- `shared/schema.ts` — Drizzle schema: users, clients, withdrawals, materials, notifications, security_logs, settings
+- `shared/schema.ts` — Drizzle schema (SQLite): users, clients, withdrawals, materials, notifications, security_logs, settings
 - `server/storage.ts` — DatabaseStorage class with all CRUD operations
-- `server/routes.ts` — API routes (auth, admin, user endpoints)
-- `server/db.ts` — Database connection
+- `server/routes.ts` — API routes (auth, admin, user endpoints) + multer image upload
+- `server/db.ts` — Turso/libSQL database connection
+- `server/cloudinary.ts` — Cloudinary image upload/delete utilities
+- `server/seed.ts` — Auto-seeds admin user on startup if none exists
 - `client/src/App.tsx` — Router with PrivateRoute auth guards
-- `client/src/lib/queryClient.ts` — React Query config with apiRequest helper
+- `client/src/lib/queryClient.ts` — React Query config with apiRequest helper (supports FormData)
+
+## Environment Variables (Required for Production)
+
+- `TURSO_DATABASE_URL` — Turso database URL (e.g., `libsql://your-db.turso.io`)
+- `TURSO_AUTH_TOKEN` — Turso auth token
+- `CLOUDINARY_CLOUD_NAME` — Cloudinary cloud name
+- `CLOUDINARY_API_KEY` — Cloudinary API key
+- `CLOUDINARY_API_SECRET` — Cloudinary API secret
 
 ## API Routes
 

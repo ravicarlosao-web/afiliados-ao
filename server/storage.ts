@@ -34,6 +34,7 @@ export interface IStorage {
   getWithdrawalStats(): Promise<{ active: number; totalPaid: string; reserved: string }>;
 
   getMaterials(): Promise<Material[]>;
+  getMaterial(id: string): Promise<Material | undefined>;
   createMaterial(material: InsertMaterial): Promise<Material>;
   deleteMaterial(id: string): Promise<void>;
 
@@ -148,17 +149,22 @@ export class DatabaseStorage implements IStorage {
 
   async getWithdrawalStats(): Promise<{ active: number; totalPaid: string; reserved: string }> {
     const activeResult = await db.select({ count: count() }).from(withdrawals).where(eq(withdrawals.status, "pendente"));
-    const paidResult = await db.select({ total: sql<string>`COALESCE(SUM(amount), 0)` }).from(withdrawals).where(eq(withdrawals.status, "pago"));
-    const reservedResult = await db.select({ total: sql<string>`COALESCE(SUM(amount), 0)` }).from(withdrawals).where(eq(withdrawals.status, "processando"));
+    const paidResult = await db.select({ total: sql<string>`COALESCE(SUM(CAST(amount AS REAL)), 0)` }).from(withdrawals).where(eq(withdrawals.status, "pago"));
+    const reservedResult = await db.select({ total: sql<string>`COALESCE(SUM(CAST(amount AS REAL)), 0)` }).from(withdrawals).where(eq(withdrawals.status, "processando"));
     return {
       active: activeResult[0].count,
-      totalPaid: paidResult[0].total,
-      reserved: reservedResult[0].total,
+      totalPaid: String(paidResult[0].total),
+      reserved: String(reservedResult[0].total),
     };
   }
 
   async getMaterials(): Promise<Material[]> {
     return db.select().from(materials).orderBy(desc(materials.createdAt));
+  }
+
+  async getMaterial(id: string): Promise<Material | undefined> {
+    const [m] = await db.select().from(materials).where(eq(materials.id, id));
+    return m;
   }
 
   async createMaterial(material: InsertMaterial): Promise<Material> {
@@ -170,17 +176,31 @@ export class DatabaseStorage implements IStorage {
     await db.delete(materials).where(eq(materials.id, id));
   }
 
+  private parseNotificationChannels(notifs: Notification[]): Notification[] {
+    return notifs.map(n => ({
+      ...n,
+      channels: n.channels ? (typeof n.channels === "string" ? JSON.parse(n.channels) : n.channels) : null,
+    })) as Notification[];
+  }
+
   async getNotifications(targetRole?: string, targetUserId?: string): Promise<Notification[]> {
+    let results: Notification[];
     if (targetUserId) {
-      return db.select().from(notifications)
+      results = await db.select().from(notifications)
         .where(sql`${notifications.targetUserId} = ${targetUserId} OR ${notifications.targetRole} = 'user' OR ${notifications.targetRole} IS NULL`)
         .orderBy(desc(notifications.createdAt));
+    } else {
+      results = await db.select().from(notifications).orderBy(desc(notifications.createdAt));
     }
-    return db.select().from(notifications).orderBy(desc(notifications.createdAt));
+    return this.parseNotificationChannels(results);
   }
 
   async createNotification(notification: InsertNotification): Promise<Notification> {
-    const [n] = await db.insert(notifications).values(notification).returning();
+    const channelsJson = notification.channels ? JSON.stringify(notification.channels) : null;
+    const [n] = await db.insert(notifications).values({
+      ...notification,
+      channels: channelsJson,
+    } as any).returning();
     return n;
   }
 
@@ -199,8 +219,12 @@ export class DatabaseStorage implements IStorage {
   }
 
   async setSetting(key: string, value: string): Promise<void> {
-    await db.insert(settings).values({ key, value })
-      .onConflictDoUpdate({ target: settings.key, set: { value } });
+    const existing = await this.getSetting(key);
+    if (existing !== undefined) {
+      await db.update(settings).set({ value }).where(eq(settings.key, key));
+    } else {
+      await db.insert(settings).values({ key, value });
+    }
   }
 
   async getAllSettings(): Promise<Settings[]> {
@@ -216,22 +240,22 @@ export class DatabaseStorage implements IStorage {
     const affiliateCount = await this.getAffiliateCount();
 
     const volumeResult = await db.select({
-      total: sql<string>`COALESCE(SUM(price), 0)`,
+      total: sql<string>`COALESCE(SUM(CAST(price AS REAL)), 0)`,
     }).from(clients).where(eq(clients.status, "pagamento_feito"));
 
     const commPaidResult = await db.select({
-      total: sql<string>`COALESCE(SUM(commission), 0)`,
+      total: sql<string>`COALESCE(SUM(CAST(commission AS REAL)), 0)`,
     }).from(clients).where(eq(clients.status, "pagamento_feito"));
 
     const pendingResult = await db.select({
-      total: sql<string>`COALESCE(SUM(commission), 0)`,
+      total: sql<string>`COALESCE(SUM(CAST(commission AS REAL)), 0)`,
     }).from(clients).where(sql`${clients.status} IN ('em_analise', 'em_contacto')`);
 
     return {
       activeAffiliates: affiliateCount,
-      totalVolume: volumeResult[0].total,
-      totalCommissionPaid: commPaidResult[0].total,
-      pendingCommission: pendingResult[0].total,
+      totalVolume: String(volumeResult[0].total),
+      totalCommissionPaid: String(commPaidResult[0].total),
+      pendingCommission: String(pendingResult[0].total),
     };
   }
 }

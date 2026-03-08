@@ -176,8 +176,17 @@ export default function AdminDashboard() {
   });
 
   const createMaterialMutation = useMutation({
-    mutationFn: async (data: any) => {
-      await apiRequest("POST", "/api/admin/materials", data);
+    mutationFn: async (data: { title: string; type: string; content: string | null; image?: File | null }) => {
+      if (data.type === "image" && data.image) {
+        const formData = new FormData();
+        formData.append("title", data.title);
+        formData.append("type", data.type);
+        if (data.content) formData.append("content", data.content);
+        formData.append("image", data.image);
+        await apiRequest("POST", "/api/admin/materials", formData);
+      } else {
+        await apiRequest("POST", "/api/admin/materials", { title: data.title, type: data.type, content: data.content });
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/materials"] });
@@ -200,6 +209,7 @@ export default function AdminDashboard() {
   const [matTitle, setMatTitle] = useState("");
   const [matType, setMatType] = useState("copy");
   const [matContent, setMatContent] = useState("");
+  const [matImage, setMatImage] = useState<File | null>(null);
 
   const [commBase, setCommBase] = useState(adminSettings?.commission_base || "0");
   const [commEssencial, setCommEssencial] = useState(adminSettings?.commission_essencial || "0");
@@ -635,16 +645,30 @@ export default function AdminDashboard() {
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="space-y-2">
-                  <Label className="text-xs">Conteúdo</Label>
-                  <textarea className="w-full min-h-[80px] bg-white/5 border border-white/10 rounded-lg p-3 text-sm focus:outline-none focus:ring-1 focus:ring-red-500/50" value={matContent} onChange={(e) => setMatContent(e.target.value)} placeholder="Escreva o conteúdo aqui..." data-testid="input-material-content" />
-                </div>
+                {matType === "image" ? (
+                  <div className="space-y-2">
+                    <Label className="text-xs">Imagem</Label>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => setMatImage(e.target.files?.[0] || null)}
+                      className="w-full text-sm text-white/60 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-white/10 file:text-white hover:file:bg-white/20"
+                      data-testid="input-material-image"
+                    />
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <Label className="text-xs">Conteúdo</Label>
+                    <textarea className="w-full min-h-[80px] bg-white/5 border border-white/10 rounded-lg p-3 text-sm focus:outline-none focus:ring-1 focus:ring-red-500/50" value={matContent} onChange={(e) => setMatContent(e.target.value)} placeholder="Escreva o conteúdo aqui..." data-testid="input-material-content" />
+                  </div>
+                )}
                 <Button
                   onClick={() => {
                     if (!matTitle) return;
-                    createMaterialMutation.mutate({ title: matTitle, type: matType, content: matContent || null });
+                    createMaterialMutation.mutate({ title: matTitle, type: matType, content: matContent || null, image: matImage });
                     setMatTitle("");
                     setMatContent("");
+                    setMatImage(null);
                   }}
                   disabled={createMaterialMutation.isPending}
                   className="w-full bg-white text-black font-bold"

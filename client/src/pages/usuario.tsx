@@ -659,22 +659,31 @@ export default function UserDashboard() {
                               </CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-4">
+                              {mat.imageUrl && (
+                                <img src={mat.imageUrl} alt={mat.title} className="w-full rounded border border-white/10" />
+                              )}
                               {mat.content && (
                                 <p className="text-xs text-white/60 bg-black/40 p-3 rounded border border-white/5 italic">"{mat.content}"</p>
                               )}
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="w-full border-white/10 gap-2"
-                                onClick={() => {
-                                  if (mat.content) {
+                              {mat.content ? (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="w-full border-white/10 gap-2"
+                                  onClick={() => {
                                     navigator.clipboard.writeText(mat.content);
                                     toast({ title: "Texto copiado!" });
-                                  }
-                                }}
-                              >
-                                <Copy className="w-3 h-3" /> Copiar Conteúdo
-                              </Button>
+                                  }}
+                                >
+                                  <Copy className="w-3 h-3" /> Copiar Conteúdo
+                                </Button>
+                              ) : mat.imageUrl ? (
+                                <a href={mat.imageUrl} target="_blank" rel="noopener noreferrer" className="block">
+                                  <Button variant="outline" size="sm" className="w-full border-white/10 gap-2">
+                                    <ImageIcon className="w-3 h-3" /> Abrir Imagem
+                                  </Button>
+                                </a>
+                              ) : null}
                             </CardContent>
                           </Card>
                         ))}

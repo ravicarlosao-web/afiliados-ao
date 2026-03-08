@@ -1,81 +1,76 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, integer, decimal, boolean, timestamp, pgEnum } from "drizzle-orm/pg-core";
+import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-export const roleEnum = pgEnum("role", ["admin", "user"]);
-export const clientStatusEnum = pgEnum("client_status", ["em_analise", "em_contacto", "pagamento_feito", "reprovado"]);
-export const withdrawalStatusEnum = pgEnum("withdrawal_status", ["pendente", "processando", "pago", "recusado"]);
-export const materialTypeEnum = pgEnum("material_type", ["copy", "script", "image"]);
-export const logStatusEnum = pgEnum("log_status", ["success", "warning", "error"]);
-
-export const users = pgTable("users", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+export const users = sqliteTable("users", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
   name: text("name").notNull(),
   phone: text("phone").notNull().unique(),
   password: text("password").notNull(),
-  role: roleEnum("role").notNull().default("user"),
+  role: text("role", { enum: ["admin", "user"] }).notNull().default("user"),
   iban: text("iban"),
   multicaixaExpress: text("multicaixa_express"),
   referralCode: text("referral_code"),
-  isActive: boolean("is_active").notNull().default(true),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
+  isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull().$defaultFn(() => new Date()),
 });
 
-export const clients = pgTable("clients", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+export const clients = sqliteTable("clients", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
   name: text("name").notNull(),
   contact: text("contact").notNull(),
   plan: text("plan").notNull(),
-  status: clientStatusEnum("status").notNull().default("em_analise"),
-  affiliateId: varchar("affiliate_id").notNull().references(() => users.id),
-  price: decimal("price", { precision: 12, scale: 2 }).notNull().default("0"),
-  commission: decimal("commission", { precision: 12, scale: 2 }).notNull().default("0"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
+  status: text("status", { enum: ["em_analise", "em_contacto", "pagamento_feito", "reprovado"] }).notNull().default("em_analise"),
+  affiliateId: text("affiliate_id").notNull().references(() => users.id),
+  price: text("price").notNull().default("0"),
+  commission: text("commission").notNull().default("0"),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull().$defaultFn(() => new Date()),
 });
 
-export const withdrawals = pgTable("withdrawals", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  affiliateId: varchar("affiliate_id").notNull().references(() => users.id),
-  amount: decimal("amount", { precision: 12, scale: 2 }).notNull(),
+export const withdrawals = sqliteTable("withdrawals", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  affiliateId: text("affiliate_id").notNull().references(() => users.id),
+  amount: text("amount").notNull(),
   method: text("method").notNull(),
   accountInfo: text("account_info"),
-  status: withdrawalStatusEnum("status").notNull().default("pendente"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
+  status: text("status", { enum: ["pendente", "processando", "pago", "recusado"] }).notNull().default("pendente"),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull().$defaultFn(() => new Date()),
 });
 
-export const materials = pgTable("materials", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+export const materials = sqliteTable("materials", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
   title: text("title").notNull(),
-  type: materialTypeEnum("type").notNull(),
+  type: text("type", { enum: ["copy", "script", "image"] }).notNull(),
   content: text("content"),
   imageUrl: text("image_url"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
+  cloudinaryPublicId: text("cloudinary_public_id"),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull().$defaultFn(() => new Date()),
 });
 
-export const notifications = pgTable("notifications", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+export const notifications = sqliteTable("notifications", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
   title: text("title").notNull(),
   description: text("description").notNull(),
   type: text("type").notNull().default("info"),
-  targetRole: roleEnum("target_role"),
-  targetUserId: varchar("target_user_id").references(() => users.id),
-  channels: text("channels").array(),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
+  targetRole: text("target_role"),
+  targetUserId: text("target_user_id").references(() => users.id),
+  channels: text("channels"),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull().$defaultFn(() => new Date()),
 });
 
-export const securityLogs = pgTable("security_logs", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+export const securityLogs = sqliteTable("security_logs", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
   action: text("action").notNull(),
-  userId: varchar("user_id").references(() => users.id),
+  userId: text("user_id").references(() => users.id),
   userLabel: text("user_label"),
   ip: text("ip"),
-  status: logStatusEnum("status").notNull().default("success"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
+  status: text("status", { enum: ["success", "warning", "error"] }).notNull().default("success"),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull().$defaultFn(() => new Date()),
 });
 
-export const settings = pgTable("settings", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+export const settings = sqliteTable("settings", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
   key: text("key").notNull().unique(),
   value: text("value").notNull(),
 });
@@ -83,7 +78,7 @@ export const settings = pgTable("settings", {
 export const insertUserSchema = createInsertSchema(users).omit({ id: true, createdAt: true, referralCode: true });
 export const insertClientSchema = createInsertSchema(clients).omit({ id: true, createdAt: true });
 export const insertWithdrawalSchema = createInsertSchema(withdrawals).omit({ id: true, createdAt: true });
-export const insertMaterialSchema = createInsertSchema(materials).omit({ id: true, createdAt: true });
+export const insertMaterialSchema = createInsertSchema(materials).omit({ id: true, createdAt: true, cloudinaryPublicId: true });
 export const insertNotificationSchema = createInsertSchema(notifications).omit({ id: true, createdAt: true });
 export const insertSecurityLogSchema = createInsertSchema(securityLogs).omit({ id: true, createdAt: true });
 
