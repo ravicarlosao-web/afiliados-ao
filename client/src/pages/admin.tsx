@@ -93,10 +93,10 @@ export default function AdminDashboard() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               {[
-                { title: "Afiliados Ativos", value: "1,284", growth: "+12%", icon: Users, color: "text-blue-400" },
-                { title: "Volume Total", value: "Kz 12.4M", growth: "+24%", icon: Briefcase, color: "text-emerald-400" },
-                { title: "Comissão Paga", value: "Kz 3.1M", growth: "+18%", icon: Receipt, color: "text-purple-400" },
-                { title: "Comissão Pendente", value: "Kz 845k", growth: "-5%", icon: Clock, color: "text-amber-400" },
+                { title: "Afiliados Ativos", value: "0", growth: "0%", icon: Users, color: "text-blue-400" },
+                { title: "Volume Total", value: "Kz 0,00", growth: "0%", icon: Briefcase, color: "text-emerald-400" },
+                { title: "Comissão Paga", value: "Kz 0,00", growth: "0%", icon: Receipt, color: "text-purple-400" },
+                { title: "Comissão Pendente", value: "Kz 0,00", growth: "0%", icon: Clock, color: "text-amber-400" },
               ].map((stat, i) => (
                 <Card key={i} className="bg-white/5 border-white/10 backdrop-blur-xl hover:bg-white/[0.08] transition-all duration-300 group">
                   <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -121,19 +121,13 @@ export default function AdminDashboard() {
                 <CardHeader className="flex flex-row items-center justify-between">
                   <div>
                     <CardTitle className="text-lg">Performance de Vendas</CardTitle>
-                    <CardDescription className="text-xs text-white/40">Ticket Médio: Kz 45.000,00</CardDescription>
+                    <CardDescription className="text-xs text-white/40">Ticket Médio: Kz 0,00</CardDescription>
                   </div>
-                  <Badge variant="outline" className="text-[10px] border-emerald-500/20 text-emerald-400">Conversão Global: 3.2%</Badge>
+                  <Badge variant="outline" className="text-[10px] border-emerald-500/20 text-emerald-400">Conversão Global: 0.0%</Badge>
                 </CardHeader>
                 <CardContent>
-                  <div className="h-[240px] flex items-end gap-2 px-2 pb-2 border-b border-white/5">
-                    {[30, 45, 60, 40, 85, 70, 95, 65, 80, 50, 40, 90].map((height, i) => (
-                      <div 
-                        key={i} 
-                        className="flex-1 bg-gradient-to-t from-red-500/10 to-red-400/50 rounded-t-sm transition-all duration-500" 
-                        style={{ height: `${height}%` }}
-                      />
-                    ))}
+                  <div className="h-[240px] flex items-end justify-center gap-2 px-2 pb-2 border-b border-white/5">
+                     <p className="text-xs text-white/40 mb-10">Sem dados suficientes para o gráfico</p>
                   </div>
                   <div className="flex justify-between mt-4 text-[10px] text-white/40 uppercase font-bold px-2">
                     <span>Jan</span><span>Fev</span><span>Mar</span><span>Abr</span><span>Mai</span><span>Jun</span><span>Jul</span><span>Ago</span><span>Set</span><span>Out</span><span>Nov</span><span>Dez</span>
@@ -150,35 +144,22 @@ export default function AdminDashboard() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    {[
-                      { name: "João Silva", sales: "Kz 1.2M", rank: 1 },
-                      { name: "Maria Santos", sales: "Kz 840k", rank: 2 },
-                      { name: "Pedro Costa", sales: "Kz 620k", rank: 3 },
-                      { name: "Ana Benguela", sales: "Kz 590k", rank: 4 },
-                      { name: "Lucas Malanje", sales: "Kz 410k", rank: 5 },
-                    ].map((af, i) => (
-                      <div key={i} className="flex items-center justify-between group">
-                        <div className="flex items-center gap-3">
-                          <span className="text-xs font-bold text-white/20 w-4">{af.rank}.</span>
-                          <span className="text-xs font-medium text-white/80 group-hover:text-white">{af.name}</span>
-                        </div>
-                        <span className="text-xs font-bold text-emerald-400">{af.sales}</span>
-                      </div>
-                    ))}
+                     <div className="text-center py-4">
+                        <p className="text-xs text-white/40">Ainda não há vendas registradas esta semana.</p>
+                     </div>
                   </CardContent>
                 </Card>
 
-                <Card className="bg-red-500/5 border-red-500/20 backdrop-blur-md">
+                <Card className="bg-white/5 border-white/10 backdrop-blur-md">
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-[10px] font-bold uppercase text-red-400 flex items-center gap-2">
-                      <AlertTriangle className="w-3 h-3" /> Alerta Crítico
+                    <CardTitle className="text-[10px] font-bold uppercase text-white/60 flex items-center gap-2">
+                      <Clock className="w-3 h-3" /> Status do Sistema
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-xs text-white/60 leading-relaxed">
-                      12 solicitações de saque ultrapassaram 48h.
+                    <p className="text-xs text-white/40 leading-relaxed">
+                      Todos os sistemas operacionais. Nenhuma solicitação pendente.
                     </p>
-                    <Button size="sm" className="w-full mt-3 bg-red-500 hover:bg-red-600 text-[10px] h-7">Resolver Agora</Button>
                   </CardContent>
                 </Card>
               </div>
@@ -220,48 +201,11 @@ export default function AdminDashboard() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-white/5">
-                      {[
-                        { id: 1, name: "João Silva", level: "Elite", sales: 142, conv: "4.8%", total: "Kz 1.2M", paid: "Kz 1M", status: "Ativo" },
-                        { id: 2, name: "Maria Santos", level: "Pro", sales: 84, conv: "3.2%", total: "Kz 840k", paid: "Kz 800k", status: "Ativo" },
-                        { id: 3, name: "Pedro Costa", level: "Iniciante", sales: 12, conv: "1.5%", total: "Kz 45k", paid: "Kz 0", status: "Pendente" },
-                      ].map((af) => (
-                        <tr key={af.id} className="group hover:bg-white/[0.02]">
-                          <td className="py-4">
-                            <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-[10px] font-bold border border-white/10">JS</div>
-                              <div>
-                                <p className="font-bold text-white/90 text-xs">{af.name}</p>
-                                <p className="text-[10px] text-white/20">ID: #AFF-{af.id}</p>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="py-4 text-center">
-                            <Badge variant="outline" className={`text-[10px] h-5 px-2 ${af.level === 'Elite' ? 'border-amber-500/20 text-amber-400' : 'border-blue-500/20 text-blue-400'}`}>
-                              {af.level}
-                            </Badge>
-                          </td>
-                          <td className="py-4 text-center font-mono text-xs text-white/60">{af.sales}</td>
-                          <td className="py-4 text-center font-mono text-xs text-white/60">{af.conv}</td>
-                          <td className="py-4">
-                            <p className="text-xs font-bold text-white/90">{af.total}</p>
-                            <p className="text-[10px] text-emerald-400">Paga: {af.paid}</p>
-                          </td>
-                          <td className="py-4 text-right">
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="sm" className="h-8 w-8 p-0"><MoreVertical className="w-4 h-4" /></Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end" className="bg-black border-white/10 text-white">
-                                <DropdownMenuItem className="gap-2 text-xs"><TrendingUp className="w-3.5 h-3.5" /> Editar Comissão %</DropdownMenuItem>
-                                <DropdownMenuItem className="gap-2 text-xs"><Eye className="w-3.5 h-3.5" /> Ver Clientes</DropdownMenuItem>
-                                <DropdownMenuItem className="gap-2 text-xs"><History className="w-3.5 h-3.5" /> Atividades</DropdownMenuItem>
-                                <DropdownMenuItem className="gap-2 text-xs"><Lock className="w-3.5 h-3.5" /> Resetar Senha</DropdownMenuItem>
-                                <DropdownMenuItem className="gap-2 text-xs text-red-400"><Ban className="w-3.5 h-3.5" /> Bloquear</DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </td>
+                        <tr>
+                            <td colSpan={6} className="py-8 text-center text-xs text-white/40">
+                                Nenhum afiliado encontrado no sistema.
+                            </td>
                         </tr>
-                      ))}
                     </tbody>
                   </table>
                 </div>
@@ -322,7 +266,7 @@ export default function AdminDashboard() {
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-xs font-bold">Bónus por Volume</p>
-                        <p className="text-[10px] text-white/40">Kz 50.000 bónus para cada 10 vendas</p>
+                        <p className="text-[10px] text-white/40">Bónus para cada 10 vendas (Valor a definir)</p>
                       </div>
                       <Switch defaultChecked />
                     </div>
@@ -349,8 +293,8 @@ export default function AdminDashboard() {
                   <CardTitle className="text-xs uppercase tracking-widest text-white/40 font-bold">Plano Mais Vendido</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-xl font-bold">Profissional</div>
-                  <p className="text-[10px] text-emerald-400">48% do total de vendas</p>
+                  <div className="text-xl font-bold">N/D</div>
+                  <p className="text-[10px] text-white/40">Sem dados de vendas</p>
                 </CardContent>
               </Card>
               <Card className="bg-white/5 border-white/10">
@@ -358,7 +302,7 @@ export default function AdminDashboard() {
                   <CardTitle className="text-xs uppercase tracking-widest text-white/40 font-bold">Tempo Médio Fechamento</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-xl font-bold">1.4 dias</div>
+                  <div className="text-xl font-bold">0 dias</div>
                   <p className="text-[10px] text-white/20">Desde o registo do lead</p>
                 </CardContent>
               </Card>
@@ -367,8 +311,8 @@ export default function AdminDashboard() {
                   <CardTitle className="text-xs uppercase tracking-widest text-white/40 font-bold">Ticket Médio</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-xl font-bold">Kz 84.200</div>
-                  <p className="text-[10px] text-emerald-400">+12% este mês</p>
+                  <div className="text-xl font-bold">Kz 0,00</div>
+                  <p className="text-[10px] text-white/40">Sem dados este mês</p>
                 </CardContent>
               </Card>
             </div>
@@ -378,22 +322,9 @@ export default function AdminDashboard() {
                 <CardTitle className="text-lg">Canais que Mais Convertem</CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
-                {[
-                  { channel: "WhatsApp Status", percentage: 45, color: "bg-emerald-500" },
-                  { channel: "Instagram DM", percentage: 28, color: "bg-purple-500" },
-                  { channel: "Indicação Direta", percentage: 15, color: "bg-blue-500" },
-                  { channel: "Facebook Ads", percentage: 12, color: "bg-red-500" },
-                ].map((item) => (
-                  <div key={item.channel} className="space-y-2">
-                    <div className="flex justify-between text-xs">
-                      <span>{item.channel}</span>
-                      <span className="font-bold">{item.percentage}%</span>
-                    </div>
-                    <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
-                      <div className={`h-full ${item.color}`} style={{ width: `${item.percentage}%` }} />
-                    </div>
-                  </div>
-                ))}
+                <div className="py-8 text-center">
+                    <p className="text-sm text-white/40">Aguardando os primeiros dados de conversão de canais.</p>
+                </div>
               </CardContent>
             </Card>
           </div>
@@ -562,11 +493,11 @@ export default function AdminDashboard() {
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label className="text-[10px] uppercase font-bold tracking-widest text-white/40">Plano Essencial</Label>
-                      <Input defaultValue="Kz 65.000" className="bg-white/5 border-white/10 h-9" />
+                      <Input defaultValue="0" className="bg-white/5 border-white/10 h-9" />
                     </div>
                     <div className="space-y-2">
                       <Label className="text-[10px] uppercase font-bold tracking-widest text-white/40">Plano Premium</Label>
-                      <Input defaultValue="Kz 280.000" className="bg-white/5 border-white/10 h-9" />
+                      <Input defaultValue="0" className="bg-white/5 border-white/10 h-9" />
                     </div>
                   </div>
                   <div className="pt-4 border-t border-white/5 space-y-4">
@@ -650,32 +581,11 @@ export default function AdminDashboard() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-white/5">
-                      {[
-                        { id: 1, name: "Tech Solutions", aff: "João Silva", plan: "Profissional", price: "Kz 145.000", com: "Kz 43.500", status: "Pago" },
-                        { id: 2, name: "Restaurante Girassol", aff: "Maria Santos", plan: "Essencial", price: "Kz 65.000", com: "Kz 19.500", status: "Análise" },
-                        { id: 3, name: "Consultoria ABC", aff: "João Silva", plan: "Premium", price: "Kz 280.000", com: "Kz 84.000", status: "Contacto" },
-                      ].map((cl) => (
-                        <tr key={cl.id} className="group hover:bg-white/[0.02]">
-                          <td className="py-4">
-                            <p className="font-bold text-white/90 text-xs">{cl.name}</p>
-                            <p className="text-[10px] text-white/20">Registado há 2 dias</p>
-                          </td>
-                          <td className="py-4 text-white/60 text-xs font-medium">{cl.aff}</td>
-                          <td className="py-4">
-                            <p className="text-xs font-bold">{cl.plan}</p>
-                            <p className="text-[10px] text-white/40">{cl.price}</p>
-                          </td>
-                          <td className="py-4 font-bold text-emerald-400 text-xs">{cl.com}</td>
-                          <td className="py-4 text-center">
-                            <Badge className={`text-[9px] px-2 h-5 rounded-full ${cl.status === 'Pago' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : cl.status === 'Análise' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' : 'bg-blue-500/10 text-blue-400 border-blue-500/20'}`}>
-                              {cl.status}
-                            </Badge>
-                          </td>
-                          <td className="py-4 text-right">
-                            <Button variant="ghost" size="sm" className="text-[10px] h-7">Histórico</Button>
-                          </td>
+                        <tr>
+                            <td colSpan={6} className="py-8 text-center text-xs text-white/40">
+                                Nenhum cliente registado no momento.
+                            </td>
                         </tr>
-                      ))}
                     </tbody>
                   </table>
                 </div>
@@ -714,7 +624,7 @@ export default function AdminDashboard() {
                         </div>
                         <div>
                           <p className="text-sm font-bold">Empresa XYZ Ltda</p>
-                          <p className="text-[10px] text-white/40">Transferência • Kz 145.000,00</p>
+                          <p className="text-[10px] text-white/40">Transferência • Kz 0,00</p>
                         </div>
                       </div>
                       <div className="flex gap-2">
@@ -730,9 +640,9 @@ export default function AdminDashboard() {
               <TabsContent value="affiliate-payouts" className="mt-6 space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   {[
-                    { label: "Solicitações Ativas", value: "12", sub: "Kz 450.000" },
-                    { label: "Total Pago", value: "Kz 8.4M", sub: "Mês corrente" },
-                    { label: "Saldo em Reserva", value: "Kz 2.1M", sub: "Comissões futuras" },
+                    { label: "Solicitações Ativas", value: "0", sub: "Kz 0,00" },
+                    { label: "Total Pago", value: "Kz 0,00", sub: "Mês corrente" },
+                    { label: "Saldo em Reserva", value: "Kz 0,00", sub: "Comissões futuras" },
                   ].map((s, i) => (
                     <Card key={i} className="bg-white/5 border-white/10">
                       <CardContent className="pt-6">
@@ -748,22 +658,9 @@ export default function AdminDashboard() {
                    <div className="p-4 border-b border-white/10 bg-white/[0.02] flex justify-between items-center">
                     <h3 className="text-[10px] font-bold uppercase tracking-widest text-white/40">Solicitações de Saque</h3>
                   </div>
-                  {[1, 2, 3].map((i) => (
-                    <div key={i} className="p-4 flex items-center justify-between border-b border-white/5 last:border-0 hover:bg-white/[0.01]">
-                      <div className="flex items-center gap-4">
-                        <div className="w-8 h-8 rounded-full bg-red-500/10 flex items-center justify-center text-[10px] font-bold text-red-400 border border-red-500/20">A</div>
-                        <div>
-                          <p className="text-xs font-bold">Afiliado #{i}92</p>
-                          <p className="text-[10px] text-white/40">IBAN: AO06 0040 0000 {i}234 5678 9</p>
-                        </div>
-                      </div>
-                      <div className="text-right flex items-center gap-6">
-                        <span className="text-sm font-bold text-emerald-400">Kz 25.000,00</span>
-                        <div className="flex gap-2">
-                          <Button size="sm" variant="ghost" className="text-[10px] h-7 hover:text-red-400">Recusar</Button>
-                          <Button size="sm" className="text-[10px] h-7 bg-white text-black hover:bg-white/90">Aprovar Saque</Button>
-                        </div>
-                      </div>
+                  {[1].map((i) => (
+                    <div key={i} className="p-4 flex items-center justify-center border-b border-white/5 last:border-0 hover:bg-white/[0.01]">
+                        <p className="text-sm text-white/40">Nenhuma solicitação de saque no momento.</p>
                     </div>
                   ))}
                 </Card>
