@@ -28,6 +28,7 @@ Angola's affiliate marketing platform where affiliates refer businesses for webs
 - `server/db.ts` — Turso/libSQL database connection
 - `server/cloudinary.ts` — Cloudinary image upload/delete utilities
 - `server/session-store.ts` — SQLite-backed session store (persistent across restarts)
+- `server/rate-limit-store.ts` — SQLite-backed rate limiting (express-rate-limit store + login attempt tracking); persists across restarts; uses atomic upserts
 - `server/seed.ts` — Auto-seeds admin user on startup if none exists
 - `migrations/` — Drizzle migration files; auto-applied on server startup via `runMigrations()` in `server/db.ts`
 - `client/src/App.tsx` — Router with PrivateRoute auth guards

@@ -4,6 +4,7 @@ import session from "express-session";
 import { SQLiteSessionStore } from "./session-store";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
+import { SQLiteRateLimitStore, checkAccountLock, recordFailedLogin, clearFailedLogins, getRemainingAttempts } from "./rate-limit-store";
 import hpp from "hpp";
 import multer from "multer";
 import { storage } from "./storage";
@@ -25,10 +26,6 @@ const upload = multer({
   },
 });
 
-
-const loginAttempts = new Map<string, { count: number; lockedUntil: number | null }>();
-const MAX_LOGIN_ATTEMPTS = 5;
-const LOCKOUT_DURATION_MS = 15 * 60 * 1000;
 
 function getClientIp(req: Request): string {
   const forwarded = req.headers["x-forwarded-for"];
@@ -60,31 +57,6 @@ function sanitizeObject(obj: Record<string, any>): Record<string, any> {
   return sanitized;
 }
 
-function checkAccountLock(identifier: string): { locked: boolean; remainingMs: number } {
-  const record = loginAttempts.get(identifier);
-  if (!record) return { locked: false, remainingMs: 0 };
-  if (record.lockedUntil && Date.now() < record.lockedUntil) {
-    return { locked: true, remainingMs: record.lockedUntil - Date.now() };
-  }
-  if (record.lockedUntil && Date.now() >= record.lockedUntil) {
-    loginAttempts.delete(identifier);
-    return { locked: false, remainingMs: 0 };
-  }
-  return { locked: false, remainingMs: 0 };
-}
-
-function recordFailedLogin(identifier: string): void {
-  const record = loginAttempts.get(identifier) || { count: 0, lockedUntil: null };
-  record.count += 1;
-  if (record.count >= MAX_LOGIN_ATTEMPTS) {
-    record.lockedUntil = Date.now() + LOCKOUT_DURATION_MS;
-  }
-  loginAttempts.set(identifier, record);
-}
-
-function clearFailedLogins(identifier: string): void {
-  loginAttempts.delete(identifier);
-}
 
 function safeError(_error: any): string {
   return "Erro interno do servidor";
@@ -161,6 +133,7 @@ export async function registerRoutes(
     legacyHeaders: false,
     message: { message: "Demasiados pedidos. Tente novamente mais tarde." },
     keyGenerator: (req) => getClientIp(req),
+    store: new SQLiteRateLimitStore("general:"),
   });
 
   const authLimiter = rateLimit({
@@ -170,6 +143,7 @@ export async function registerRoutes(
     legacyHeaders: false,
     message: { message: "Demasiadas tentativas de autenticação. Tente novamente em 15 minutos." },
     keyGenerator: (req) => getClientIp(req),
+    store: new SQLiteRateLimitStore("auth:"),
   });
 
   const strictLimiter = rateLimit({
@@ -179,6 +153,7 @@ export async function registerRoutes(
     legacyHeaders: false,
     message: { message: "Operação limitada. Aguarde um momento." },
     keyGenerator: (req) => getClientIp(req),
+    store: new SQLiteRateLimitStore("strict:"),
   });
 
   app.use("/api/", generalLimiter);
@@ -342,7 +317,7 @@ ganhar dinheiro na internet angola, marketing de afiliados angola, renda extra a
       const clientIp = getClientIp(req);
       const lockKey = `${parsed.data.phone}_${clientIp}`;
 
-      const lockStatus = checkAccountLock(lockKey);
+      const lockStatus = await checkAccountLock(lockKey);
       if (lockStatus.locked) {
         const minutesRemaining = Math.ceil(lockStatus.remainingMs / 60000);
         await storage.createSecurityLog({
@@ -358,7 +333,7 @@ ganhar dinheiro na internet angola, marketing de afiliados angola, renda extra a
 
       const user = await storage.getUserByPhone(parsed.data.phone);
       if (!user) {
-        recordFailedLogin(lockKey);
+        await recordFailedLogin(lockKey);
         await storage.createSecurityLog({
           action: "Tentativa de Login Falhou",
           userLabel: parsed.data.phone,
@@ -381,9 +356,8 @@ ganhar dinheiro na internet angola, marketing de afiliados angola, renda extra a
 
       const valid = await bcrypt.compare(parsed.data.password, user.password);
       if (!valid) {
-        recordFailedLogin(lockKey);
-        const record = loginAttempts.get(lockKey);
-        const remaining = MAX_LOGIN_ATTEMPTS - (record?.count || 0);
+        await recordFailedLogin(lockKey);
+        const remaining = await getRemainingAttempts(lockKey);
 
         await storage.createSecurityLog({
           action: `Tentativa de Login Falhou (${remaining > 0 ? remaining + " tentativas restantes" : "conta bloqueada"})`,
@@ -395,7 +369,7 @@ ganhar dinheiro na internet angola, marketing de afiliados angola, renda extra a
         return res.status(401).json({ message: "Credenciais inválidas" });
       }
 
-      clearFailedLogins(lockKey);
+      await clearFailedLogins(lockKey);
 
       req.session.regenerate((err) => {
         if (err) {
