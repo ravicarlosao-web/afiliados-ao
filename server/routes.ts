@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import session from "express-session";
 import MemoryStore from "memorystore";
 import { storage } from "./storage";
-import { loginSchema, insertUserSchema, insertClientSchema, insertWithdrawalSchema, insertMaterialSchema, insertNotificationSchema } from "@shared/schema";
+import { loginSchema, insertUserSchema, insertClientSchema, insertWithdrawalSchema, insertMaterialSchema, insertNotificationSchema, updateProfileSchema, changePasswordSchema } from "@shared/schema";
 import bcrypt from "bcrypt";
 
 const SessionStore = MemoryStore(session);
@@ -371,6 +371,49 @@ export async function registerRoutes(
     try {
       const mats = await storage.getMaterials();
       res.json(mats);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  // === USER: PROFILE UPDATE ===
+  app.patch("/api/user/profile", requireAuth, async (req, res) => {
+    try {
+      const parsed = updateProfileSchema.safeParse(req.body);
+      if (!parsed.success) return res.status(400).json({ message: "Dados inválidos", errors: parsed.error.flatten() });
+
+      const updated = await storage.updateUserProfile(req.session.userId!, parsed.data);
+      if (!updated) return res.status(404).json({ message: "Utilizador não encontrado" });
+      res.json({ id: updated.id, name: updated.name, phone: updated.phone, iban: updated.iban, multicaixaExpress: updated.multicaixaExpress });
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  // === USER: CHANGE PASSWORD ===
+  app.post("/api/user/change-password", requireAuth, async (req, res) => {
+    try {
+      const parsed = changePasswordSchema.safeParse(req.body);
+      if (!parsed.success) return res.status(400).json({ message: "Dados inválidos", errors: parsed.error.flatten() });
+
+      const user = await storage.getUser(req.session.userId!);
+      if (!user) return res.status(404).json({ message: "Utilizador não encontrado" });
+
+      const valid = await bcrypt.compare(parsed.data.currentPassword, user.password);
+      if (!valid) return res.status(401).json({ message: "Senha atual incorreta" });
+
+      const hashedPassword = await bcrypt.hash(parsed.data.newPassword, 10);
+      await storage.updateUserPassword(req.session.userId!, hashedPassword);
+
+      await storage.createSecurityLog({
+        action: "Senha Alterada",
+        userId: user.id,
+        userLabel: user.name,
+        ip: req.ip || "unknown",
+        status: "warning",
+      });
+
+      res.json({ message: "Senha atualizada com sucesso" });
     } catch (error: any) {
       res.status(500).json({ message: error.message });
     }

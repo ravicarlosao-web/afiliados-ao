@@ -92,6 +92,16 @@ export const loginSchema = z.object({
   password: z.string().min(1),
 });
 
+export const updateProfileSchema = z.object({
+  iban: z.string().optional().nullable(),
+  multicaixaExpress: z.string().optional().nullable(),
+});
+
+export const changePasswordSchema = z.object({
+  currentPassword: z.string().min(1),
+  newPassword: z.string().min(6),
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type Client = typeof clients.$inferSelect;
