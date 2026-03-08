@@ -18,6 +18,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 import { apiRequest, queryClient, getQueryFn } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
@@ -144,8 +146,8 @@ export default function AdminDashboard() {
   });
 
   const updateClientStatusMutation = useMutation({
-    mutationFn: async ({ id, status }: { id: string; status: string }) => {
-      await apiRequest("PATCH", `/api/admin/clients/${id}/status`, { status });
+    mutationFn: async ({ id, status, adminNote, notifyAffiliate }: { id: string; status: string; adminNote?: string; notifyAffiliate?: boolean }) => {
+      await apiRequest("PATCH", `/api/admin/clients/${id}/status`, { status, adminNote, notifyAffiliate });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/clients"] });
@@ -153,6 +155,77 @@ export default function AdminDashboard() {
       toast({ title: "Status do cliente atualizado" });
     },
   });
+
+  const updateSiteStartedMutation = useMutation({
+    mutationFn: async ({ id, siteStarted }: { id: string; siteStarted: boolean }) => {
+      await apiRequest("PATCH", `/api/admin/clients/${id}/site-started`, { siteStarted });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/clients"] });
+      toast({ title: "Estado do site atualizado" });
+    },
+  });
+
+  const saveNoteMutation = useMutation({
+    mutationFn: async ({ id, adminNote, notifyAffiliate }: { id: string; adminNote: string; notifyAffiliate?: boolean }) => {
+      await apiRequest("PATCH", `/api/admin/clients/${id}/note`, { adminNote, notifyAffiliate });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/clients"] });
+      toast({ title: "Nota guardada" });
+    },
+  });
+
+  const [selectedClient, setSelectedClient] = useState<any | null>(null);
+  const [clientDetailOpen, setClientDetailOpen] = useState(false);
+  const [clientAdminNote, setClientAdminNote] = useState("");
+  const [clientNotifyAffiliate, setClientNotifyAffiliate] = useState(false);
+
+  const openClientDetail = async (cl: any) => {
+    setSelectedClient(cl);
+    setClientAdminNote(cl.adminNote || "");
+    setClientNotifyAffiliate(false);
+    setClientDetailOpen(true);
+  };
+
+  const handleSaveNote = () => {
+    if (!selectedClient || !clientAdminNote.trim()) return;
+    saveNoteMutation.mutate(
+      { id: selectedClient.id, adminNote: clientAdminNote, notifyAffiliate: clientNotifyAffiliate },
+      {
+        onSuccess: () => {
+          setSelectedClient((prev: any) => prev ? { ...prev, adminNote: clientAdminNote } : null);
+          setClientNotifyAffiliate(false);
+        },
+      }
+    );
+  };
+
+  const handleStatusChange = (status: string) => {
+    if (!selectedClient) return;
+    updateClientStatusMutation.mutate(
+      { id: selectedClient.id, status, adminNote: clientAdminNote || undefined, notifyAffiliate: clientNotifyAffiliate },
+      {
+        onSuccess: () => {
+          setSelectedClient((prev: any) => prev ? { ...prev, status, adminNote: clientAdminNote || prev.adminNote } : null);
+          setClientAdminNote("");
+          setClientNotifyAffiliate(false);
+        },
+      }
+    );
+  };
+
+  const handleSiteStartedToggle = (checked: boolean) => {
+    if (!selectedClient) return;
+    updateSiteStartedMutation.mutate(
+      { id: selectedClient.id, siteStarted: checked },
+      {
+        onSuccess: () => {
+          setSelectedClient((prev: any) => prev ? { ...prev, siteStarted: checked } : null);
+        },
+      }
+    );
+  };
 
   const saveSettingsMutation = useMutation({
     mutationFn: async (data: Record<string, string>) => {
@@ -422,7 +495,7 @@ export default function AdminDashboard() {
                       {allClients.length === 0 ? (
                         <tr><td colSpan={5} className="py-8 text-center text-xs text-white/40">Nenhum cliente registado no momento.</td></tr>
                       ) : allClients.map((cl: any) => (
-                        <tr key={cl.id} className="group hover:bg-white/[0.02]" data-testid={`row-client-${cl.id}`}>
+                        <tr key={cl.id} className="group hover:bg-white/[0.02] cursor-pointer" onClick={() => openClientDetail(cl)} data-testid={`row-client-${cl.id}`}>
                           <td className="py-4">
                             <p className="font-bold text-white/90 text-xs">{cl.name}</p>
                             <p className="text-[10px] text-white/20">{cl.contact}</p>
@@ -438,16 +511,9 @@ export default function AdminDashboard() {
                             </Badge>
                           </td>
                           <td className="py-4 text-right">
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="sm" className="h-8 w-8 p-0"><MoreVertical className="w-4 h-4" /></Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end" className="bg-black border-white/10 text-white">
-                                <DropdownMenuItem onClick={() => updateClientStatusMutation.mutate({ id: cl.id, status: "em_contacto" })} className="gap-2 text-xs"><History className="w-3.5 h-3.5" /> Em Contacto</DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => updateClientStatusMutation.mutate({ id: cl.id, status: "pagamento_feito" })} className="gap-2 text-xs"><CheckCircle2 className="w-3.5 h-3.5" /> Pagamento Feito</DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => updateClientStatusMutation.mutate({ id: cl.id, status: "reprovado" })} className="gap-2 text-xs text-red-400"><XCircle className="w-3.5 h-3.5" /> Reprovar</DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
+                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={(e) => { e.stopPropagation(); openClientDetail(cl); }}>
+                              <Eye className="w-4 h-4" />
+                            </Button>
                           </td>
                         </tr>
                       ))}
@@ -456,6 +522,192 @@ export default function AdminDashboard() {
                 </div>
               </CardContent>
             </Card>
+
+            <Dialog open={clientDetailOpen} onOpenChange={setClientDetailOpen}>
+              <DialogContent className="bg-[#0a0a0a] border-white/10 text-white max-w-2xl max-h-[90vh] overflow-y-auto">
+                {selectedClient && (
+                  <>
+                    <DialogHeader>
+                      <DialogTitle className="text-xl font-bold flex items-center gap-3">
+                        <div className="h-10 w-10 rounded-full bg-gradient-to-br from-red-500 to-amber-500 flex items-center justify-center text-white font-bold text-sm">
+                          {selectedClient.name?.charAt(0)?.toUpperCase()}
+                        </div>
+                        <div>
+                          <span>{selectedClient.name}</span>
+                          <Badge className={`ml-3 text-[9px] px-2 h-5 rounded-full ${statusColors[selectedClient.status] || ""}`}>
+                            {statusLabels[selectedClient.status] || selectedClient.status}
+                          </Badge>
+                        </div>
+                      </DialogTitle>
+                    </DialogHeader>
+
+                    <div className="space-y-5 mt-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-1">
+                          <p className="text-[10px] uppercase tracking-wider text-white/30 font-bold">Contacto</p>
+                          <p className="text-sm text-white/80">{selectedClient.contact}</p>
+                        </div>
+                        <div className="space-y-1">
+                          <p className="text-[10px] uppercase tracking-wider text-white/30 font-bold">Plano</p>
+                          <p className="text-sm text-white/80">{selectedClient.plan}</p>
+                        </div>
+                        <div className="space-y-1">
+                          <p className="text-[10px] uppercase tracking-wider text-white/30 font-bold">Valor</p>
+                          <p className="text-sm text-emerald-400 font-bold">{formatKz(selectedClient.price)}</p>
+                        </div>
+                        <div className="space-y-1">
+                          <p className="text-[10px] uppercase tracking-wider text-white/30 font-bold">Comissão</p>
+                          <p className="text-sm text-emerald-400 font-bold">{formatKz(selectedClient.commission)}</p>
+                        </div>
+                        {selectedClient.companyName && (
+                          <div className="space-y-1">
+                            <p className="text-[10px] uppercase tracking-wider text-white/30 font-bold">Empresa</p>
+                            <p className="text-sm text-white/80">{selectedClient.companyName}</p>
+                          </div>
+                        )}
+                        {selectedClient.contactPerson && (
+                          <div className="space-y-1">
+                            <p className="text-[10px] uppercase tracking-wider text-white/30 font-bold">Pessoa de Contacto</p>
+                            <p className="text-sm text-white/80">{selectedClient.contactPerson}</p>
+                          </div>
+                        )}
+                        {selectedClient.socialMedia && (
+                          <div className="space-y-1">
+                            <p className="text-[10px] uppercase tracking-wider text-white/30 font-bold">Rede Social</p>
+                            <p className="text-sm text-white/80">{selectedClient.socialMedia}</p>
+                          </div>
+                        )}
+                        <div className="space-y-1">
+                          <p className="text-[10px] uppercase tracking-wider text-white/30 font-bold">Afiliado</p>
+                          <p className="text-sm text-white/80">{selectedClient.affiliateName || "—"}</p>
+                          <p className="text-[10px] text-white/30">{selectedClient.affiliatePhone || ""}</p>
+                        </div>
+                      </div>
+
+                      {selectedClient.status === "em_contacto" || selectedClient.status === "pagamento_feito" ? (
+                        <Card className="bg-white/5 border-white/10">
+                          <CardContent className="p-4 space-y-3">
+                            <div className="flex items-center justify-between">
+                              <div className="space-y-0.5">
+                                <p className="text-xs font-bold text-white/80 flex items-center gap-2">
+                                  <Globe className="w-3.5 h-3.5 text-blue-400" />
+                                  Site em Desenvolvimento
+                                </p>
+                                <p className="text-[10px] text-white/40">Marque quando o site do cliente começar a ser feito</p>
+                              </div>
+                              <Switch
+                                checked={!!selectedClient.siteStarted}
+                                onCheckedChange={handleSiteStartedToggle}
+                                data-testid="switch-site-started"
+                              />
+                            </div>
+                            {selectedClient.siteStarted && (
+                              <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3 text-xs text-blue-300 flex items-start gap-2">
+                                <Zap className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+                                <span>O site está em desenvolvimento. O afiliado será notificado que o pagamento da comissão está pendente até a conclusão.</span>
+                              </div>
+                            )}
+                          </CardContent>
+                        </Card>
+                      ) : null}
+
+                      <div className="space-y-3">
+                        <p className="text-xs font-bold text-white/50 uppercase tracking-wider">Nota / Motivo</p>
+                        <Textarea
+                          placeholder="Ex: WhatsApp não encontrado com o número fornecido, cliente não convertido correctamente..."
+                          value={clientAdminNote}
+                          onChange={(e) => setClientAdminNote(e.target.value)}
+                          className="bg-white/5 border-white/10 text-white text-xs min-h-[80px] placeholder:text-white/20"
+                          data-testid="input-admin-note"
+                        />
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <Switch
+                              checked={clientNotifyAffiliate}
+                              onCheckedChange={setClientNotifyAffiliate}
+                              data-testid="switch-notify-affiliate"
+                            />
+                            <Label className="text-xs text-white/60 cursor-pointer" onClick={() => setClientNotifyAffiliate(!clientNotifyAffiliate)}>
+                              Enviar mensagem ao afiliado
+                            </Label>
+                          </div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="gap-1.5 text-xs border-white/10 hover:bg-white/5"
+                            onClick={handleSaveNote}
+                            disabled={saveNoteMutation.isPending || !clientAdminNote.trim()}
+                            data-testid="button-save-note"
+                          >
+                            <MessageSquare className="w-3 h-3" />
+                            Guardar Nota
+                          </Button>
+                        </div>
+                      </div>
+
+                      <div className="space-y-3">
+                        <p className="text-xs font-bold text-white/50 uppercase tracking-wider">Alterar Status</p>
+                        <div className="grid grid-cols-2 gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className={`gap-2 text-xs border-blue-500/30 text-blue-400 hover:bg-blue-500/10 ${selectedClient.status === "em_contacto" ? "bg-blue-500/20 ring-1 ring-blue-500/40" : ""}`}
+                            onClick={() => handleStatusChange("em_contacto")}
+                            disabled={updateClientStatusMutation.isPending}
+                            data-testid="button-status-contacto"
+                          >
+                            <History className="w-3.5 h-3.5" />
+                            Em Contacto
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className={`gap-2 text-xs border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10 ${selectedClient.status === "pagamento_feito" ? "bg-emerald-500/20 ring-1 ring-emerald-500/40" : ""}`}
+                            onClick={() => handleStatusChange("pagamento_feito")}
+                            disabled={updateClientStatusMutation.isPending}
+                            data-testid="button-status-aprovado"
+                          >
+                            <CheckCircle2 className="w-3.5 h-3.5" />
+                            Aprovado / Fechado
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className={`gap-2 text-xs border-red-500/30 text-red-400 hover:bg-red-500/10 ${selectedClient.status === "reprovado" ? "bg-red-500/20 ring-1 ring-red-500/40" : ""}`}
+                            onClick={() => handleStatusChange("reprovado")}
+                            disabled={updateClientStatusMutation.isPending}
+                            data-testid="button-status-reprovado"
+                          >
+                            <XCircle className="w-3.5 h-3.5" />
+                            Reprovado
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className={`gap-2 text-xs border-amber-500/30 text-amber-400 hover:bg-amber-500/10 ${selectedClient.status === "em_analise" ? "bg-amber-500/20 ring-1 ring-amber-500/40" : ""}`}
+                            onClick={() => handleStatusChange("em_analise")}
+                            disabled={updateClientStatusMutation.isPending}
+                            data-testid="button-status-analise"
+                          >
+                            <Clock className="w-3.5 h-3.5" />
+                            Em Análise
+                          </Button>
+                        </div>
+                      </div>
+
+                      {selectedClient.adminNote && (
+                        <Card className="bg-red-500/5 border-red-500/20">
+                          <CardContent className="p-3">
+                            <p className="text-[10px] uppercase tracking-wider text-red-400/60 font-bold mb-1">Última Nota do Admin</p>
+                            <p className="text-xs text-red-300/80">{selectedClient.adminNote}</p>
+                          </CardContent>
+                        </Card>
+                      )}
+                    </div>
+                  </>
+                )}
+              </DialogContent>
+            </Dialog>
           </div>
         );
       case "commissions":

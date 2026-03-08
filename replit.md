@@ -47,7 +47,8 @@ Angola's affiliate marketing platform where affiliates refer businesses for webs
 
 ### Admin (requireAdmin)
 - GET /api/admin/dashboard, /affiliates, /clients, /withdrawals, /withdrawals/stats, /materials, /notifications, /security-logs, /settings
-- PATCH /api/admin/clients/:id/status, /withdrawals/:id/status, /settings
+- GET /api/admin/clients/:id (single client with affiliate info)
+- PATCH /api/admin/clients/:id/status (with adminNote, notifyAffiliate), /clients/:id/note, /clients/:id/site-started, /withdrawals/:id/status, /settings
 - POST /api/admin/materials, /notifications
 - DELETE /api/admin/materials/:id
 

@@ -24,7 +24,9 @@ export interface IStorage {
   getClients(): Promise<Client[]>;
   getClientsByAffiliate(affiliateId: string): Promise<Client[]>;
   createClient(client: InsertClient): Promise<Client>;
-  updateClientStatus(id: string, status: string): Promise<Client | undefined>;
+  getClient(id: string): Promise<Client | undefined>;
+  updateClientStatus(id: string, status: string | undefined, adminNote?: string): Promise<Client | undefined>;
+  updateClientSiteStarted(id: string, siteStarted: boolean): Promise<Client | undefined>;
   getClientCountByStatus(): Promise<Record<string, number>>;
 
   getWithdrawals(): Promise<Withdrawal[]>;
@@ -112,8 +114,22 @@ export class DatabaseStorage implements IStorage {
     return newClient;
   }
 
-  async updateClientStatus(id: string, status: string): Promise<Client | undefined> {
-    const [updated] = await db.update(clients).set({ status: status as any }).where(eq(clients.id, id)).returning();
+  async getClient(id: string): Promise<Client | undefined> {
+    const [client] = await db.select().from(clients).where(eq(clients.id, id));
+    return client;
+  }
+
+  async updateClientStatus(id: string, status: string | undefined, adminNote?: string): Promise<Client | undefined> {
+    const updateData: any = {};
+    if (status) updateData.status = status as any;
+    if (adminNote !== undefined) updateData.adminNote = adminNote;
+    if (Object.keys(updateData).length === 0) return this.getClient(id);
+    const [updated] = await db.update(clients).set(updateData).where(eq(clients.id, id)).returning();
+    return updated;
+  }
+
+  async updateClientSiteStarted(id: string, siteStarted: boolean): Promise<Client | undefined> {
+    const [updated] = await db.update(clients).set({ siteStarted }).where(eq(clients.id, id)).returning();
     return updated;
   }
 

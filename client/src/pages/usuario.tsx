@@ -639,6 +639,12 @@ export default function UserDashboard() {
                               <div className={`w-2 h-2 rounded-full ${statusColors[client.status] || "bg-white/20"}`} />
                               <span className="text-xs">{statusLabels[client.status] || client.status}</span>
                             </div>
+                            {client.siteStarted && (
+                              <p className="text-[10px] text-blue-400 mt-1 flex items-center gap-1">
+                                <span className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-pulse" />
+                                Site em desenvolvimento — pagamento pendente
+                              </p>
+                            )}
                           </td>
                           <td className="py-4">
                             <span className="font-bold">{formatKz(client.commission)}</span>

@@ -28,6 +28,8 @@ export const clients = sqliteTable("clients", {
   companyName: text("company_name"),
   contactPerson: text("contact_person"),
   socialMedia: text("social_media"),
+  adminNote: text("admin_note"),
+  siteStarted: integer("site_started", { mode: "boolean" }).default(false),
   createdAt: integer("created_at", { mode: "timestamp" }).notNull().$defaultFn(() => new Date()),
 });
 

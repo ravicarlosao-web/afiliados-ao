@@ -525,9 +525,29 @@ ganhar dinheiro na internet angola, marketing de afiliados angola, renda extra a
   app.get("/api/admin/clients", requireAdmin, async (_req: Request, res: Response) => {
     try {
       const allClients = await storage.getClients();
-      res.json(allClients);
+      const allUsers = await storage.getAffiliates();
+      const userMap = new Map(allUsers.map((u: any) => [u.id, u]));
+      const enriched = allClients.map((cl: any) => {
+        const aff = userMap.get(cl.affiliateId);
+        return { ...cl, affiliateName: aff?.name || "Desconhecido", affiliatePhone: aff?.phone || "" };
+      });
+      res.json(enriched);
     } catch (error: any) {
       console.error("Clients error:", error);
+      res.status(500).json({ message: safeError(error) });
+    }
+  });
+
+  app.get("/api/admin/clients/:id", requireAdmin, async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      if (!isValidUUID(id)) return res.status(400).json({ message: "ID inválido" });
+      const client = await storage.getClient(id);
+      if (!client) return res.status(404).json({ message: "Cliente não encontrado" });
+      const affiliate = await storage.getUser(client.affiliateId);
+      res.json({ ...client, affiliateName: affiliate?.name || "Desconhecido", affiliatePhone: affiliate?.phone || "" });
+    } catch (error: any) {
+      console.error("Client detail error:", error);
       res.status(500).json({ message: safeError(error) });
     }
   });
@@ -537,13 +557,28 @@ ganhar dinheiro na internet angola, marketing de afiliados angola, renda extra a
       const { id } = req.params;
       if (!isValidUUID(id)) return res.status(400).json({ message: "ID inválido" });
 
-      const { status } = req.body;
+      const { status, adminNote, notifyAffiliate } = req.body;
       if (!VALID_CLIENT_STATUSES.includes(status)) {
         return res.status(400).json({ message: "Status inválido" });
       }
+      if (adminNote && (typeof adminNote !== "string" || adminNote.length > 1000)) {
+        return res.status(400).json({ message: "Nota inválida (máx. 1000 caracteres)" });
+      }
 
-      const updated = await storage.updateClientStatus(id, status);
+      const updated = await storage.updateClientStatus(id, status, adminNote ? sanitizeString(adminNote) : undefined);
       if (!updated) return res.status(404).json({ message: "Cliente não encontrado" });
+
+      if (notifyAffiliate && adminNote) {
+        const statusLabel = status === "reprovado" ? "Reprovado" : status === "em_contacto" ? "Em Contacto" : status === "pagamento_feito" ? "Aprovado" : status;
+        await storage.createNotification({
+          title: `Cliente "${updated.name}" — ${statusLabel}`,
+          description: sanitizeString(adminNote),
+          type: status === "reprovado" ? "warning" : "info",
+          targetUserId: updated.affiliateId,
+          targetRole: null,
+          channels: null,
+        });
+      }
 
       await storage.createSecurityLog({
         action: `Status de Cliente Alterado para ${status}`,
@@ -556,6 +591,64 @@ ganhar dinheiro na internet angola, marketing de afiliados angola, renda extra a
       res.json(updated);
     } catch (error: any) {
       console.error("Client status error:", error);
+      res.status(500).json({ message: safeError(error) });
+    }
+  });
+
+  app.patch("/api/admin/clients/:id/note", requireAdmin, async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      if (!isValidUUID(id)) return res.status(400).json({ message: "ID inválido" });
+
+      const { adminNote, notifyAffiliate } = req.body;
+      if (typeof adminNote !== "string" || adminNote.length > 1000) {
+        return res.status(400).json({ message: "Nota inválida (máx. 1000 caracteres)" });
+      }
+
+      const updated = await storage.updateClientStatus(id, undefined as any, sanitizeString(adminNote));
+      if (!updated) return res.status(404).json({ message: "Cliente não encontrado" });
+
+      if (notifyAffiliate && adminNote) {
+        await storage.createNotification({
+          title: `Mensagem sobre cliente "${updated.name}"`,
+          description: sanitizeString(adminNote),
+          type: "info",
+          targetUserId: updated.affiliateId,
+          targetRole: null,
+          channels: null,
+        });
+      }
+
+      res.json(updated);
+    } catch (error: any) {
+      console.error("Client note error:", error);
+      res.status(500).json({ message: safeError(error) });
+    }
+  });
+
+  app.patch("/api/admin/clients/:id/site-started", requireAdmin, async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      if (!isValidUUID(id)) return res.status(400).json({ message: "ID inválido" });
+
+      const { siteStarted } = req.body;
+      const updated = await storage.updateClientSiteStarted(id, !!siteStarted);
+      if (!updated) return res.status(404).json({ message: "Cliente não encontrado" });
+
+      if (siteStarted) {
+        await storage.createNotification({
+          title: `Site do cliente "${updated.name}" está em desenvolvimento`,
+          description: "O site começou a ser desenvolvido. O pagamento da comissão está pendente até a conclusão.",
+          type: "info",
+          targetUserId: updated.affiliateId,
+          targetRole: null,
+          channels: null,
+        });
+      }
+
+      res.json(updated);
+    } catch (error: any) {
+      console.error("Site started error:", error);
       res.status(500).json({ message: safeError(error) });
     }
   });
