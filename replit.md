@@ -49,13 +49,14 @@ Angola's affiliate marketing platform where affiliates refer businesses for webs
 - GET /api/admin/dashboard, /affiliates, /clients, /withdrawals, /withdrawals/stats, /materials, /notifications, /security-logs, /settings
 - GET /api/admin/clients/:id (single client with affiliate info)
 - PATCH /api/admin/clients/:id/status (with adminNote, notifyAffiliate), /clients/:id/note, /clients/:id/site-started, /withdrawals/:id/status, /settings
-- POST /api/admin/materials, /notifications
+- GET /api/admin/screenshot-requests (print requests from affiliates)
+- POST /api/admin/materials, /notifications, /screenshots (max 3 images via multer)
 - DELETE /api/admin/materials/:id
 
 ### User (requireAuth)
-- GET /api/user/clients, /withdrawals, /notifications, /materials
-- POST /api/user/clients, /withdrawals, /change-password
-- PATCH /api/user/profile
+- GET /api/user/clients, /withdrawals, /notifications, /materials, /screenshots
+- POST /api/user/clients, /withdrawals, /change-password, /request-conversation-status
+- PATCH /api/user/profile, /notifications/read (mark as read with ownership check)
 
 ## Credentials
 

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
@@ -104,6 +104,11 @@ export default function UserDashboard() {
     queryFn: getQueryFn({ on401: "throw" }),
   });
 
+  const { data: myScreenshots = [] } = useQuery<any[]>({
+    queryKey: ["/api/user/screenshots"],
+    queryFn: getQueryFn({ on401: "throw" }),
+  });
+
   const paidClients = myClients.filter((c: any) => c.status === "pagamento_feito");
   const pendingClients = myClients.filter((c: any) => c.status === "em_analise" || c.status === "em_contacto");
 
@@ -202,6 +207,27 @@ export default function UserDashboard() {
     },
   });
 
+  const markReadMutation = useMutation({
+    mutationFn: async (ids: string[]) => {
+      await apiRequest("PATCH", "/api/user/notifications/read", { ids });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/user/notifications"] });
+    },
+  });
+
+  const requestPrintMutation = useMutation({
+    mutationFn: async (clientId: string) => {
+      await apiRequest("POST", "/api/user/request-conversation-status", { clientId });
+    },
+    onSuccess: () => {
+      toast({ title: "Pedido enviado! A equipa irá enviar os prints em breve." });
+    },
+    onError: () => {
+      toast({ title: "Erro ao solicitar prints", variant: "destructive" });
+    },
+  });
+
   const [profileIban, setProfileIban] = useState("");
   const [profileMulticaixa, setProfileMulticaixa] = useState("");
   const [currentPassword, setCurrentPassword] = useState("");
@@ -223,6 +249,21 @@ export default function UserDashboard() {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const markReadRef = useRef(false);
+  useEffect(() => {
+    if (activeItem === "messages" && !markReadRef.current) {
+      const isClientMessage = (n: any) =>
+        n.title?.includes("Cliente") || n.title?.includes("cliente") || n.title?.includes("Site do cliente") || n.title?.includes("Mensagem sobre cliente") || n.title?.includes("Print de conversa");
+      const unreadIds = myNotifications.filter((n: any) => isClientMessage(n) && !n.isRead).map((n: any) => n.id);
+      if (unreadIds.length > 0) {
+        markReadRef.current = true;
+        markReadMutation.mutate(unreadIds, {
+          onSettled: () => { markReadRef.current = false; },
+        });
+      }
+    }
+  }, [activeItem, myNotifications]);
+
   const menuItems = [
     { id: "dashboard", label: "Visão Geral", icon: LayoutDashboard },
     { id: "wallet", label: "Carteira & Saque", icon: Wallet },
@@ -230,6 +271,7 @@ export default function UserDashboard() {
     { id: "messages", label: "Mensagens", icon: MessageSquare },
     { id: "materials", label: "Materiais de Venda", icon: ImageIcon },
     { id: "goals", label: "Minhas Metas", icon: Trophy },
+    { id: "tutorial", label: "Tutorial", icon: Lightbulb },
     { id: "profile", label: "Meu Perfil", icon: User },
     { id: "notifications", label: "Notificações", icon: Bell },
     { id: "settings", label: "Configurações", icon: Settings },
@@ -663,15 +705,74 @@ export default function UserDashboard() {
           </div>
         );
       case "messages": {
-        const clientMessages = myNotifications.filter((n: any) =>
-          n.title?.includes("Cliente") || n.title?.includes("cliente") || n.title?.includes("Site do cliente") || n.title?.includes("Mensagem sobre cliente")
-        );
+        const isClientMessage = (n: any) =>
+          n.title?.includes("Cliente") || n.title?.includes("cliente") || n.title?.includes("Site do cliente") || n.title?.includes("Mensagem sobre cliente") || n.title?.includes("Print de conversa");
+        const clientMessages = myNotifications.filter(isClientMessage);
+
         return (
           <div className="space-y-6 sm:space-y-8">
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold tracking-tight bg-gradient-to-r from-white to-white/40 bg-clip-text text-transparent">Mensagens</h1>
               <p className="text-white/40 text-sm">Mensagens da equipa sobre os seus clientes indicados.</p>
             </div>
+
+            {myClients.length > 0 && (
+              <Card className="bg-white/5 border-white/10">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-bold flex items-center gap-2">
+                    <Search className="w-4 h-4 text-blue-400" />
+                    Verificar Estado da Conversa
+                  </CardTitle>
+                  <CardDescription className="text-xs text-white/40">Solicite prints das últimas mensagens entre a nossa equipa e o seu cliente para acompanhar o progresso.</CardDescription>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {myClients.map((cl: any) => (
+                      <Button
+                        key={cl.id}
+                        variant="outline"
+                        size="sm"
+                        className="justify-start gap-2 text-xs border-white/10 hover:bg-white/5 text-white/70"
+                        onClick={() => requestPrintMutation.mutate(cl.id)}
+                        disabled={requestPrintMutation.isPending}
+                        data-testid={`button-request-print-${cl.id}`}
+                      >
+                        <ImageIcon className="w-3.5 h-3.5 text-blue-400 shrink-0" />
+                        <span className="truncate">Pedir print — {cl.name}</span>
+                      </Button>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {myScreenshots.length > 0 && (
+              <Card className="bg-white/5 border-white/10">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-bold flex items-center gap-2">
+                    <ImageIcon className="w-4 h-4 text-emerald-400" />
+                    Prints de Conversa Recentes
+                  </CardTitle>
+                  <CardDescription className="text-xs text-white/40">As imagens ficam disponíveis durante 3 dias e são eliminadas automaticamente.</CardDescription>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <div className="space-y-4">
+                    {myScreenshots.map((ss: any) => (
+                      <div key={ss.id} className="bg-white/[0.03] border border-white/5 rounded-lg p-3" data-testid={`screenshot-${ss.id}`}>
+                        {ss.message && <p className="text-xs text-white/60 mb-2">{ss.message}</p>}
+                        <img
+                          src={ss.imageUrl}
+                          alt="Print de conversa"
+                          className="rounded-lg max-h-[300px] object-contain w-full bg-black/30"
+                          loading="lazy"
+                        />
+                        <p className="text-[10px] text-white/20 mt-2">{timeAgo(ss.createdAt)} — expira em 3 dias</p>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             <Card className="bg-white/5 border-white/10">
               <CardContent className="p-0">
@@ -1015,6 +1116,117 @@ export default function UserDashboard() {
             </div>
           </div>
         );
+      case "tutorial":
+        return (
+          <div className="space-y-6 sm:space-y-8">
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight bg-gradient-to-r from-white to-white/40 bg-clip-text text-transparent">Como Funciona</h1>
+              <p className="text-white/40 text-sm">Guia passo a passo para ganhar comissões como afiliado.</p>
+            </div>
+
+            <div className="space-y-4">
+              <Card className="bg-white/5 border-white/10">
+                <CardContent className="p-6">
+                  <div className="flex items-start gap-4">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center text-white font-bold text-sm shrink-0">1</div>
+                    <div>
+                      <h3 className="text-base font-bold text-white/90 mb-2">Encontre alguém que precise de um site</h3>
+                      <p className="text-sm text-white/60 leading-relaxed">O primeiro passo é simples: encontre uma pessoa ou empresa que queira ter um site profissional. Pode ser um amigo, um familiar, um negócio da sua zona, um empreendedor nas redes sociais — qualquer pessoa que precise de presença digital. Não precisa ser técnico nem saber programar. O seu papel é apresentar a oportunidade e mostrar as vantagens de ter um site.</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-white/5 border-white/10">
+                <CardContent className="p-6">
+                  <div className="flex items-start gap-4">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-white font-bold text-sm shrink-0">2</div>
+                    <div>
+                      <h3 className="text-base font-bold text-white/90 mb-2">Convença e registe o cliente</h3>
+                      <p className="text-sm text-white/60 leading-relaxed">Depois de encontrar a pessoa interessada, explique os nossos planos e preços. Utilize os materiais de venda disponíveis na secção "Materiais de Venda" — lá tem textos prontos, argumentos e imagens que facilitam a conversa. Quando o cliente aceitar, registe-o na secção "Meus Clientes" com o contacto (WhatsApp de preferência) e o plano escolhido.</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-white/5 border-white/10">
+                <CardContent className="p-6">
+                  <div className="flex items-start gap-4">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold text-sm shrink-0">3</div>
+                    <div>
+                      <h3 className="text-base font-bold text-white/90 mb-2">A nossa assistente entra em contacto</h3>
+                      <p className="text-sm text-white/60 leading-relaxed">Depois de registar o cliente, informe-o que a nossa assistente irá entrar em contacto pelo número que ele forneceu. A assistente vai conversar com o cliente para obter todas as informações necessárias para a criação do site: logotipo, cores, conteúdos, fotos, textos e outros detalhes. Você não precisa fazer mais nada nesta fase — nós tratamos de tudo.</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-white/5 border-white/10">
+                <CardContent className="p-6">
+                  <div className="flex items-start gap-4">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-green-500 flex items-center justify-center text-white font-bold text-sm shrink-0">4</div>
+                    <div>
+                      <h3 className="text-base font-bold text-white/90 mb-2">O site começa a ser desenvolvido</h3>
+                      <p className="text-sm text-white/60 leading-relaxed">Quando o cliente fornecer todas as informações e aceitar as condições, nós começamos a desenvolver o site. Você será notificado na secção "Mensagens" de que o site entrou em fase de desenvolvimento. Nesta altura, pode ficar tranquilo — a nossa equipa está a trabalhar no projecto do seu cliente.</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-white/5 border-white/10">
+                <CardContent className="p-6">
+                  <div className="flex items-start gap-4">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-500 to-amber-500 flex items-center justify-center text-white font-bold text-sm shrink-0">5</div>
+                    <div>
+                      <h3 className="text-base font-bold text-white/90 mb-2">Primeiro pagamento do cliente</h3>
+                      <p className="text-sm text-white/60 leading-relaxed">Quando o cliente fizer o primeiro pagamento (a primeira parcela do valor do site), nós iremos informá-lo através das suas mensagens. Este pagamento confirma o compromisso do cliente e significa que o projecto está a avançar. A sua comissão fica pendente até a entrega final do site.</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-white/5 border-white/10">
+                <CardContent className="p-6">
+                  <div className="flex items-start gap-4">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-red-500 to-rose-500 flex items-center justify-center text-white font-bold text-sm shrink-0">6</div>
+                    <div>
+                      <h3 className="text-base font-bold text-white/90 mb-2">Entrega do site e pagamento da comissão</h3>
+                      <p className="text-sm text-white/60 leading-relaxed">Quando o site estiver pronto e for entregue ao cliente, e o cliente fizer o pagamento da segunda parcela (pagamento final), é nesse momento que a sua comissão é libertada e ficará disponível para levantamento. Será notificado nas suas mensagens e o valor da comissão aparecerá na sua carteira, pronto para solicitar saque.</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 border-blue-500/20">
+                <CardContent className="p-6">
+                  <div className="flex items-start gap-4">
+                    <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center shrink-0">
+                      <MessageSquare className="w-5 h-5 text-blue-400" />
+                    </div>
+                    <div>
+                      <h3 className="text-base font-bold text-white/90 mb-2">Acompanhe tudo na secção Mensagens</h3>
+                      <p className="text-sm text-white/60 leading-relaxed">Na secção "Mensagens" do menu lateral, pode acompanhar todo o processo. Receberá notificações quando o estado do seu cliente mudar — desde a aprovação até o pagamento. Também pode solicitar prints das conversas entre a nossa equipa e o seu cliente, para ter a certeza de que tudo está a correr bem. Basta clicar em "Pedir print" na secção de mensagens e a equipa envia-lhe as capturas das últimas conversas.</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-gradient-to-br from-amber-500/10 to-red-500/10 border-amber-500/20">
+                <CardContent className="p-6">
+                  <div className="flex items-start gap-4">
+                    <div className="w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center shrink-0">
+                      <Lightbulb className="w-5 h-5 text-amber-400" />
+                    </div>
+                    <div>
+                      <h3 className="text-base font-bold text-amber-300/90 mb-2">Dica importante</h3>
+                      <p className="text-sm text-white/60 leading-relaxed">Para que o processo corra bem, certifique-se de que o contacto que fornece é o WhatsApp do cliente. Se o número não tiver WhatsApp ou estiver incorreto, a nossa assistente não conseguirá entrar em contacto e o cliente poderá ser reprovado. Nesse caso, receberá uma mensagem a explicar o motivo e poderá corrigir a informação.</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        );
       case "profile":
         return (
           <div className="space-y-6 sm:space-y-8">
@@ -1183,15 +1395,16 @@ export default function UserDashboard() {
                       >
                         <item.icon className={`w-6 h-6 shrink-0 ${activeItem === item.id ? "text-white" : "text-white/40"}`} />
                         <span className="font-semibold text-base lg:text-lg truncate">{item.label}</span>
-                        {item.id === "messages" && myNotifications.filter((n: any) =>
-                          n.title?.includes("Cliente") || n.title?.includes("cliente") || n.title?.includes("Site do cliente") || n.title?.includes("Mensagem sobre cliente")
-                        ).length > 0 && (
-                          <span className="ml-auto mr-1 bg-red-500 text-white text-[9px] font-bold rounded-full w-5 h-5 flex items-center justify-center shrink-0">
-                            {myNotifications.filter((n: any) =>
-                              n.title?.includes("Cliente") || n.title?.includes("cliente") || n.title?.includes("Site do cliente") || n.title?.includes("Mensagem sobre cliente")
-                            ).length}
-                          </span>
-                        )}
+                        {item.id === "messages" && (() => {
+                          const unread = myNotifications.filter((n: any) =>
+                            !n.isRead && (n.title?.includes("Cliente") || n.title?.includes("cliente") || n.title?.includes("Site do cliente") || n.title?.includes("Mensagem sobre cliente") || n.title?.includes("Print de conversa"))
+                          ).length;
+                          return unread > 0 ? (
+                            <span className="ml-auto mr-1 bg-red-500 text-white text-[9px] font-bold rounded-full w-5 h-5 flex items-center justify-center shrink-0">
+                              {unread}
+                            </span>
+                          ) : null;
+                        })()}
                         {activeItem === item.id && <ChevronRight className="ml-auto w-5 h-5 shrink-0 opacity-50" />}
                       </SidebarMenuButton>
                     </SidebarMenuItem>

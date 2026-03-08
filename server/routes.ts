@@ -784,6 +784,59 @@ ganhar dinheiro na internet angola, marketing de afiliados angola, renda extra a
     }
   });
 
+  // === ADMIN: CONVERSATION SCREENSHOTS ===
+  app.get("/api/admin/screenshot-requests", requireAdmin, async (_req: Request, res: Response) => {
+    try {
+      const allNotifs = await storage.getNotifications();
+      const requests = allNotifs.filter((n: any) => n.title?.startsWith("Pedido de Print"));
+      res.json(requests);
+    } catch (error: any) {
+      console.error("Screenshot requests error:", error);
+      res.status(500).json({ message: safeError(error) });
+    }
+  });
+
+  app.post("/api/admin/screenshots", requireAdmin, upload.array("images", 3), async (req: Request, res: Response) => {
+    try {
+      const { affiliateId, clientId, message } = req.body;
+      if (!affiliateId || !isValidUUID(affiliateId)) return res.status(400).json({ message: "ID de afiliado inválido" });
+
+      const files = req.files as Express.Multer.File[];
+      if (!files || files.length === 0) return res.status(400).json({ message: "Nenhuma imagem enviada" });
+      if (files.length > 3) return res.status(400).json({ message: "Máximo 3 imagens" });
+
+      if (!isCloudinaryConfigured()) return res.status(500).json({ message: "Cloudinary não configurado" });
+
+      const screenshots: any[] = [];
+      for (const file of files) {
+        const { url, publicId } = await uploadImage(file.buffer, "screenshots");
+        const s = await storage.createScreenshot({
+          affiliateId,
+          clientId: clientId && isValidUUID(clientId) ? clientId : null,
+          imageUrl: url,
+          cloudinaryPublicId: publicId,
+          message: message ? sanitizeString(message) : null,
+        });
+        screenshots.push(s);
+      }
+
+      const client = clientId ? await storage.getClient(clientId) : null;
+      await storage.createNotification({
+        title: `Print de conversa${client ? ` — ${client.name}` : ""}`,
+        description: message ? sanitizeString(message) : "A equipa enviou prints da conversa com o seu cliente. Consulte a secção de Mensagens.",
+        type: "info",
+        targetUserId: affiliateId,
+        targetRole: null,
+        channels: null,
+      });
+
+      res.status(201).json(screenshots);
+    } catch (error: any) {
+      console.error("Upload screenshots error:", error);
+      res.status(500).json({ message: safeError(error) });
+    }
+  });
+
   // === ADMIN: SECURITY LOGS ===
   app.get("/api/admin/security-logs", requireAdmin, async (_req: Request, res: Response) => {
     try {
@@ -939,6 +992,43 @@ ganhar dinheiro na internet angola, marketing de afiliados angola, renda extra a
       res.json(notifs);
     } catch (error: any) {
       console.error("User notifications error:", error);
+      res.status(500).json({ message: safeError(error) });
+    }
+  });
+
+  app.patch("/api/user/notifications/read", requireActiveUser, async (req: Request, res: Response) => {
+    try {
+      const { ids } = req.body;
+      if (!Array.isArray(ids) || ids.length === 0) return res.status(400).json({ message: "IDs inválidos" });
+      if (ids.length > 100) return res.status(400).json({ message: "Máximo 100 notificações de cada vez" });
+      await storage.markNotificationsRead(ids, req.session.userId!);
+      res.json({ success: true });
+    } catch (error: any) {
+      console.error("Mark notifications read error:", error);
+      res.status(500).json({ message: safeError(error) });
+    }
+  });
+
+  app.post("/api/user/request-conversation-status", requireActiveUser, strictLimiter, async (req: Request, res: Response) => {
+    try {
+      const { clientId } = req.body;
+      if (!clientId || !isValidUUID(clientId)) return res.status(400).json({ message: "ID de cliente inválido" });
+      const client = await storage.getClient(clientId);
+      if (!client || client.affiliateId !== req.session.userId) return res.status(403).json({ message: "Sem permissão" });
+      const notif = await storage.requestConversationStatus(req.session.userId!, clientId);
+      res.json(notif);
+    } catch (error: any) {
+      console.error("Request conversation status error:", error);
+      res.status(500).json({ message: safeError(error) });
+    }
+  });
+
+  app.get("/api/user/screenshots", requireActiveUser, async (req: Request, res: Response) => {
+    try {
+      const screenshots = await storage.getScreenshotsByAffiliate(req.session.userId!);
+      res.json(screenshots);
+    } catch (error: any) {
+      console.error("User screenshots error:", error);
       res.status(500).json({ message: safeError(error) });
     }
   });

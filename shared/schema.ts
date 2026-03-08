@@ -61,7 +61,23 @@ export const notifications = sqliteTable("notifications", {
   targetRole: text("target_role"),
   targetUserId: text("target_user_id").references(() => users.id),
   channels: text("channels"),
+  isRead: integer("is_read", { mode: "boolean" }).notNull().default(false),
   createdAt: integer("created_at", { mode: "timestamp" }).notNull().$defaultFn(() => new Date()),
+});
+
+export const conversationScreenshots = sqliteTable("conversation_screenshots", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  affiliateId: text("affiliate_id").notNull().references(() => users.id),
+  clientId: text("client_id").references(() => clients.id),
+  imageUrl: text("image_url").notNull(),
+  cloudinaryPublicId: text("cloudinary_public_id").notNull(),
+  message: text("message"),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull().$defaultFn(() => new Date()),
+  expiresAt: integer("expires_at", { mode: "timestamp" }).notNull().$defaultFn(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 3);
+    return d;
+  }),
 });
 
 export const securityLogs = sqliteTable("security_logs", {
@@ -84,7 +100,8 @@ export const insertUserSchema = createInsertSchema(users).omit({ id: true, creat
 export const insertClientSchema = createInsertSchema(clients).omit({ id: true, createdAt: true });
 export const insertWithdrawalSchema = createInsertSchema(withdrawals).omit({ id: true, createdAt: true });
 export const insertMaterialSchema = createInsertSchema(materials).omit({ id: true, createdAt: true, cloudinaryPublicId: true });
-export const insertNotificationSchema = createInsertSchema(notifications).omit({ id: true, createdAt: true });
+export const insertNotificationSchema = createInsertSchema(notifications).omit({ id: true, createdAt: true, isRead: true });
+export const insertConversationScreenshotSchema = createInsertSchema(conversationScreenshots).omit({ id: true, createdAt: true, expiresAt: true });
 export const insertSecurityLogSchema = createInsertSchema(securityLogs).omit({ id: true, createdAt: true });
 
 export const loginSchema = z.object({
@@ -114,4 +131,6 @@ export type Notification = typeof notifications.$inferSelect;
 export type InsertNotification = z.infer<typeof insertNotificationSchema>;
 export type SecurityLog = typeof securityLogs.$inferSelect;
 export type InsertSecurityLog = z.infer<typeof insertSecurityLogSchema>;
+export type ConversationScreenshot = typeof conversationScreenshots.$inferSelect;
+export type InsertConversationScreenshot = z.infer<typeof insertConversationScreenshotSchema>;
 export type Settings = typeof settings.$inferSelect;

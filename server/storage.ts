@@ -1,13 +1,14 @@
 import { db } from "./db";
 import { eq, desc, sql, and, count } from "drizzle-orm";
 import {
-  users, clients, withdrawals, materials, notifications, securityLogs, settings,
+  users, clients, withdrawals, materials, notifications, securityLogs, settings, conversationScreenshots,
   type User, type InsertUser,
   type Client, type InsertClient,
   type Withdrawal, type InsertWithdrawal,
   type Material, type InsertMaterial,
   type Notification, type InsertNotification,
   type SecurityLog, type InsertSecurityLog,
+  type ConversationScreenshot, type InsertConversationScreenshot,
   type Settings,
 } from "@shared/schema";
 
@@ -42,6 +43,12 @@ export interface IStorage {
 
   getNotifications(targetRole?: string, targetUserId?: string): Promise<Notification[]>;
   createNotification(notification: InsertNotification): Promise<Notification>;
+  markNotificationsRead(ids: string[], userId: string): Promise<void>;
+
+  getScreenshotsByAffiliate(affiliateId: string): Promise<ConversationScreenshot[]>;
+  createScreenshot(screenshot: InsertConversationScreenshot): Promise<ConversationScreenshot>;
+  deleteExpiredScreenshots(): Promise<string[]>;
+  requestConversationStatus(affiliateId: string, clientId: string): Promise<Notification>;
 
   getSecurityLogs(): Promise<SecurityLog[]>;
   createSecurityLog(log: InsertSecurityLog): Promise<SecurityLog>;
@@ -218,6 +225,54 @@ export class DatabaseStorage implements IStorage {
       channels: channelsJson,
     } as any).returning();
     return n;
+  }
+
+  async markNotificationsRead(ids: string[], userId: string): Promise<void> {
+    for (const id of ids) {
+      await db.update(notifications).set({ isRead: true } as any).where(
+        and(eq(notifications.id, id), sql`(${notifications.targetUserId} = ${userId} OR ${notifications.targetRole} = 'user' OR ${notifications.targetRole} IS NULL)`)
+      );
+    }
+  }
+
+  async getScreenshotsByAffiliate(affiliateId: string): Promise<ConversationScreenshot[]> {
+    const now = new Date();
+    return db.select().from(conversationScreenshots)
+      .where(and(eq(conversationScreenshots.affiliateId, affiliateId), sql`${conversationScreenshots.expiresAt} > ${now}`))
+      .orderBy(desc(conversationScreenshots.createdAt));
+  }
+
+  async createScreenshot(screenshot: InsertConversationScreenshot): Promise<ConversationScreenshot> {
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 3);
+    const [s] = await db.insert(conversationScreenshots).values({
+      ...screenshot,
+      expiresAt,
+    } as any).returning();
+    return s;
+  }
+
+  async deleteExpiredScreenshots(): Promise<string[]> {
+    const now = new Date();
+    const expired = await db.select().from(conversationScreenshots)
+      .where(sql`${conversationScreenshots.expiresAt} <= ${now}`);
+    const publicIds = expired.map(s => s.cloudinaryPublicId);
+    if (expired.length > 0) {
+      await db.delete(conversationScreenshots).where(sql`${conversationScreenshots.expiresAt} <= ${now}`);
+    }
+    return publicIds;
+  }
+
+  async requestConversationStatus(affiliateId: string, clientId: string): Promise<Notification> {
+    const client = await this.getClient(clientId);
+    return this.createNotification({
+      title: `Pedido de Print — Cliente "${client?.name || "Desconhecido"}"`,
+      description: `O afiliado solicitou prints da conversa com o cliente "${client?.name || ""}" (${client?.contact || ""}).`,
+      type: "info",
+      targetRole: "admin",
+      targetUserId: null,
+      channels: null,
+    });
   }
 
   async getSecurityLogs(): Promise<SecurityLog[]> {

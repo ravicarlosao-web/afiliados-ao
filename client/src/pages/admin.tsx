@@ -284,6 +284,35 @@ export default function AdminDashboard() {
   const [matContent, setMatContent] = useState("");
   const [matImage, setMatImage] = useState<File | null>(null);
 
+  const [ssAffiliateId, setSsAffiliateId] = useState("");
+  const [ssClientId, setSsClientId] = useState("");
+  const [ssMessage, setSsMessage] = useState("");
+  const [ssImages, setSsImages] = useState<File[]>([]);
+
+  const { data: screenshotRequests = [] } = useQuery<any[]>({
+    queryKey: ["/api/admin/screenshot-requests"],
+    queryFn: getQueryFn({ on401: "throw" }),
+  });
+
+  const uploadScreenshotsMutation = useMutation({
+    mutationFn: async ({ affiliateId, clientId, message, images }: { affiliateId: string; clientId?: string; message?: string; images: File[] }) => {
+      const formData = new FormData();
+      formData.append("affiliateId", affiliateId);
+      if (clientId) formData.append("clientId", clientId);
+      if (message) formData.append("message", message);
+      images.forEach(img => formData.append("images", img));
+      await apiRequest("POST", "/api/admin/screenshots", formData);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/screenshot-requests"] });
+      toast({ title: "Prints enviados com sucesso" });
+      setSsAffiliateId("");
+      setSsClientId("");
+      setSsMessage("");
+      setSsImages([]);
+    },
+  });
+
   const [commBase, setCommBase] = useState("0");
   const [commEssencial, setCommEssencial] = useState("0");
   const [commProfissional, setCommProfissional] = useState("0");
@@ -873,6 +902,123 @@ export default function AdminDashboard() {
                   data-testid="button-send-notification"
                 >
                   <Megaphone className="w-4 h-4" /> {sendNotificationMutation.isPending ? "Enviando..." : "Disparar Notificação"}
+                </Button>
+              </CardContent>
+            </Card>
+
+            {screenshotRequests.length > 0 && (
+              <Card className="bg-white/5 border-white/10 max-w-2xl">
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <ImageIcon className="w-5 h-5 text-amber-400" />
+                    Pedidos de Prints Pendentes
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <div className="divide-y divide-white/5">
+                    {screenshotRequests.map((req: any) => (
+                      <div key={req.id} className="px-6 py-3 text-xs text-white/60 flex items-center justify-between" data-testid={`row-ss-request-${req.id}`}>
+                        <div>
+                          <p className="font-bold text-white/80">{req.title}</p>
+                          <p className="text-white/40 mt-0.5">{req.description}</p>
+                        </div>
+                        <span className="text-[10px] text-white/30">{timeAgo(req.createdAt)}</span>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            <Card className="bg-white/5 border-white/10 max-w-2xl">
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <ImageIcon className="w-5 h-5 text-blue-400" />
+                  Enviar Prints de Conversa
+                </CardTitle>
+                <p className="text-xs text-white/40 mt-1">Envie capturas de ecrã da conversa com o cliente para o afiliado acompanhar. Máximo 3 imagens. As imagens são eliminadas automaticamente após 3 dias.</p>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label className="text-xs">Afiliado</Label>
+                  <Select value={ssAffiliateId} onValueChange={setSsAffiliateId}>
+                    <SelectTrigger className="bg-white/5 border-white/10 text-white" data-testid="select-ss-affiliate">
+                      <SelectValue placeholder="Selecionar afiliado..." />
+                    </SelectTrigger>
+                    <SelectContent className="bg-black border-white/10 text-white">
+                      {(allClients || []).reduce((acc: any[], cl: any) => {
+                        if (!acc.find((a: any) => a.affiliateId === cl.affiliateId)) {
+                          acc.push({ affiliateId: cl.affiliateId, affiliateName: cl.affiliateName || "Afiliado" });
+                        }
+                        return acc;
+                      }, []).map((aff: any) => (
+                        <SelectItem key={aff.affiliateId} value={aff.affiliateId}>{aff.affiliateName}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {ssAffiliateId && (
+                  <div className="space-y-2">
+                    <Label className="text-xs">Cliente (opcional)</Label>
+                    <Select value={ssClientId} onValueChange={setSsClientId}>
+                      <SelectTrigger className="bg-white/5 border-white/10 text-white" data-testid="select-ss-client">
+                        <SelectValue placeholder="Selecionar cliente..." />
+                      </SelectTrigger>
+                      <SelectContent className="bg-black border-white/10 text-white">
+                        {(allClients || []).filter((cl: any) => cl.affiliateId === ssAffiliateId).map((cl: any) => (
+                          <SelectItem key={cl.id} value={cl.id}>{cl.name} — {cl.contact}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+
+                <div className="space-y-2">
+                  <Label className="text-xs">Mensagem (opcional)</Label>
+                  <Textarea
+                    placeholder="Ex: Aqui estão as últimas mensagens com o cliente..."
+                    value={ssMessage}
+                    onChange={(e) => setSsMessage(e.target.value)}
+                    className="bg-white/5 border-white/10 text-white text-xs min-h-[60px] placeholder:text-white/20"
+                    data-testid="input-ss-message"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-xs">Imagens (máx. 3)</Label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={(e) => {
+                      const files = Array.from(e.target.files || []).slice(0, 3);
+                      setSsImages(files);
+                    }}
+                    className="text-xs text-white/60 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-white/10 file:text-white/70 file:text-xs file:cursor-pointer hover:file:bg-white/20"
+                    data-testid="input-ss-images"
+                  />
+                  {ssImages.length > 0 && (
+                    <p className="text-[10px] text-white/40">{ssImages.length} imagem(ns) selecionada(s)</p>
+                  )}
+                </div>
+
+                <Button
+                  onClick={() => {
+                    if (!ssAffiliateId || ssImages.length === 0) return;
+                    uploadScreenshotsMutation.mutate({
+                      affiliateId: ssAffiliateId,
+                      clientId: ssClientId || undefined,
+                      message: ssMessage || undefined,
+                      images: ssImages,
+                    });
+                  }}
+                  disabled={uploadScreenshotsMutation.isPending || !ssAffiliateId || ssImages.length === 0}
+                  className="w-full bg-blue-500 hover:bg-blue-600 font-bold gap-2"
+                  data-testid="button-send-screenshots"
+                >
+                  <ImageIcon className="w-4 h-4" />
+                  {uploadScreenshotsMutation.isPending ? "Enviando..." : "Enviar Prints"}
                 </Button>
               </CardContent>
             </Card>
