@@ -856,24 +856,26 @@ export default function UserDashboard() {
               </Card>
             ) : (
               <Tabs defaultValue="all" className="w-full">
-                <TabsList className="bg-white/5 border border-white/10 p-1">
+                <TabsList className="bg-white/5 border border-white/10 p-1 flex-wrap">
                   <TabsTrigger value="all" className="data-[state=active]:bg-white/10">Todos</TabsTrigger>
                   <TabsTrigger value="copy" className="data-[state=active]:bg-white/10">Textos</TabsTrigger>
                   <TabsTrigger value="script" className="data-[state=active]:bg-white/10">Scripts</TabsTrigger>
                   <TabsTrigger value="image" className="data-[state=active]:bg-white/10">Imagens</TabsTrigger>
+                  <TabsTrigger value="portfolio" className="data-[state=active]:bg-white/10">Sites Feitos</TabsTrigger>
                 </TabsList>
 
-                {["all", "copy", "script", "image"].map(tab => (
+                {["all", "copy", "script", "image", "portfolio"].map(tab => (
                   <TabsContent key={tab} value={tab} className="mt-6 space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       {myMaterials
                         .filter((m: any) => tab === "all" || m.type === tab)
                         .map((mat: any) => (
-                          <Card key={mat.id} className="bg-white/5 border-white/10" data-testid={`card-material-${mat.id}`}>
+                          <Card key={mat.id} className={`border-white/10 ${mat.type === "portfolio" ? "bg-gradient-to-br from-green-500/5 to-white/5" : "bg-white/5"}`} data-testid={`card-material-${mat.id}`}>
                             <CardHeader className="pb-2">
                               <CardTitle className="text-sm font-semibold flex items-center gap-2">
                                 {mat.type === "copy" ? <MessageSquare className="w-4 h-4 text-blue-400" /> :
                                  mat.type === "script" ? <FileText className="w-4 h-4 text-purple-400" /> :
+                                 mat.type === "portfolio" ? <Globe className="w-4 h-4 text-green-400" /> :
                                  <ImageIcon className="w-4 h-4 text-amber-400" />}
                                 {mat.title}
                               </CardTitle>
@@ -882,21 +884,44 @@ export default function UserDashboard() {
                               {mat.imageUrl && (
                                 <img src={mat.imageUrl} alt={mat.title} className="w-full rounded border border-white/10" />
                               )}
-                              {mat.content && (
-                                <p className="text-xs text-white/60 bg-black/40 p-3 rounded border border-white/5 italic">"{mat.content}"</p>
-                              )}
-                              {mat.content ? (
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  className="w-full border-white/10 gap-2"
-                                  onClick={() => {
-                                    navigator.clipboard.writeText(mat.content);
-                                    toast({ title: "Texto copiado!" });
-                                  }}
-                                >
-                                  <Copy className="w-3 h-3" /> Copiar Conteúdo
-                                </Button>
+                              {mat.type === "portfolio" && mat.content ? (
+                                <>
+                                  <p className="text-xs text-white/50">Site feito pela nossa equipa — envie este link ao cliente para mostrar o nosso trabalho.</p>
+                                  <div className="flex gap-2">
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      className="flex-1 border-green-500/20 text-green-400 hover:bg-green-500/10 gap-2"
+                                      onClick={() => {
+                                        navigator.clipboard.writeText(mat.content);
+                                        toast({ title: "Link copiado!" });
+                                      }}
+                                      data-testid={`button-copy-portfolio-${mat.id}`}
+                                    >
+                                      <Copy className="w-3 h-3" /> Copiar Link
+                                    </Button>
+                                    <a href={mat.content.startsWith("http") ? mat.content : `https://${mat.content}`} target="_blank" rel="noopener noreferrer">
+                                      <Button variant="outline" size="sm" className="border-white/10 gap-2" data-testid={`button-visit-portfolio-${mat.id}`}>
+                                        <Globe className="w-3 h-3" /> Visitar
+                                      </Button>
+                                    </a>
+                                  </div>
+                                </>
+                              ) : mat.content ? (
+                                <>
+                                  <p className="text-xs text-white/60 bg-black/40 p-3 rounded border border-white/5 italic">"{mat.content}"</p>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="w-full border-white/10 gap-2"
+                                    onClick={() => {
+                                      navigator.clipboard.writeText(mat.content);
+                                      toast({ title: "Texto copiado!" });
+                                    }}
+                                  >
+                                    <Copy className="w-3 h-3" /> Copiar Conteúdo
+                                  </Button>
+                                </>
                               ) : mat.imageUrl ? (
                                 <a href={mat.imageUrl} target="_blank" rel="noopener noreferrer" className="block">
                                   <Button variant="outline" size="sm" className="w-full border-white/10 gap-2">

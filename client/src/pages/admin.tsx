@@ -1051,6 +1051,7 @@ export default function AdminDashboard() {
                       <SelectItem value="copy">Texto / Copy</SelectItem>
                       <SelectItem value="script">Script de Venda</SelectItem>
                       <SelectItem value="image">Imagem / Criativo</SelectItem>
+                      <SelectItem value="portfolio">Link de Portfólio</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -1064,6 +1065,11 @@ export default function AdminDashboard() {
                       className="w-full text-sm text-white/60 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-white/10 file:text-white hover:file:bg-white/20"
                       data-testid="input-material-image"
                     />
+                  </div>
+                ) : matType === "portfolio" ? (
+                  <div className="space-y-2">
+                    <Label className="text-xs">URL do Site</Label>
+                    <Input value={matContent} onChange={(e) => setMatContent(e.target.value)} placeholder="https://exemplo.ao" className="bg-white/5 border-white/10" data-testid="input-material-url" />
                   </div>
                 ) : (
                   <div className="space-y-2">
@@ -1097,7 +1103,7 @@ export default function AdminDashboard() {
                   <div key={mat.id} className="flex items-center justify-between p-3 rounded bg-black/40 border border-white/5" data-testid={`card-material-${mat.id}`}>
                     <div>
                       <p className="text-xs font-bold">{mat.title}</p>
-                      <p className="text-[10px] text-white/20">{mat.type === "copy" ? "Texto" : mat.type === "script" ? "Script" : "Imagem"} • {timeAgo(mat.createdAt)}</p>
+                      <p className="text-[10px] text-white/20">{mat.type === "copy" ? "Texto" : mat.type === "script" ? "Script" : mat.type === "portfolio" ? "Portfólio" : "Imagem"} • {timeAgo(mat.createdAt)}</p>
                     </div>
                     <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-red-400 hover:bg-red-500/10" onClick={() => deleteMaterialMutation.mutate(mat.id)}>
                       <XCircle className="w-3 h-3" />

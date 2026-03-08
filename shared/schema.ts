@@ -46,7 +46,7 @@ export const withdrawals = sqliteTable("withdrawals", {
 export const materials = sqliteTable("materials", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
   title: text("title").notNull(),
-  type: text("type", { enum: ["copy", "script", "image"] }).notNull(),
+  type: text("type", { enum: ["copy", "script", "image", "portfolio"] }).notNull(),
   content: text("content"),
   imageUrl: text("image_url"),
   cloudinaryPublicId: text("cloudinary_public_id"),
