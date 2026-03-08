@@ -6,7 +6,7 @@ const ease = [0.16, 1, 0.3, 1];
 
 export function Footer() {
   return (
-    <footer className="pt-16 sm:pt-20 md:pt-24 pb-8 sm:pb-12 px-4 sm:px-6 container mx-auto relative z-20 border-t border-white/5 overflow-hidden">
+    <footer className="pt-16 sm:pt-20 md:pt-24 pb-8 sm:pb-12 px-4 sm:px-6 container mx-auto relative z-20 border-t border-white/5 overflow-hidden" role="contentinfo" itemScope itemType="https://schema.org/WPFooter">
       <motion.div
         initial={{ opacity: 0, y: 60, scale: 0.95, rotateX: 4 }}
         whileInView={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}

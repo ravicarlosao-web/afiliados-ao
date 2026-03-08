@@ -28,7 +28,7 @@ const features = [
 
 export function ValueProposition() {
   return (
-    <section id="features" className="py-16 sm:py-20 md:py-24 px-4 sm:px-6 container mx-auto overflow-hidden">
+    <section id="features" className="py-16 sm:py-20 md:py-24 px-4 sm:px-6 container mx-auto overflow-hidden" aria-label="Funcionalidades da plataforma de afiliados">
       <motion.div 
         initial={{ opacity: 0, scale: 0.94, rotateX: 3 }}
         whileInView={{ opacity: 1, scale: 1, rotateX: 0 }}

@@ -211,7 +211,7 @@ export function FeaturesGrid() {
   ];
 
   return (
-    <section id="applications" className="py-16 sm:py-20 md:py-24 px-4 sm:px-6 container mx-auto overflow-hidden">
+    <section id="applications" className="py-16 sm:py-20 md:py-24 px-4 sm:px-6 container mx-auto overflow-hidden" aria-label="Como funciona o programa de afiliados e tabelas de comissão" itemScope itemType="https://schema.org/ItemList">
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         whileInView={{ opacity: 1, y: 0 }}

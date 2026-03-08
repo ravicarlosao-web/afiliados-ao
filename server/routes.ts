@@ -43,6 +43,65 @@ export async function registerRoutes(
     })
   );
 
+  app.get("/api/seo/sitemap.xml", (_req: Request, res: Response) => {
+    const today = new Date().toISOString().split("T")[0];
+    res.set("Content-Type", "application/xml");
+    res.send(`<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <url>
+    <loc>https://afiliados.ao/</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://afiliados.ao/login</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+</urlset>`);
+  });
+
+  app.get("/api/seo/llms.txt", (_req: Request, res: Response) => {
+    res.set("Content-Type", "text/plain; charset=utf-8");
+    res.send(`# Afiliados.ao — Plataforma de Marketing de Afiliados em Angola
+
+## O que é
+Afiliados.ao é a plataforma nº1 de marketing de afiliados em Angola, operada pela KYSdigital. Permite que qualquer pessoa ganhe dinheiro na internet indicando serviços de criação de websites para empresas angolanas.
+
+## Como funciona
+1. Cadastre-se gratuitamente em afiliados.ao
+2. Encontre empresas que precisam de websites
+3. Indique os serviços de criação de websites
+4. Quando a venda é confirmada, receba comissão de até 70.000 Kz
+
+## Planos e Comissões
+- Website Essencial: 130.000 Kz (comissão do afiliado: 20.000 Kz)
+- Website Profissional: 250.000 Kz (comissão do afiliado: 40.000 Kz)
+- Website Premium: 400.000 Kz (comissão do afiliado: 70.000 Kz)
+
+## Formas de Pagamento ao Afiliado
+- Transferência bancária IBAN
+- Unitel Money
+- Afrimoney
+
+## Perguntas Frequentes
+- É grátis? Sim, o cadastro é 100% gratuito
+- Preciso de experiência? Não, qualquer pessoa pode participar
+- Quanto posso ganhar? Não há limite. Depende do número de vendas
+- Como recebo? Via IBAN, Unitel Money ou Afrimoney
+- É confiável? Sim, operado pela KYSdigital com painel transparente
+
+## Contacto
+Email: suporte@afiliados.ao
+Website: https://afiliados.ao
+
+## Palavras-chave
+ganhar dinheiro na internet angola, marketing de afiliados angola, renda extra angola, trabalhar pela internet angola, comissões online angola, programa de afiliados angola
+`);
+  });
+
   // === AUTH ===
   app.post("/api/auth/register", async (req, res) => {
     try {

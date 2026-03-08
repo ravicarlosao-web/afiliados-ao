@@ -5,7 +5,7 @@ const ease = [0.16, 1, 0.3, 1];
 
 export function Hero() {
   return (
-    <section className="pt-28 sm:pt-32 md:pt-40 pb-12 sm:pb-16 md:pb-20 px-4 sm:px-6 text-center overflow-hidden">
+    <section className="pt-28 sm:pt-32 md:pt-40 pb-12 sm:pb-16 md:pb-20 px-4 sm:px-6 text-center overflow-hidden" aria-label="Ganhe dinheiro na internet em Angola com marketing de afiliados" itemScope itemType="https://schema.org/WPHeader">
       <div className="max-w-6xl mx-auto space-y-6 sm:space-y-8">
         <motion.div
           initial={{ opacity: 0, scale: 0.92, filter: "blur(12px)" }}
@@ -17,6 +17,8 @@ export function Hero() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.9, delay: 0.3, ease }}
             className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-normal tracking-tight leading-[1.15] sm:leading-[1.2] font-['DM_Sans'] max-w-5xl mx-auto"
+
+            itemProp="headline"
           >
             Comece a ganhar 70.000 Kz por semana vendendo sites sem precisar criar nenhum site!
           </motion.h1>

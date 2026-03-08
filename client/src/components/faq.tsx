@@ -33,7 +33,7 @@ export function FAQ() {
   ];
 
   return (
-    <section id="faq" className="py-16 sm:py-20 md:py-24 px-4 sm:px-6 container mx-auto overflow-hidden">
+    <section id="faq" className="py-16 sm:py-20 md:py-24 px-4 sm:px-6 container mx-auto overflow-hidden" aria-label="Perguntas frequentes sobre marketing de afiliados em Angola">
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         whileInView={{ opacity: 1, y: 0 }}

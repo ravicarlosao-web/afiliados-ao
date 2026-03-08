@@ -70,3 +70,16 @@ All pages are fully responsive with mobile-first breakpoints:
 - **User dashboard**: same responsive patterns as admin, profile avatar/cards scale, action buttons full-width on mobile
 - **Login page**: already responsive with max-w-[400px] centered card
 - Custom thin scrollbar styles for horizontal scroll areas in index.css
+
+## SEO
+
+Comprehensive SEO implementation targeting "ganhar dinheiro na internet angola" and related keywords:
+- **Meta tags**: Complete title, description, keywords, geo tags, canonical URL, hreflang pt-AO/pt
+- **Open Graph & Twitter Cards**: Full OG and Twitter meta tags with proper content
+- **Structured Data (JSON-LD)**: 6 blocks — WebApplication, Organization, FAQPage, HowTo, BreadcrumbList, Service with OfferCatalog
+- **robots.txt**: Allows all pages except /admin /usuario /api; explicitly allows AI crawlers (GPTBot, ChatGPT-User, ClaudeBot, PerplexityBot, Applebot-Extended)
+- **sitemap.xml**: Static sitemap in client/public + dynamic endpoint at /api/seo/sitemap.xml
+- **llms.txt**: AI-readable structured content at client/public/llms.txt + /api/seo/llms.txt
+- **seo-content.tsx**: Screen-reader-only semantic content with keyword-rich FAQs and descriptions
+- **Semantic HTML**: aria-labels, itemScope, itemType, itemProp, role attributes on all landing page sections
+- **Animations**: Professional framer-motion animations with overflow-hidden to prevent layout shifts
