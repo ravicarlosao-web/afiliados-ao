@@ -285,10 +285,9 @@ export default function AdminDashboard() {
   const [matContent, setMatContent] = useState("");
   const [matImage, setMatImage] = useState<File | null>(null);
 
-  const [ssAffiliateId, setSsAffiliateId] = useState("");
-  const [ssClientId, setSsClientId] = useState("");
   const [ssMessage, setSsMessage] = useState("");
   const [ssImages, setSsImages] = useState<File[]>([]);
+  const [activeRequestId, setActiveRequestId] = useState<string | null>(null);
 
   const { data: screenshotRequests = [] } = useQuery<any[]>({
     queryKey: ["/api/admin/screenshot-requests"],
@@ -307,10 +306,9 @@ export default function AdminDashboard() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/screenshot-requests"] });
       toast({ title: "Prints enviados com sucesso" });
-      setSsAffiliateId("");
-      setSsClientId("");
       setSsMessage("");
       setSsImages([]);
+      setActiveRequestId(null);
     },
   });
 
@@ -914,126 +912,118 @@ export default function AdminDashboard() {
           <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-500">
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold tracking-tight bg-gradient-to-r from-white to-red-400 bg-clip-text text-transparent">Prints de Conversa</h1>
-              <p className="text-white/40 text-sm">Envie capturas de ecrã das conversas com os clientes para os afiliados acompanharem o progresso.</p>
+              <p className="text-white/40 text-sm">Pedidos de prints dos afiliados. Cada pedido já identifica o afiliado e o cliente — basta anexar as imagens e enviar.</p>
             </div>
 
-            {screenshotRequests.length > 0 && (
-              <Card className="bg-amber-500/5 border-amber-500/20">
-                <CardHeader>
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <Bell className="w-5 h-5 text-amber-400" />
-                    Pedidos de Prints ({screenshotRequests.length})
-                  </CardTitle>
-                  <p className="text-xs text-white/40 mt-1">Afiliados que solicitaram prints da conversa com os seus clientes.</p>
-                </CardHeader>
-                <CardContent className="p-0">
-                  <div className="divide-y divide-white/5">
-                    {screenshotRequests.map((req: any) => (
-                      <div key={req.id} className="px-6 py-4 flex items-center justify-between gap-4" data-testid={`row-ss-request-${req.id}`}>
-                        <div className="min-w-0">
-                          <p className="text-sm font-bold text-white/80">{req.title}</p>
-                          <p className="text-xs text-white/40 mt-0.5">{req.description}</p>
-                        </div>
-                        <span className="text-[10px] text-white/30 whitespace-nowrap shrink-0">{timeAgo(req.createdAt)}</span>
-                      </div>
-                    ))}
-                  </div>
+            {screenshotRequests.length === 0 && (
+              <Card className="bg-white/5 border-white/10">
+                <CardContent className="py-12 text-center">
+                  <ImageIcon className="w-10 h-10 mx-auto text-white/10 mb-3" />
+                  <p className="text-white/30 text-sm">Nenhum pedido de print pendente.</p>
+                  <p className="text-white/20 text-xs mt-1">Quando um afiliado solicitar prints de um cliente, o pedido aparecerá aqui.</p>
                 </CardContent>
               </Card>
             )}
 
-            <Card className="bg-white/5 border-white/10">
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <ImageIcon className="w-5 h-5 text-blue-400" />
-                  Enviar Prints
-                </CardTitle>
-                <p className="text-xs text-white/40 mt-1">Selecione o afiliado e o cliente, anexe até 3 imagens e envie. As imagens são eliminadas automaticamente após 3 dias.</p>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label className="text-xs">Afiliado</Label>
-                  <Select value={ssAffiliateId} onValueChange={(v) => { setSsAffiliateId(v); setSsClientId(""); }}>
-                    <SelectTrigger className="bg-white/5 border-white/10 text-white" data-testid="select-ss-affiliate">
-                      <SelectValue placeholder="Selecionar afiliado..." />
-                    </SelectTrigger>
-                    <SelectContent className="bg-black border-white/10 text-white">
-                      {(allClients || []).reduce((acc: any[], cl: any) => {
-                        if (!acc.find((a: any) => a.affiliateId === cl.affiliateId)) {
-                          acc.push({ affiliateId: cl.affiliateId, affiliateName: cl.affiliateName || "Afiliado" });
-                        }
-                        return acc;
-                      }, []).map((aff: any) => (
-                        <SelectItem key={aff.affiliateId} value={aff.affiliateId}>{aff.affiliateName}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+            <div className="space-y-4">
+              {screenshotRequests.map((req: any) => (
+                <Card key={req.id} className={`border transition-all ${activeRequestId === req.id ? "bg-blue-500/5 border-blue-500/20" : "bg-white/5 border-white/10"}`} data-testid={`row-ss-request-${req.id}`}>
+                  <CardContent className="p-5 space-y-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="space-y-1.5 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <Badge className="bg-amber-500/20 text-amber-400 text-[10px]">Pendente</Badge>
+                          <span className="text-[10px] text-white/30">{timeAgo(req.createdAt)}</span>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1 mt-2">
+                          <div>
+                            <p className="text-[10px] text-white/30 uppercase tracking-wider">Afiliado</p>
+                            <p className="text-sm font-bold text-white/80">{req.affiliateName || "—"}</p>
+                          </div>
+                          <div>
+                            <p className="text-[10px] text-white/30 uppercase tracking-wider">Cliente</p>
+                            <p className="text-sm font-bold text-white/80">{req.clientName || "—"}</p>
+                            {req.clientContact && <p className="text-[10px] text-white/40">{req.clientContact}</p>}
+                          </div>
+                        </div>
+                      </div>
+                      {activeRequestId !== req.id ? (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="gap-1.5 text-[11px] border-blue-500/20 text-blue-400 hover:bg-blue-500/10 shrink-0"
+                          onClick={() => { setActiveRequestId(req.id); setSsMessage(""); setSsImages([]); }}
+                          data-testid={`button-reply-request-${req.id}`}
+                        >
+                          <ImageIcon className="w-3 h-3" />
+                          Enviar Prints
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-[11px] text-white/40 hover:text-white/60 shrink-0"
+                          onClick={() => setActiveRequestId(null)}
+                        >
+                          <XCircle className="w-3.5 h-3.5" />
+                        </Button>
+                      )}
+                    </div>
 
-                {ssAffiliateId && (
-                  <div className="space-y-2">
-                    <Label className="text-xs">Cliente</Label>
-                    <Select value={ssClientId} onValueChange={setSsClientId}>
-                      <SelectTrigger className="bg-white/5 border-white/10 text-white" data-testid="select-ss-client">
-                        <SelectValue placeholder="Selecionar cliente..." />
-                      </SelectTrigger>
-                      <SelectContent className="bg-black border-white/10 text-white">
-                        {(allClients || []).filter((cl: any) => cl.affiliateId === ssAffiliateId).map((cl: any) => (
-                          <SelectItem key={cl.id} value={cl.id}>{cl.name} — {cl.contact}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
+                    {activeRequestId === req.id && (
+                      <div className="space-y-3 pt-3 border-t border-white/5">
+                        <div className="space-y-2">
+                          <Label className="text-xs">Mensagem (opcional)</Label>
+                          <Textarea
+                            placeholder="Ex: Aqui estão as últimas mensagens com o cliente..."
+                            value={ssMessage}
+                            onChange={(e) => setSsMessage(e.target.value)}
+                            className="bg-white/5 border-white/10 text-white text-xs min-h-[60px] placeholder:text-white/20"
+                            data-testid="input-ss-message"
+                          />
+                        </div>
 
-                <div className="space-y-2">
-                  <Label className="text-xs">Mensagem (opcional)</Label>
-                  <Textarea
-                    placeholder="Ex: Aqui estão as últimas mensagens com o cliente..."
-                    value={ssMessage}
-                    onChange={(e) => setSsMessage(e.target.value)}
-                    className="bg-white/5 border-white/10 text-white text-xs min-h-[80px] placeholder:text-white/20"
-                    data-testid="input-ss-message"
-                  />
-                </div>
+                        <div className="space-y-2">
+                          <Label className="text-xs">Imagens (máx. 3)</Label>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            multiple
+                            onChange={(e) => {
+                              const files = Array.from(e.target.files || []).slice(0, 3);
+                              setSsImages(files);
+                            }}
+                            className="text-xs text-white/60 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-white/10 file:text-white/70 file:text-xs file:cursor-pointer hover:file:bg-white/20"
+                            data-testid="input-ss-images"
+                          />
+                          {ssImages.length > 0 && (
+                            <p className="text-[10px] text-white/40">{ssImages.length} imagem(ns) selecionada(s)</p>
+                          )}
+                        </div>
 
-                <div className="space-y-2">
-                  <Label className="text-xs">Imagens (máx. 3)</Label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    onChange={(e) => {
-                      const files = Array.from(e.target.files || []).slice(0, 3);
-                      setSsImages(files);
-                    }}
-                    className="text-xs text-white/60 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-white/10 file:text-white/70 file:text-xs file:cursor-pointer hover:file:bg-white/20"
-                    data-testid="input-ss-images"
-                  />
-                  {ssImages.length > 0 && (
-                    <p className="text-[10px] text-white/40">{ssImages.length} imagem(ns) selecionada(s)</p>
-                  )}
-                </div>
-
-                <Button
-                  onClick={() => {
-                    if (!ssAffiliateId || ssImages.length === 0) return;
-                    uploadScreenshotsMutation.mutate({
-                      affiliateId: ssAffiliateId,
-                      clientId: ssClientId || undefined,
-                      message: ssMessage || undefined,
-                      images: ssImages,
-                    });
-                  }}
-                  disabled={uploadScreenshotsMutation.isPending || !ssAffiliateId || ssImages.length === 0}
-                  className="w-full bg-blue-500 hover:bg-blue-600 font-bold gap-2"
-                  data-testid="button-send-screenshots"
-                >
-                  <ImageIcon className="w-4 h-4" />
-                  {uploadScreenshotsMutation.isPending ? "Enviando..." : "Enviar Prints"}
-                </Button>
-              </CardContent>
-            </Card>
+                        <Button
+                          onClick={() => {
+                            if (!req.affiliateId || ssImages.length === 0) return;
+                            uploadScreenshotsMutation.mutate({
+                              affiliateId: req.affiliateId,
+                              clientId: req.clientId || undefined,
+                              message: ssMessage || undefined,
+                              images: ssImages,
+                            });
+                          }}
+                          disabled={uploadScreenshotsMutation.isPending || ssImages.length === 0}
+                          className="w-full bg-blue-500 hover:bg-blue-600 font-bold gap-2"
+                          data-testid="button-send-screenshots"
+                        >
+                          <ImageIcon className="w-4 h-4" />
+                          {uploadScreenshotsMutation.isPending ? "Enviando..." : "Enviar Prints"}
+                        </Button>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </div>
         );
       case "materials":

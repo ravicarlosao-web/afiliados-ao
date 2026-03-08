@@ -265,13 +265,14 @@ export class DatabaseStorage implements IStorage {
 
   async requestConversationStatus(affiliateId: string, clientId: string): Promise<Notification> {
     const client = await this.getClient(clientId);
+    const affiliate = await this.getUser(affiliateId);
     return this.createNotification({
       title: `Pedido de Print — Cliente "${client?.name || "Desconhecido"}"`,
-      description: `O afiliado solicitou prints da conversa com o cliente "${client?.name || ""}" (${client?.contact || ""}).`,
+      description: `O afiliado "${affiliate?.name || ""}" solicitou prints da conversa com o cliente "${client?.name || ""}" (${client?.contact || ""}).`,
       type: "info",
       targetRole: "admin",
       targetUserId: null,
-      channels: null,
+      channels: JSON.stringify({ affiliateId, clientId }),
     });
   }
 

@@ -789,7 +789,25 @@ ganhar dinheiro na internet angola, marketing de afiliados angola, renda extra a
     try {
       const allNotifs = await storage.getNotifications();
       const requests = allNotifs.filter((n: any) => n.title?.startsWith("Pedido de Print"));
-      res.json(requests);
+      const enriched = await Promise.all(requests.map(async (req: any) => {
+        let affiliateId = null, clientId = null, affiliateName = null, clientName = null, clientContact = null;
+        try {
+          const parsed = req.channels ? JSON.parse(req.channels) : {};
+          affiliateId = parsed.affiliateId || null;
+          clientId = parsed.clientId || null;
+          if (affiliateId) {
+            const aff = await storage.getUser(affiliateId);
+            affiliateName = aff?.name || null;
+          }
+          if (clientId) {
+            const cl = await storage.getClient(clientId);
+            clientName = cl?.name || null;
+            clientContact = cl?.contact || null;
+          }
+        } catch {}
+        return { ...req, affiliateId, clientId, affiliateName, clientName, clientContact };
+      }));
+      res.json(enriched);
     } catch (error: any) {
       console.error("Screenshot requests error:", error);
       res.status(500).json({ message: safeError(error) });
