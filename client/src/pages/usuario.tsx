@@ -716,30 +716,35 @@ export default function UserDashboard() {
               <p className="text-white/40 text-sm">Mensagens da equipa sobre os seus clientes indicados.</p>
             </div>
 
-            {myClients.length > 0 && (
+            {myClients.filter((cl: any) => cl.status === "em_contacto" || cl.status === "pagamento_feito").length > 0 && (
               <Card className="bg-white/5 border-white/10">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-sm font-bold flex items-center gap-2">
                     <Search className="w-4 h-4 text-blue-400" />
                     Verificar Estado da Conversa
                   </CardTitle>
-                  <CardDescription className="text-xs text-white/40">Solicite prints das últimas mensagens entre a nossa equipa e o seu cliente para acompanhar o progresso.</CardDescription>
+                  <CardDescription className="text-xs text-white/40">Solicite prints das últimas mensagens entre a nossa equipa e o seu cliente. Só disponível para clientes que já estão em contacto connosco.</CardDescription>
                 </CardHeader>
                 <CardContent className="pt-0">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    {myClients.map((cl: any) => (
-                      <Button
-                        key={cl.id}
-                        variant="outline"
-                        size="sm"
-                        className="justify-start gap-2 text-xs border-white/10 hover:bg-white/5 text-white/70"
-                        onClick={() => requestPrintMutation.mutate(cl.id)}
-                        disabled={requestPrintMutation.isPending}
-                        data-testid={`button-request-print-${cl.id}`}
-                      >
-                        <ImageIcon className="w-3.5 h-3.5 text-blue-400 shrink-0" />
-                        <span className="truncate">Pedir print — {cl.name}</span>
-                      </Button>
+                  <div className="grid grid-cols-1 gap-3">
+                    {myClients.filter((cl: any) => cl.status === "em_contacto" || cl.status === "pagamento_feito").map((cl: any) => (
+                      <div key={cl.id} className="flex items-center justify-between gap-3 bg-white/[0.02] border border-white/5 rounded-lg p-3">
+                        <div className="min-w-0">
+                          <p className="text-xs font-bold text-white/80 truncate">{cl.name}</p>
+                          <p className="text-[10px] text-white/30">{cl.contact} — {cl.plan}</p>
+                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="gap-1.5 text-[11px] border-blue-500/20 text-blue-400 hover:bg-blue-500/10 shrink-0"
+                          onClick={() => requestPrintMutation.mutate(cl.id)}
+                          disabled={requestPrintMutation.isPending}
+                          data-testid={`button-request-print-${cl.id}`}
+                        >
+                          <ImageIcon className="w-3 h-3" />
+                          Pedir Print
+                        </Button>
+                      </div>
                     ))}
                   </div>
                 </CardContent>
