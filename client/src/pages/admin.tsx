@@ -7,7 +7,7 @@ import {
   CheckCircle2, Clock, Briefcase, FileText, Plus, Search, ArrowUpRight,
   UserCheck, MoreVertical, Download, Eye, Lock, Ban, Receipt, Target, Percent,
   Megaphone, Layout, Shield, MessageSquare, Image as ImageIcon, Zap, Globe, Mail,
-  Smartphone, XCircle, LineChart, Filter
+  Smartphone, XCircle, LineChart, Filter, Bell
 } from "lucide-react";
 import { StarField } from "@/components/star-field";
 import { Button } from "@/components/ui/button";
@@ -74,6 +74,7 @@ export default function AdminDashboard() {
     { id: "commissions", label: "Comissões", icon: Percent },
     { id: "analytics", label: "Analíticos", icon: LineChart },
     { id: "notifications", label: "Notificações", icon: Megaphone },
+    { id: "prints", label: "Prints de Conversa", icon: ImageIcon },
     { id: "materials", label: "Materiais", icon: Layout },
     { id: "security", label: "Segurança", icon: Shield },
     { id: "settings", label: "Configurações", icon: Settings },
@@ -906,23 +907,34 @@ export default function AdminDashboard() {
               </CardContent>
             </Card>
 
+          </div>
+        );
+      case "prints":
+        return (
+          <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-500">
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight bg-gradient-to-r from-white to-red-400 bg-clip-text text-transparent">Prints de Conversa</h1>
+              <p className="text-white/40 text-sm">Envie capturas de ecrã das conversas com os clientes para os afiliados acompanharem o progresso.</p>
+            </div>
+
             {screenshotRequests.length > 0 && (
-              <Card className="bg-white/5 border-white/10 max-w-2xl">
+              <Card className="bg-amber-500/5 border-amber-500/20">
                 <CardHeader>
                   <CardTitle className="text-lg flex items-center gap-2">
-                    <ImageIcon className="w-5 h-5 text-amber-400" />
-                    Pedidos de Prints Pendentes
+                    <Bell className="w-5 h-5 text-amber-400" />
+                    Pedidos de Prints ({screenshotRequests.length})
                   </CardTitle>
+                  <p className="text-xs text-white/40 mt-1">Afiliados que solicitaram prints da conversa com os seus clientes.</p>
                 </CardHeader>
                 <CardContent className="p-0">
                   <div className="divide-y divide-white/5">
                     {screenshotRequests.map((req: any) => (
-                      <div key={req.id} className="px-6 py-3 text-xs text-white/60 flex items-center justify-between" data-testid={`row-ss-request-${req.id}`}>
-                        <div>
-                          <p className="font-bold text-white/80">{req.title}</p>
-                          <p className="text-white/40 mt-0.5">{req.description}</p>
+                      <div key={req.id} className="px-6 py-4 flex items-center justify-between gap-4" data-testid={`row-ss-request-${req.id}`}>
+                        <div className="min-w-0">
+                          <p className="text-sm font-bold text-white/80">{req.title}</p>
+                          <p className="text-xs text-white/40 mt-0.5">{req.description}</p>
                         </div>
-                        <span className="text-[10px] text-white/30">{timeAgo(req.createdAt)}</span>
+                        <span className="text-[10px] text-white/30 whitespace-nowrap shrink-0">{timeAgo(req.createdAt)}</span>
                       </div>
                     ))}
                   </div>
@@ -930,18 +942,18 @@ export default function AdminDashboard() {
               </Card>
             )}
 
-            <Card className="bg-white/5 border-white/10 max-w-2xl">
+            <Card className="bg-white/5 border-white/10">
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
                   <ImageIcon className="w-5 h-5 text-blue-400" />
-                  Enviar Prints de Conversa
+                  Enviar Prints
                 </CardTitle>
-                <p className="text-xs text-white/40 mt-1">Envie capturas de ecrã da conversa com o cliente para o afiliado acompanhar. Máximo 3 imagens. As imagens são eliminadas automaticamente após 3 dias.</p>
+                <p className="text-xs text-white/40 mt-1">Selecione o afiliado e o cliente, anexe até 3 imagens e envie. As imagens são eliminadas automaticamente após 3 dias.</p>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <Label className="text-xs">Afiliado</Label>
-                  <Select value={ssAffiliateId} onValueChange={setSsAffiliateId}>
+                  <Select value={ssAffiliateId} onValueChange={(v) => { setSsAffiliateId(v); setSsClientId(""); }}>
                     <SelectTrigger className="bg-white/5 border-white/10 text-white" data-testid="select-ss-affiliate">
                       <SelectValue placeholder="Selecionar afiliado..." />
                     </SelectTrigger>
@@ -960,7 +972,7 @@ export default function AdminDashboard() {
 
                 {ssAffiliateId && (
                   <div className="space-y-2">
-                    <Label className="text-xs">Cliente (opcional)</Label>
+                    <Label className="text-xs">Cliente</Label>
                     <Select value={ssClientId} onValueChange={setSsClientId}>
                       <SelectTrigger className="bg-white/5 border-white/10 text-white" data-testid="select-ss-client">
                         <SelectValue placeholder="Selecionar cliente..." />
@@ -980,7 +992,7 @@ export default function AdminDashboard() {
                     placeholder="Ex: Aqui estão as últimas mensagens com o cliente..."
                     value={ssMessage}
                     onChange={(e) => setSsMessage(e.target.value)}
-                    className="bg-white/5 border-white/10 text-white text-xs min-h-[60px] placeholder:text-white/20"
+                    className="bg-white/5 border-white/10 text-white text-xs min-h-[80px] placeholder:text-white/20"
                     data-testid="input-ss-message"
                   />
                 </div>
@@ -1308,6 +1320,9 @@ export default function AdminDashboard() {
                       >
                         <item.icon className={`w-5 h-5 ${activeItem === item.id ? "text-red-400" : "text-white/40"}`} />
                         <span className="font-bold text-[10px] uppercase tracking-[0.2em]">{item.label}</span>
+                        {item.id === "prints" && screenshotRequests.length > 0 && (
+                          <Badge className="ml-auto bg-amber-500 text-black text-[9px] px-1.5 py-0 min-w-[18px] flex items-center justify-center">{screenshotRequests.length}</Badge>
+                        )}
                         {activeItem === item.id && <ArrowUpRight className="ml-auto w-3 h-3 opacity-50" />}
                       </SidebarMenuButton>
                     </SidebarMenuItem>
