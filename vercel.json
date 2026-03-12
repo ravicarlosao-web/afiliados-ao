@@ -5,18 +5,15 @@
   "installCommand": "npm install --include=dev",
   "framework": null,
   "functions": {
-    "api/*.ts": {
+    "api/index.ts": {
       "maxDuration": 30,
       "includeFiles": "migrations/**"
+    },
+    "api/cron.ts": {
+      "maxDuration": 30
     }
   },
   "headers": [
-    {
-      "source": "/(.*)\\.html",
-      "headers": [
-        { "key": "Content-Type", "value": "text/html; charset=utf-8" }
-      ]
-    },
     {
       "source": "/assets/(.*)",
       "headers": [
@@ -25,8 +22,9 @@
     }
   ],
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api/$1" },
-    { "source": "/((?!api/).*)", "destination": "/index.html" }
+    { "source": "/api/cron", "destination": "/api/cron" },
+    { "source": "/api/(.*)", "destination": "/api/index" },
+    { "source": "/(.*)", "destination": "/index.html" }
   ],
   "crons": [
     { "path": "/api/cron", "schedule": "0 */6 * * *" }
