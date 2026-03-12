@@ -247,14 +247,6 @@ export default function UserDashboard() {
   };
 
   const [copied, setCopied] = useState(false);
-  const referralLink = currentUser?.referralCode ? `afiliados.ao/ref/${currentUser.referralCode}` : "";
-
-  const handleCopy = () => {
-    if (!referralLink) return;
-    navigator.clipboard.writeText(referralLink);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
 
   const markReadRef = useRef(false);
   const markNotifReadRef = useRef(false);
@@ -374,27 +366,6 @@ export default function UserDashboard() {
                 </CardContent>
               </Card>
 
-              <Card className="bg-white/5 border-white/10 backdrop-blur-md">
-                <CardHeader>
-                  <CardTitle className="text-lg font-semibold">Seu Link</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="p-3 bg-black/40 border border-white/5 rounded-lg break-all text-xs font-mono text-white/60">
-                    {referralLink || "Carregando..."}
-                  </div>
-                  <Button 
-                    onClick={handleCopy}
-                    className={`w-full font-bold transition-all duration-300 ${copied ? 'bg-emerald-500 text-white' : 'bg-white text-black hover:bg-white/90'}`}
-                    data-testid="button-copy-link"
-                  >
-                    {copied ? (
-                      <span className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4" /> Copiado!</span>
-                    ) : (
-                      <span className="flex items-center gap-2"><Copy className="w-4 h-4" /> Copiar Link</span>
-                    )}
-                  </Button>
-                </CardContent>
-              </Card>
             </div>
           </div>
         );
@@ -1482,12 +1453,6 @@ export default function UserDashboard() {
                       <div>
                         <p className="text-sm font-medium">Telefone</p>
                         <p className="text-xs text-white/40">{currentUser?.phone || "..."}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between p-4 rounded-lg bg-white/5 border border-white/10">
-                      <div>
-                        <p className="text-sm font-medium">Código de Referência</p>
-                        <p className="text-xs text-white/40 font-mono">{currentUser?.referralCode || "..."}</p>
                       </div>
                     </div>
                   </CardContent>
