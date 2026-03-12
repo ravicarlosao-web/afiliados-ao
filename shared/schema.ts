@@ -122,6 +122,7 @@ export const loginSchema = z.object({
 });
 
 export const updateProfileSchema = z.object({
+  name: z.string().min(2).optional(),
   iban: z.string().optional().nullable(),
   multicaixaExpress: z.string().optional().nullable(),
 });

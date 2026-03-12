@@ -1129,6 +1129,9 @@ ganhar dinheiro na internet angola, marketing de afiliados angola, renda extra a
       if (!parsed.success) return res.status(400).json({ message: "Dados inválidos" });
 
       const sanitizedData: Record<string, any> = {};
+      if (parsed.data.name !== undefined) {
+        sanitizedData.name = sanitizeString(parsed.data.name);
+      }
       if (parsed.data.iban !== undefined) {
         const ibanClean = parsed.data.iban ? parsed.data.iban.replace(/[^A-Z0-9]/gi, "").toUpperCase() : null;
         if (ibanClean && (ibanClean.length < 15 || ibanClean.length > 34)) {

@@ -228,6 +228,7 @@ export default function UserDashboard() {
     },
   });
 
+  const [profileName, setProfileName] = useState("");
   const [profileIban, setProfileIban] = useState("");
   const [profileMulticaixa, setProfileMulticaixa] = useState("");
   const [currentPassword, setCurrentPassword] = useState("");
@@ -1263,6 +1264,43 @@ export default function UserDashboard() {
           </div>
         );
       case "profile":
+        const angolanBanks: Record<string, string> = {
+          "0040": "Banco Anglo Angolano (BAA)",
+          "0006": "Banco de Poupança e Crédito (BPC)",
+          "0010": "Banco de Negócios Internacional (BNI)",
+          "0021": "Standard Bank Angola",
+          "0004": "Banco de Fomento Angola (BFA)",
+          "0005": "Banco Económico",
+          "0018": "Banco BAI",
+          "0019": "Banco Keve",
+          "0023": "Finibanco Angola",
+          "0025": "Banco BIC (agora BFA)",
+          "0026": "Banco Yetu",
+          "0030": "Banco Valor",
+          "0033": "Banco Caixa Geral Angola",
+          "0034": "Banco Prestígio",
+          "0035": "Standard Chartered Angola",
+          "0036": "Banco VTB África",
+          "0037": "Banco Kwanza Invest",
+          "0038": "Banco Comercial do Huambo",
+          "0039": "Banco da China Limited Luanda",
+          "0041": "Banco Letshego",
+          "0042": "Banco de Investimento Rural",
+          "0043": "Banco Millennium Atlântico",
+          "0044": "Banco de Comércio e Indústria (BCI)",
+          "0045": "Banco Sol",
+          "0046": "Banco BIR",
+          "0047": "Banco de Crédito do Sul (BCS)",
+          "0048": "Banco Comercial Angolano (BCA)",
+          "0049": "Banco de Desenvolvimento de Angola (BDA)",
+          "0051": "Finibanco Angola",
+          "0052": "Banco BAI Micro Finanças",
+          "0053": "Banco de Poupança e Promoção Habitacional",
+          "0055": "Banco LUSEQUI",
+        };
+        const ibanValue = (profileIban || currentUser?.iban || "").replace(/\s/g, "").toUpperCase();
+        const bankCode = ibanValue.length >= 8 && ibanValue.startsWith("AO") ? ibanValue.substring(4, 8) : "";
+        const detectedBank = bankCode ? angolanBanks[bankCode] || null : null;
         return (
           <div className="space-y-6 sm:space-y-8">
             <h1 className="text-2xl sm:text-3xl font-bold tracking-tight bg-gradient-to-r from-white to-white/40 bg-clip-text text-transparent">Meu Perfil</h1>
@@ -1270,21 +1308,14 @@ export default function UserDashboard() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-8">
               <div className="lg:col-span-1 space-y-6">
                 <Card className="bg-white/5 border-white/10 overflow-hidden shadow-2xl">
-                  <div className="h-24 sm:h-32 bg-gradient-to-br from-purple-600/30 via-blue-500/20 to-emerald-400/10 relative" />
-                  <CardContent className="relative pt-0 px-4 sm:px-6 pb-4 sm:pb-6">
-                    <div className="flex flex-col items-center -mt-12 sm:-mt-16 gap-3 sm:gap-4">
-                      <div className="relative group">
-                        <div className="absolute -inset-1 bg-gradient-to-r from-purple-500 to-blue-500 rounded-2xl blur opacity-30 group-hover:opacity-60 transition duration-500" />
-                        <div className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-2xl bg-black border-4 border-black overflow-hidden flex items-center justify-center">
-                          <User className="w-12 h-12 sm:w-16 sm:h-16 text-white/20" />
-                        </div>
-                      </div>
-                      
-                      <div className="text-center space-y-2">
+                  <div className="h-16 sm:h-20 bg-gradient-to-br from-purple-600/30 via-blue-500/20 to-emerald-400/10 relative" />
+                  <CardContent className="relative pt-4 px-4 sm:px-6 pb-4 sm:pb-6">
+                    <div className="space-y-4">
+                      <div className="space-y-2">
                         <h2 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent" data-testid="text-profile-name">
                           {currentUser?.name || "Carregando..."}
                         </h2>
-                        <div className="flex items-center justify-center gap-2">
+                        <div className="flex items-center gap-2">
                           <Badge className={`${currentUser?.isActive ? "bg-amber-400/10 text-amber-400 border-amber-400/20" : "bg-red-500/10 text-red-400 border-red-500/20"} font-bold px-3 py-1`}>
                             {currentUser?.isActive ? "Ativo" : "Inativo"}
                           </Badge>
@@ -1324,12 +1355,22 @@ export default function UserDashboard() {
                 <Card className="bg-white/5 border-white/10">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                      <CreditCard className="w-5 h-5 text-blue-400" />
-                      Dados de Pagamento
+                      <User className="w-5 h-5 text-blue-400" />
+                      Informações Pessoais
                     </CardTitle>
-                    <CardDescription>Onde você receberá suas comissões.</CardDescription>
+                    <CardDescription>Os seus dados pessoais e de pagamento.</CardDescription>
                   </CardHeader>
-                  <CardContent className="space-y-4">
+                  <CardContent className="space-y-5">
+                    <div className="space-y-2">
+                      <Label>Nome Completo</Label>
+                      <Input
+                        value={profileName || currentUser?.name || ""}
+                        onChange={(e) => setProfileName(e.target.value)}
+                        placeholder="Seu nome completo"
+                        className="bg-white/5 border-white/10 text-white"
+                        data-testid="input-profile-name"
+                      />
+                    </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label>IBAN</Label>
@@ -1340,6 +1381,18 @@ export default function UserDashboard() {
                           className="bg-white/5 border-white/10 text-white"
                           data-testid="input-profile-iban"
                         />
+                        {detectedBank && (
+                          <div className="flex items-center gap-2 mt-1">
+                            <div className="w-2 h-2 rounded-full bg-emerald-400" />
+                            <span className="text-xs text-emerald-400 font-medium" data-testid="text-detected-bank">{detectedBank}</span>
+                          </div>
+                        )}
+                        {bankCode && !detectedBank && ibanValue.startsWith("AO") && (
+                          <div className="flex items-center gap-2 mt-1">
+                            <div className="w-2 h-2 rounded-full bg-amber-400" />
+                            <span className="text-xs text-amber-400">Banco não identificado</span>
+                          </div>
+                        )}
                       </div>
                       <div className="space-y-2">
                         <Label>Multicaixa Express</Label>
@@ -1355,6 +1408,7 @@ export default function UserDashboard() {
                     <Button
                       onClick={() => {
                         updateProfileMutation.mutate({
+                          name: profileName || currentUser?.name || "",
                           iban: profileIban || currentUser?.iban || "",
                           multicaixaExpress: profileMulticaixa || currentUser?.multicaixaExpress || "",
                         });
@@ -1363,7 +1417,7 @@ export default function UserDashboard() {
                       className="bg-white text-black hover:bg-white/90"
                       data-testid="button-update-profile"
                     >
-                      {updateProfileMutation.isPending ? "Atualizando..." : "Atualizar Dados"}
+                      {updateProfileMutation.isPending ? "Atualizando..." : "Guardar Informações"}
                     </Button>
                   </CardContent>
                 </Card>
