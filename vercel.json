@@ -2,7 +2,7 @@
   "version": 2,
   "buildCommand": "npx vite build",
   "outputDirectory": "dist/public",
-  "installCommand": "npm install",
+  "installCommand": "npm install --include=dev",
   "framework": null,
   "functions": {
     "api/*.ts": {
@@ -12,21 +12,9 @@
   },
   "headers": [
     {
-      "source": "/(.*).html",
+      "source": "/(.*)\\.html",
       "headers": [
         { "key": "Content-Type", "value": "text/html; charset=utf-8" }
-      ]
-    },
-    {
-      "source": "/(.*).js",
-      "headers": [
-        { "key": "Content-Type", "value": "application/javascript; charset=utf-8" }
-      ]
-    },
-    {
-      "source": "/(.*).css",
-      "headers": [
-        { "key": "Content-Type", "value": "text/css; charset=utf-8" }
       ]
     }
   ],
