@@ -871,6 +871,28 @@ ganhar dinheiro na internet angola, marketing de afiliados angola, renda extra a
     }
   });
 
+  // === PUBLIC: COMMISSION/PRICE INFO ===
+  app.get("/api/public/plans", async (_req: Request, res: Response) => {
+    try {
+      const defaults = {
+        price_essencial: "130000",
+        price_profissional: "250000",
+        price_premium: "400000",
+        commission_essencial: "20000",
+        commission_profissional: "40000",
+        commission_premium: "70000",
+      };
+      const result: Record<string, string> = { ...defaults };
+      for (const key of Object.keys(defaults)) {
+        const val = await storage.getSetting(key);
+        if (val) result[key] = val;
+      }
+      res.json(result);
+    } catch (error: any) {
+      res.status(500).json({ message: safeError(error) });
+    }
+  });
+
   // === ADMIN: SETTINGS ===
   app.get("/api/admin/settings", requireAdmin, async (_req: Request, res: Response) => {
     try {

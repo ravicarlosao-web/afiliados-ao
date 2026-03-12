@@ -1,8 +1,34 @@
 import { UserPlus, Search, PenSquare, CreditCard, Wallet, Calculator, ShieldCheck, Zap, Globe } from "lucide-react";
 import { motion } from "framer-motion";
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 
 const ease = [0.16, 1, 0.3, 1];
+
+interface PlanData {
+  price_essencial: string;
+  price_profissional: string;
+  price_premium: string;
+  commission_essencial: string;
+  commission_profissional: string;
+  commission_premium: string;
+}
+
+function usePlans() {
+  return useQuery<PlanData>({
+    queryKey: ["/api/public/plans"],
+    queryFn: async () => {
+      const res = await fetch("/api/public/plans");
+      if (!res.ok) throw new Error("Failed to fetch plans");
+      return res.json();
+    },
+    staleTime: 60000,
+  });
+}
+
+function formatKz(value: number): string {
+  return `${value.toLocaleString("pt-PT")} Kz`;
+}
 
 const AudioWave = () => (
   <div className="flex items-center gap-1 h-12">
@@ -22,10 +48,16 @@ const AudioWave = () => (
 
 function CommissionCalculator() {
   const [sales, setSales] = useState(1);
+  const { data: planData } = usePlans();
+
+  const commEssencial = parseInt(planData?.commission_essencial || "20000", 10);
+  const commProfissional = parseInt(planData?.commission_profissional || "40000", 10);
+  const commPremium = parseInt(planData?.commission_premium || "70000", 10);
+
   const plans = [
-    { name: "Essencial", commission: 20000 },
-    { name: "Profissional", commission: 40000 },
-    { name: "Premium", commission: 70000 },
+    { name: "Essencial", commission: commEssencial },
+    { name: "Profissional", commission: commProfissional },
+    { name: "Premium", commission: commPremium },
   ];
 
   return (
@@ -57,6 +89,7 @@ function CommissionCalculator() {
                 value={sales} 
                 onChange={(e) => setSales(parseInt(e.target.value))}
                 className="w-full h-1.5 bg-white/10 rounded-lg appearance-none cursor-pointer accent-white"
+                data-testid="input-calculator-slider"
               />
               <span className="text-xl sm:text-2xl font-medium w-12 text-center">{sales}</span>
             </div>
@@ -73,7 +106,7 @@ function CommissionCalculator() {
                 className="flex justify-between items-center p-3 sm:p-4 rounded-xl bg-white/5 border border-white/5"
               >
                 <span className="text-zinc-300 text-sm sm:text-base">Se vender {plan.name}:</span>
-                <span className="text-lg sm:text-xl font-medium text-white">
+                <span className="text-lg sm:text-xl font-medium text-white" data-testid={`text-calc-${plan.name.toLowerCase()}`}>
                   Kz {(plan.commission * sales).toLocaleString('pt-PT')},00
                 </span>
               </motion.div>
@@ -93,8 +126,8 @@ function CommissionCalculator() {
           <div className="relative bg-black rounded-2xl p-6 sm:p-8 border border-white/10 text-center">
             <Calculator className="w-10 h-10 sm:w-12 sm:h-12 text-white mx-auto mb-4 sm:mb-6 opacity-50" />
             <div className="text-zinc-500 text-xs sm:text-sm mb-2 uppercase tracking-widest">Potencial de Ganho Máximo</div>
-            <div className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-['DM_Sans'] mb-3 sm:mb-4">
-              Kz {(70000 * sales).toLocaleString('pt-PT')},00
+            <div className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-['DM_Sans'] mb-3 sm:mb-4" data-testid="text-calc-max">
+              Kz {(commPremium * sales).toLocaleString('pt-PT')},00
             </div>
             <p className="text-zinc-400 text-xs sm:text-sm italic">*Baseado no plano Premium</p>
           </div>
@@ -105,6 +138,15 @@ function CommissionCalculator() {
 }
 
 export function FeaturesGrid() {
+  const { data: planData } = usePlans();
+
+  const commEssencial = parseInt(planData?.commission_essencial || "20000", 10);
+  const commProfissional = parseInt(planData?.commission_profissional || "40000", 10);
+  const commPremium = parseInt(planData?.commission_premium || "70000", 10);
+  const priceEssencial = parseInt(planData?.price_essencial || "130000", 10);
+  const priceProfissional = parseInt(planData?.price_profissional || "250000", 10);
+  const pricePremium = parseInt(planData?.price_premium || "400000", 10);
+
   const steps = [
     {
       icon: UserPlus,
@@ -177,7 +219,7 @@ export function FeaturesGrid() {
       visual: (
         <div className="bg-black border border-white/10 rounded-xl p-4 sm:p-5 shadow-2xl w-full text-center">
           <div className="text-xs text-zinc-500 mb-1">Comissão Disponível</div>
-          <div className="text-xl sm:text-2xl font-['DM_Sans'] text-white">Kz 25.000,00</div>
+          <div className="text-xl sm:text-2xl font-['DM_Sans'] text-white" data-testid="text-visual-commission">Kz {formatKz(commEssencial)}</div>
           <div className="mt-2 sm:mt-3 py-1.5 px-3 bg-white text-black text-[10px] font-bold rounded-full uppercase tracking-tighter inline-block">
             Sacar Agora
           </div>
@@ -189,22 +231,22 @@ export function FeaturesGrid() {
   const plans = [
     {
       title: "Website Essencial",
-      price: "130.000 Kz",
-      commission: "20.000 Kz",
+      price: formatKz(priceEssencial),
+      commission: formatKz(commEssencial),
       icon: Zap,
       desc: "Ideal para pequenos negócios que precisam de uma presença digital rápida e eficiente."
     },
     {
       title: "Website Profissional",
-      price: "250.000 Kz",
-      commission: "40.000 Kz",
+      price: formatKz(priceProfissional),
+      commission: formatKz(commProfissional),
       icon: ShieldCheck,
       desc: "A solução completa para empresas em crescimento com funcionalidades avançadas."
     },
     {
       title: "Website Premium",
-      price: "400.000 Kz",
-      commission: "70.000 Kz",
+      price: formatKz(pricePremium),
+      commission: formatKz(commPremium),
       icon: Globe,
       desc: "Experiência digital exclusiva com design personalizado e performance máxima."
     }
@@ -348,12 +390,12 @@ export function FeaturesGrid() {
                 </motion.div>
                 <h3 className="text-xl sm:text-2xl font-normal mb-2 font-['DM_Sans']">{plan.title}</h3>
                 <div className="text-zinc-500 text-xs sm:text-sm mb-3 sm:mb-4">{plan.desc}</div>
-                <div className="text-2xl sm:text-3xl font-bold text-white mb-4 sm:mb-6 tracking-tight">{plan.price}</div>
+                <div className="text-2xl sm:text-3xl font-bold text-white mb-4 sm:mb-6 tracking-tight" data-testid={`text-plan-price-${i}`}>{plan.price}</div>
               </div>
 
               <div className="mt-auto pt-4 sm:pt-6 border-t border-white/5">
                 <div className="text-[10px] sm:text-xs text-zinc-500 uppercase tracking-widest mb-1">Comissão do Afiliado</div>
-                <div className="text-xl sm:text-2xl font-['DM_Sans'] text-green-400 font-medium">
+                <div className="text-xl sm:text-2xl font-['DM_Sans'] text-green-400 font-medium" data-testid={`text-plan-commission-${i}`}>
                   {plan.commission} <span className="text-xs sm:text-sm font-normal text-zinc-400">por venda</span>
                 </div>
               </div>

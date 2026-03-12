@@ -283,6 +283,7 @@ export default function AdminDashboard() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/settings"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/public/plans"] });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/security-logs"] });
       toast({ title: "Configurações salvas" });
     },
@@ -378,6 +379,20 @@ export default function AdminDashboard() {
   const [commEssencial, setCommEssencial] = useState("0");
   const [commProfissional, setCommProfissional] = useState("0");
   const [commPremium, setCommPremium] = useState("0");
+  const [commEssencialManual, setCommEssencialManual] = useState(false);
+  const [commProfissionalManual, setCommProfissionalManual] = useState(false);
+  const [commPremiumManual, setCommPremiumManual] = useState(false);
+
+  const defaultPrices = {
+    essencial: 130000,
+    profissional: 250000,
+    premium: 400000,
+  };
+  const priceEssencial = parseInt(adminSettings?.price_essencial || String(defaultPrices.essencial), 10);
+  const priceProfissional = parseInt(adminSettings?.price_profissional || String(defaultPrices.profissional), 10);
+  const pricePremium = parseInt(adminSettings?.price_premium || String(defaultPrices.premium), 10);
+
+  const calcCommission = (price: number, base: string) => String(Math.round(price * parseFloat(base || "0") / 100));
 
   useEffect(() => {
     if (adminSettings) {
@@ -385,8 +400,35 @@ export default function AdminDashboard() {
       setCommEssencial(adminSettings.commission_essencial || "0");
       setCommProfissional(adminSettings.commission_profissional || "0");
       setCommPremium(adminSettings.commission_premium || "0");
+
+      const base = adminSettings.commission_base || "0";
+      const expectedE = calcCommission(priceEssencial, base);
+      const expectedP = calcCommission(priceProfissional, base);
+      const expectedPr = calcCommission(pricePremium, base);
+      setCommEssencialManual((adminSettings.commission_essencial || "0") !== expectedE);
+      setCommProfissionalManual((adminSettings.commission_profissional || "0") !== expectedP);
+      setCommPremiumManual((adminSettings.commission_premium || "0") !== expectedPr);
     }
   }, [adminSettings]);
+
+  const handleBaseChange = (newBase: string) => {
+    setCommBase(newBase);
+    const e = calcCommission(priceEssencial, newBase);
+    const p = calcCommission(priceProfissional, newBase);
+    const pr = calcCommission(pricePremium, newBase);
+    setCommEssencial(e);
+    setCommProfissional(p);
+    setCommPremium(pr);
+    setCommEssencialManual(false);
+    setCommProfissionalManual(false);
+    setCommPremiumManual(false);
+  };
+
+  const handleManualCommission = (plan: "essencial" | "profissional" | "premium", value: string) => {
+    if (plan === "essencial") { setCommEssencial(value); setCommEssencialManual(true); }
+    if (plan === "profissional") { setCommProfissional(value); setCommProfissionalManual(true); }
+    if (plan === "premium") { setCommPremium(value); setCommPremiumManual(true); }
+  };
 
   const paidClients = allClients.filter((c: any) => c.status === "pagamento_feito");
   const topAffiliates = affiliates
@@ -819,29 +861,38 @@ export default function AdminDashboard() {
                   <div className="space-y-2">
                     <Label className="text-xs">Percentagem Base (%)</Label>
                     <div className="flex gap-2">
-                      <Input value={commBase} onChange={(e) => setCommBase(e.target.value)} className="bg-white/5 border-white/10" />
+                      <Input value={commBase} onChange={(e) => handleBaseChange(e.target.value)} className="bg-white/5 border-white/10" data-testid="input-commission-base" />
                       <Button onClick={() => saveSettingsMutation.mutate({
                         commission_base: commBase,
                         commission_essencial: commEssencial,
                         commission_profissional: commProfissional,
                         commission_premium: commPremium,
-                      })} className="bg-white text-black font-bold">Salvar</Button>
+                      })} className="bg-white text-black font-bold" data-testid="button-save-commissions">Salvar</Button>
                     </div>
                   </div>
                   <div className="pt-4 border-t border-white/5 space-y-4">
                     <h4 className="text-xs font-bold uppercase tracking-widest text-white/40">Por Plano</h4>
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
-                        <span className="text-xs text-white/60">Essencial</span>
-                        <Input className="w-20 h-8 bg-white/5 border-white/10 text-center text-xs" value={commEssencial} onChange={(e) => setCommEssencial(e.target.value)} />
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-white/60">Essencial</span>
+                          {commEssencialManual && <span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 font-medium">Personalizado</span>}
+                        </div>
+                        <Input className="w-24 h-8 bg-white/5 border-white/10 text-center text-xs" value={commEssencial} onChange={(e) => handleManualCommission("essencial", e.target.value)} data-testid="input-commission-essencial" />
                       </div>
                       <div className="flex items-center justify-between">
-                        <span className="text-xs text-white/60">Profissional</span>
-                        <Input className="w-20 h-8 bg-white/5 border-white/10 text-center text-xs" value={commProfissional} onChange={(e) => setCommProfissional(e.target.value)} />
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-white/60">Profissional</span>
+                          {commProfissionalManual && <span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 font-medium">Personalizado</span>}
+                        </div>
+                        <Input className="w-24 h-8 bg-white/5 border-white/10 text-center text-xs" value={commProfissional} onChange={(e) => handleManualCommission("profissional", e.target.value)} data-testid="input-commission-profissional" />
                       </div>
                       <div className="flex items-center justify-between">
-                        <span className="text-xs text-white/60">Premium</span>
-                        <Input className="w-20 h-8 bg-white/5 border-white/10 text-center text-xs" value={commPremium} onChange={(e) => setCommPremium(e.target.value)} />
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-white/60">Premium</span>
+                          {commPremiumManual && <span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 font-medium">Personalizado</span>}
+                        </div>
+                        <Input className="w-24 h-8 bg-white/5 border-white/10 text-center text-xs" value={commPremium} onChange={(e) => handleManualCommission("premium", e.target.value)} data-testid="input-commission-premium" />
                       </div>
                     </div>
                   </div>
