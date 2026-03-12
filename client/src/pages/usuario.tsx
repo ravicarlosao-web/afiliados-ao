@@ -202,8 +202,14 @@ export default function UserDashboard() {
       setCurrentPassword("");
       setNewPassword("");
     },
-    onError: () => {
-      toast({ title: "Erro ao alterar senha", variant: "destructive" });
+    onError: (error: any) => {
+      let msg = "Erro ao alterar senha";
+      try {
+        const body = error.message?.split(": ").slice(1).join(": ");
+        const parsed = JSON.parse(body);
+        if (parsed.message) msg = parsed.message;
+      } catch {}
+      toast({ title: msg, variant: "destructive" });
     },
   });
 
@@ -1130,7 +1136,7 @@ export default function UserDashboard() {
                     <Label>Senha Atual</Label>
                     <Input
                       type="password"
-                      placeholder="••••••••"
+                      placeholder="Digite a sua senha atual"
                       className="bg-white/5 border-white/10"
                       value={currentPassword}
                       onChange={(e) => setCurrentPassword(e.target.value)}
@@ -1141,22 +1147,49 @@ export default function UserDashboard() {
                     <Label>Nova Senha</Label>
                     <Input
                       type="password"
-                      placeholder="Mínimo 6 caracteres"
+                      placeholder="Digite a nova senha"
                       className="bg-white/5 border-white/10"
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
                       data-testid="input-new-password"
                     />
+                    <div className="space-y-1 pt-1">
+                      <p className={`text-[10px] ${newPassword.length >= 8 ? 'text-emerald-400' : 'text-white/30'}`}>
+                        {newPassword.length >= 8 ? '✓' : '○'} Mínimo 8 caracteres
+                      </p>
+                      <p className={`text-[10px] ${/[A-Z]/.test(newPassword) ? 'text-emerald-400' : 'text-white/30'}`}>
+                        {/[A-Z]/.test(newPassword) ? '✓' : '○'} Pelo menos uma letra maiúscula
+                      </p>
+                      <p className={`text-[10px] ${/[0-9]/.test(newPassword) ? 'text-emerald-400' : 'text-white/30'}`}>
+                        {/[0-9]/.test(newPassword) ? '✓' : '○'} Pelo menos um número
+                      </p>
+                    </div>
                   </div>
                   <Button
                     onClick={() => {
-                      if (!currentPassword || !newPassword) {
-                        toast({ title: "Preencha ambos os campos", variant: "destructive" });
+                      if (!currentPassword) {
+                        toast({ title: "Digite a sua senha atual", variant: "destructive" });
+                        return;
+                      }
+                      if (!newPassword) {
+                        toast({ title: "Digite a nova senha", variant: "destructive" });
+                        return;
+                      }
+                      if (newPassword.length < 8) {
+                        toast({ title: "A nova senha deve ter no mínimo 8 caracteres", variant: "destructive" });
+                        return;
+                      }
+                      if (!/[A-Z]/.test(newPassword)) {
+                        toast({ title: "A nova senha deve conter pelo menos uma letra maiúscula", variant: "destructive" });
+                        return;
+                      }
+                      if (!/[0-9]/.test(newPassword)) {
+                        toast({ title: "A nova senha deve conter pelo menos um número", variant: "destructive" });
                         return;
                       }
                       changePasswordMutation.mutate({ currentPassword, newPassword });
                     }}
-                    disabled={changePasswordMutation.isPending}
+                    disabled={changePasswordMutation.isPending || !currentPassword || !newPassword}
                     className="w-full bg-white text-black font-bold"
                     data-testid="button-change-password"
                   >
