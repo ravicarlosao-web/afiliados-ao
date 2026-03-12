@@ -251,6 +251,7 @@ export default function UserDashboard() {
   };
 
   const markReadRef = useRef(false);
+  const markNotifReadRef = useRef(false);
   useEffect(() => {
     if (activeItem === "messages" && !markReadRef.current) {
       const isClientMessage = (n: any) =>
@@ -260,6 +261,15 @@ export default function UserDashboard() {
         markReadRef.current = true;
         markReadMutation.mutate(unreadIds, {
           onSettled: () => { markReadRef.current = false; },
+        });
+      }
+    }
+    if (activeItem === "notifications" && !markNotifReadRef.current) {
+      const unreadIds = myNotifications.filter((n: any) => !n.isRead).map((n: any) => n.id);
+      if (unreadIds.length > 0) {
+        markNotifReadRef.current = true;
+        markReadMutation.mutate(unreadIds, {
+          onSettled: () => { markNotifReadRef.current = false; },
         });
       }
     }
@@ -1053,17 +1063,22 @@ export default function UserDashboard() {
                 ) : (
                   <div className="divide-y divide-white/5">
                     {myNotifications.map((notif: any) => (
-                      <div key={notif.id} className="p-6 flex gap-4 hover:bg-white/[0.02] transition-colors" data-testid={`row-notification-${notif.id}`}>
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${
-                          notif.type === 'success' ? 'bg-emerald-500/10 text-emerald-400' :
-                          notif.type === 'error' ? 'bg-red-500/10 text-red-400' :
-                          notif.type === 'warning' ? 'bg-amber-500/10 text-amber-400' : 'bg-blue-500/10 text-blue-400'
-                        }`}>
-                          <Bell className="w-5 h-5" />
+                      <div key={notif.id} className={`p-6 flex gap-4 hover:bg-white/[0.02] transition-colors ${!notif.isRead ? 'bg-white/[0.03]' : ''}`} data-testid={`row-notification-${notif.id}`}>
+                        <div className="relative">
+                          <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${
+                            notif.type === 'success' ? 'bg-emerald-500/10 text-emerald-400' :
+                            notif.type === 'error' ? 'bg-red-500/10 text-red-400' :
+                            notif.type === 'warning' ? 'bg-amber-500/10 text-amber-400' : 'bg-blue-500/10 text-blue-400'
+                          }`}>
+                            <Bell className="w-5 h-5" />
+                          </div>
+                          {!notif.isRead && (
+                            <span className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-red-500 rounded-full border-2 border-black" />
+                          )}
                         </div>
                         <div className="flex-1">
                           <div className="flex items-center justify-between mb-1">
-                            <h4 className="text-sm font-bold">{notif.title}</h4>
+                            <h4 className={`text-sm ${!notif.isRead ? 'font-bold text-white' : 'font-medium text-white/70'}`}>{notif.title}</h4>
                             <span className="text-[10px] text-white/40">{timeAgo(notif.createdAt)}</span>
                           </div>
                           <p className="text-xs text-white/60 leading-relaxed">{notif.description}</p>
@@ -1492,6 +1507,12 @@ export default function UserDashboard() {
                             <span className="ml-auto mr-1 bg-red-500 text-white text-[9px] font-bold rounded-full w-5 h-5 flex items-center justify-center shrink-0">
                               {unread}
                             </span>
+                          ) : null;
+                        })()}
+                        {item.id === "notifications" && (() => {
+                          const unread = myNotifications.filter((n: any) => !n.isRead).length;
+                          return unread > 0 ? (
+                            <span className="ml-auto mr-1 w-2.5 h-2.5 bg-red-500 rounded-full shrink-0 animate-pulse" />
                           ) : null;
                         })()}
                         {activeItem === item.id && <ChevronRight className="ml-auto w-5 h-5 shrink-0 opacity-50" />}
