@@ -12,16 +12,16 @@ import { loginSchema, insertUserSchema, insertClientSchema, insertWithdrawalSche
 import bcrypt from "bcrypt";
 import crypto from "crypto";
 import { z } from "zod";
-import { uploadImage, deleteImage, isCloudinaryConfigured } from "./cloudinary";
+import { uploadImage, uploadFile, deleteImage, deleteFile, isCloudinaryConfigured } from "./cloudinary";
 
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 5 * 1024 * 1024 },
+  limits: { fileSize: 10 * 1024 * 1024 },
   fileFilter: (_req, file, cb) => {
-    if (file.mimetype.startsWith("image/")) {
+    if (file.mimetype.startsWith("image/") || file.mimetype === "application/pdf") {
       cb(null, true);
     } else {
-      cb(new Error("Apenas imagens são permitidas"));
+      cb(new Error("Apenas imagens e PDFs são permitidos"));
     }
   },
 });
@@ -686,20 +686,25 @@ ganhar dinheiro na internet angola, marketing de afiliados angola, renda extra a
     }
   });
 
-  app.post("/api/admin/materials", requireAdmin, upload.single("image"), async (req: Request, res: Response) => {
+  app.post("/api/admin/materials", requireAdmin, upload.single("file"), async (req: Request, res: Response) => {
     try {
       const parsed = insertMaterialSchema.safeParse(req.body);
       if (!parsed.success) return res.status(400).json({ message: "Dados inválidos" });
 
       const sanitized = sanitizeObject(parsed.data as Record<string, any>);
 
-      if (parsed.data.type === "image" && req.file) {
-        if (!isCloudinaryConfigured()) {
-          return res.status(500).json({ message: "Cloudinary não configurado" });
+      if (req.file && isCloudinaryConfigured()) {
+        if (parsed.data.type === "image") {
+          const { url, publicId } = await uploadImage(req.file.buffer);
+          (sanitized as any).imageUrl = url;
+          (sanitized as any).cloudinaryPublicId = publicId;
+        } else if (parsed.data.type === "pdf") {
+          const { url, publicId } = await uploadFile(req.file.buffer, "materiais_pdf");
+          (sanitized as any).imageUrl = url;
+          (sanitized as any).cloudinaryPublicId = publicId;
         }
-        const { url, publicId } = await uploadImage(req.file.buffer);
-        (sanitized as any).imageUrl = url;
-        (sanitized as any).cloudinaryPublicId = publicId;
+      } else if ((parsed.data.type === "image" || parsed.data.type === "pdf") && req.file && !isCloudinaryConfigured()) {
+        return res.status(500).json({ message: "Cloudinary não configurado" });
       }
 
       const material = await storage.createMaterial(sanitized as any);
@@ -718,7 +723,11 @@ ganhar dinheiro na internet angola, marketing de afiliados angola, renda extra a
       const material = await storage.getMaterial(id);
       if (material?.cloudinaryPublicId && isCloudinaryConfigured()) {
         try {
-          await deleteImage(material.cloudinaryPublicId);
+          if (material.type === "pdf") {
+            await deleteFile(material.cloudinaryPublicId);
+          } else {
+            await deleteImage(material.cloudinaryPublicId);
+          }
         } catch (e) {
           console.error("Cloudinary delete error:", e);
         }

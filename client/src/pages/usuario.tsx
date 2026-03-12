@@ -7,7 +7,7 @@ import {
   TrendingUp, DollarSign, Users, Briefcase, Plus, Search,
   Target, Award, CreditCard, History, ShieldCheck, FileText, CheckCircle2,
   Clock, XCircle, Sparkles, Image as ImageIcon, MessageSquare, 
-  Trophy, Lightbulb, Globe, Lock, Copy
+  Trophy, Lightbulb, Globe, Lock, Copy, Download
 } from "lucide-react";
 import { StarField } from "@/components/star-field";
 import { Button } from "@/components/ui/button";
@@ -859,9 +859,10 @@ export default function UserDashboard() {
                   <TabsTrigger value="script" className="data-[state=active]:bg-white/10">Scripts</TabsTrigger>
                   <TabsTrigger value="image" className="data-[state=active]:bg-white/10">Imagens</TabsTrigger>
                   <TabsTrigger value="portfolio" className="data-[state=active]:bg-white/10">Sites Feitos</TabsTrigger>
+                  <TabsTrigger value="pdf" className="data-[state=active]:bg-white/10">PDFs</TabsTrigger>
                 </TabsList>
 
-                {["all", "copy", "script", "image", "portfolio"].map(tab => (
+                {["all", "copy", "script", "image", "portfolio", "pdf"].map(tab => (
                   <TabsContent key={tab} value={tab} className="mt-6 space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       {myMaterials
@@ -873,15 +874,22 @@ export default function UserDashboard() {
                                 {mat.type === "copy" ? <MessageSquare className="w-4 h-4 text-blue-400" /> :
                                  mat.type === "script" ? <FileText className="w-4 h-4 text-purple-400" /> :
                                  mat.type === "portfolio" ? <Globe className="w-4 h-4 text-green-400" /> :
+                                 mat.type === "pdf" ? <Download className="w-4 h-4 text-red-400" /> :
                                  <ImageIcon className="w-4 h-4 text-amber-400" />}
                                 {mat.title}
                               </CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-4">
-                              {mat.imageUrl && (
+                              {mat.imageUrl && mat.type !== "pdf" && (
                                 <img src={mat.imageUrl} alt={mat.title} className="w-full rounded border border-white/10" />
                               )}
-                              {mat.type === "portfolio" && mat.content ? (
+                              {mat.type === "pdf" && mat.imageUrl ? (
+                                <a href={mat.imageUrl} target="_blank" rel="noopener noreferrer" download>
+                                  <Button variant="outline" size="sm" className="w-full border-red-500/20 text-red-400 hover:bg-red-500/10 gap-2" data-testid={`button-download-pdf-${mat.id}`}>
+                                    <Download className="w-4 h-4" /> Baixar PDF
+                                  </Button>
+                                </a>
+                              ) : mat.type === "portfolio" && mat.content ? (
                                 <>
                                   <p className="text-xs text-white/50">Site feito pela nossa equipa — envie este link ao cliente para mostrar o nosso trabalho.</p>
                                   <div className="flex gap-2">
