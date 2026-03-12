@@ -100,6 +100,34 @@ Comprehensive SEO implementation targeting "ganhar dinheiro na internet angola" 
 - **Semantic HTML**: aria-labels, itemScope, itemType, itemProp, role attributes on all landing page sections
 - **Animations**: Professional framer-motion animations with overflow-hidden to prevent layout shifts
 
+## Vercel Deployment
+
+The project is configured for Vercel hosting with serverless functions.
+
+### Configuration Files
+- `vercel.json` — Vercel build & routing configuration
+- `api/index.ts` — Serverless entry point wrapping the Express app
+- `api/cron.ts` — Cron job endpoint for cleanup tasks (sessions, rate limits, expired screenshots)
+
+### Environment Variables (Required in Vercel)
+- `TURSO_DATABASE_URL` — Turso remote database URL
+- `TURSO_AUTH_TOKEN` — Turso auth token
+- `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` — Cloudinary credentials
+- `SESSION_SECRET` — Fixed session secret (must be set to persist sessions across serverless invocations)
+- `CRON_SECRET` — Secret for authenticating Vercel cron job requests
+
+### Architecture Adaptations
+- `setInterval` cleanup tasks disabled in serverless (guarded by `process.env.VERCEL`)
+- Cleanup handled by Vercel Cron Jobs (`/api/cron` endpoint, runs every 6 hours)
+- Static frontend served by Vercel CDN from `dist/public`
+- API routes handled by a single serverless function at `/api`
+- Migrations run on serverless cold start via `runMigrations()`
+
+### Deploy Steps
+1. Connect the GitHub repo (`ravicarlosao-web/afiliados-ao`) to Vercel
+2. Set all environment variables in Vercel project settings
+3. Vercel will auto-build and deploy on each push
+
 ## Security
 
 Comprehensive security hardening applied to all API routes:

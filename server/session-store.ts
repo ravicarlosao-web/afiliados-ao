@@ -8,7 +8,9 @@ export class SQLiteSessionStore extends session.Store {
 
   constructor() {
     super();
-    this.startCleanup();
+    if (!process.env.VERCEL) {
+      this.startCleanup();
+    }
   }
 
   private startCleanup() {

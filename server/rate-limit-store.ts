@@ -15,7 +15,9 @@ function startCleanup() {
     } catch {}
   };
   doCleanup();
-  setInterval(doCleanup, 5 * 60 * 1000);
+  if (!process.env.VERCEL) {
+    setInterval(doCleanup, 5 * 60 * 1000);
+  }
 }
 
 export class SQLiteRateLimitStore implements Store {
