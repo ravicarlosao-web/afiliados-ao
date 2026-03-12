@@ -7,7 +7,7 @@ import {
   CheckCircle2, Clock, Briefcase, FileText, Plus, Search, ArrowUpRight,
   UserCheck, MoreVertical, Download, Eye, Lock, Ban, Receipt, Target, Percent,
   Megaphone, Layout, Shield, MessageSquare, Image as ImageIcon, Zap, Globe, Mail,
-  Smartphone, XCircle, LineChart, Filter, Bell, ChevronLeft, ChevronRight
+  Smartphone, XCircle, LineChart, Filter, Bell, ChevronLeft, ChevronRight, Trash2
 } from "lucide-react";
 import { StarField } from "@/components/star-field";
 import { Button } from "@/components/ui/button";
@@ -344,20 +344,33 @@ export default function AdminDashboard() {
   });
 
   const uploadScreenshotsMutation = useMutation({
-    mutationFn: async ({ affiliateId, clientId, message, images }: { affiliateId: string; clientId?: string; message?: string; images: File[] }) => {
+    mutationFn: async ({ affiliateId, clientId, message, images, notificationId }: { affiliateId: string; clientId?: string; message?: string; images: File[]; notificationId?: string }) => {
       const formData = new FormData();
       formData.append("affiliateId", affiliateId);
       if (clientId) formData.append("clientId", clientId);
       if (message) formData.append("message", message);
+      if (notificationId) formData.append("notificationId", notificationId);
       images.forEach(img => formData.append("images", img));
       await apiRequest("POST", "/api/admin/screenshots", formData);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/screenshot-requests"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/notifications"] });
       toast({ title: "Prints enviados com sucesso" });
       setSsMessage("");
       setSsImages([]);
       setActiveRequestId(null);
+    },
+  });
+
+  const deleteScreenshotRequestMutation = useMutation({
+    mutationFn: async (id: string) => {
+      await apiRequest("DELETE", `/api/admin/screenshot-requests/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/screenshot-requests"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/notifications"] });
+      toast({ title: "Pedido de print eliminado" });
     },
   });
 
@@ -998,27 +1011,42 @@ export default function AdminDashboard() {
                           </div>
                         </div>
                       </div>
-                      {activeRequestId !== req.id ? (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="gap-1.5 text-[11px] border-blue-500/20 text-blue-400 hover:bg-blue-500/10 shrink-0"
-                          onClick={() => { setActiveRequestId(req.id); setSsMessage(""); setSsImages([]); }}
-                          data-testid={`button-reply-request-${req.id}`}
-                        >
-                          <ImageIcon className="w-3 h-3" />
-                          Enviar Prints
-                        </Button>
-                      ) : (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-[11px] text-white/40 hover:text-white/60 shrink-0"
-                          onClick={() => setActiveRequestId(null)}
-                        >
-                          <XCircle className="w-3.5 h-3.5" />
-                        </Button>
-                      )}
+                      <div className="flex items-center gap-2 shrink-0">
+                        {activeRequestId !== req.id ? (
+                          <>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="gap-1.5 text-[11px] border-blue-500/20 text-blue-400 hover:bg-blue-500/10"
+                              onClick={() => { setActiveRequestId(req.id); setSsMessage(""); setSsImages([]); }}
+                              data-testid={`button-reply-request-${req.id}`}
+                            >
+                              <ImageIcon className="w-3 h-3" />
+                              Enviar Prints
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="gap-1.5 text-[11px] border-red-500/20 text-red-400 hover:bg-red-500/10"
+                              onClick={() => deleteScreenshotRequestMutation.mutate(req.id)}
+                              disabled={deleteScreenshotRequestMutation.isPending}
+                              data-testid={`button-delete-request-${req.id}`}
+                            >
+                              <Trash2 className="w-3 h-3" />
+                              Eliminar
+                            </Button>
+                          </>
+                        ) : (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-[11px] text-white/40 hover:text-white/60"
+                            onClick={() => setActiveRequestId(null)}
+                          >
+                            <XCircle className="w-3.5 h-3.5" />
+                          </Button>
+                        )}
+                      </div>
                     </div>
 
                     {activeRequestId === req.id && (
@@ -1060,6 +1088,7 @@ export default function AdminDashboard() {
                               clientId: req.clientId || undefined,
                               message: ssMessage || undefined,
                               images: ssImages,
+                              notificationId: req.id,
                             });
                           }}
                           disabled={uploadScreenshotsMutation.isPending || ssImages.length === 0}

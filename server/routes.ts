@@ -805,7 +805,7 @@ ganhar dinheiro na internet angola, marketing de afiliados angola, renda extra a
 
   app.post("/api/admin/screenshots", requireAdmin, upload.array("images", 3), async (req: Request, res: Response) => {
     try {
-      const { affiliateId, clientId, message } = req.body;
+      const { affiliateId, clientId, message, notificationId } = req.body;
       if (!affiliateId || !isValidUUID(affiliateId)) return res.status(400).json({ message: "ID de afiliado inválido" });
 
       const files = req.files as Express.Multer.File[];
@@ -837,9 +837,25 @@ ganhar dinheiro na internet angola, marketing de afiliados angola, renda extra a
         channels: null,
       });
 
+      if (notificationId && isValidUUID(notificationId)) {
+        await storage.deleteNotification(notificationId);
+      }
+
       res.status(201).json(screenshots);
     } catch (error: any) {
       console.error("Upload screenshots error:", error);
+      res.status(500).json({ message: safeError(error) });
+    }
+  });
+
+  app.delete("/api/admin/screenshot-requests/:id", requireAdmin, async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      if (!id || !isValidUUID(id)) return res.status(400).json({ message: "ID inválido" });
+      await storage.deleteNotification(id);
+      res.json({ success: true });
+    } catch (error: any) {
+      console.error("Delete screenshot request error:", error);
       res.status(500).json({ message: safeError(error) });
     }
   });

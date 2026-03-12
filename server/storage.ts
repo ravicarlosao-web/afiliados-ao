@@ -43,6 +43,7 @@ export interface IStorage {
 
   getNotifications(targetRole?: string, targetUserId?: string): Promise<Notification[]>;
   createNotification(notification: InsertNotification): Promise<Notification>;
+  deleteNotification(id: string): Promise<void>;
   markNotificationsRead(ids: string[], userId: string): Promise<void>;
 
   getScreenshotsByAffiliate(affiliateId: string): Promise<ConversationScreenshot[]>;
@@ -225,6 +226,10 @@ export class DatabaseStorage implements IStorage {
       channels: channelsJson,
     } as any).returning();
     return n;
+  }
+
+  async deleteNotification(id: string): Promise<void> {
+    await db.delete(notifications).where(eq(notifications.id, id));
   }
 
   async markNotificationsRead(ids: string[], userId: string): Promise<void> {
