@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
+import { Link } from "wouter";
 
 const ease = [0.16, 1, 0.3, 1];
 
@@ -45,9 +46,11 @@ export function Hero() {
             transition={{ type: "spring", stiffness: 400, damping: 17 }}
             className="rounded-full"
           >
-            <Button size="lg" className="h-12 sm:h-14 px-6 sm:px-8 rounded-full bg-white text-black hover:bg-zinc-200 gap-3 text-sm sm:text-base w-full sm:w-auto max-w-xs sm:max-w-none">
-              <span className="font-semibold">Comece a Ganhar Agora</span>
-            </Button>
+            <Link href="/login">
+              <Button size="lg" className="h-12 sm:h-14 px-6 sm:px-8 rounded-full bg-white text-black hover:bg-zinc-200 gap-3 text-sm sm:text-base w-full sm:w-auto max-w-xs sm:max-w-none" data-testid="button-hero-cta">
+                <span className="font-semibold">Comece a Ganhar Agora</span>
+              </Button>
+            </Link>
           </motion.div>
           
           <motion.a
