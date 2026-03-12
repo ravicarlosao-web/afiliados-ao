@@ -29,7 +29,7 @@ let initialized = false;
 async function initialize() {
   if (initialized) return;
   try {
-    await runMigrations();
+    //await runMigrations();
     await seedAdmin();
     const server = createServer(app);
     await registerRoutes(server, app);

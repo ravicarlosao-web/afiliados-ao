@@ -1,3 +1,4 @@
+import path from "path";
 import { drizzle } from "drizzle-orm/libsql";
 import { createClient } from "@libsql/client";
 import { migrate } from "drizzle-orm/libsql/migrator";
@@ -40,5 +41,5 @@ async function ensureBaselineMigration() {
 
 export async function runMigrations() {
   await ensureBaselineMigration();
-  await migrate(db, { migrationsFolder: "./migrations" });
+  await migrate(db, { migrationsFolder: path.join(__dirname, "migrations") });
 }
