@@ -7,3 +7,7 @@ vite.config.ts.*
 local.db
 .vercel
 .env*.local
+api/handler.js
+api/migrations/
+api/package.json
+.env.local
